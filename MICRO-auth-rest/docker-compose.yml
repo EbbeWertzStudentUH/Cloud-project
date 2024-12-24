@@ -1,0 +1,10 @@
+version: "3.8"
+
+services:
+  auth-rest-svc:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: MICRO-auth-rest
+    ports:
+      - "4567:4567"

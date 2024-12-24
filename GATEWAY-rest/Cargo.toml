@@ -1,0 +1,18 @@
+[package]
+name = "GATEWAY-rest"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+axum = "0.7.9" # rest api
+tower = "0.5.2" # web components
+tokio = { version = "1.42.0", features = ["full"] } # async runtime
+serde = { version = "1.0.216", features = ["derive"] }
+dotenvy = "0.15.7" # .env expose
+url = "2.5.4" # url parser
+
+# tonic = "0.12.3"
+# hyper = "1.5.2"
+
+# [build-dependencies]
+# tonic-build = "0.8.4"

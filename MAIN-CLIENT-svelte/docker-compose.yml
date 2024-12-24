@@ -1,0 +1,10 @@
+version: "3.8"
+
+services:
+  svelte-app-svc:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: MAIN-CLIENT-svelte
+    ports:
+      - "80:3000"
