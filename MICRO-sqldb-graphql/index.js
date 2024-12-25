@@ -14,7 +14,7 @@ app.use('/users', graphqlHTTP({
   graphiql: true,
 }));
 
-app.use('/auth-info', secret_auth, graphqlHTTP({
+app.use('/users-sensitive', secret_auth, graphqlHTTP({
   schema: sensitiveSchema,
   rootValue: sensitiveResolvers,
   graphiql: true,
@@ -22,5 +22,5 @@ app.use('/auth-info', secret_auth, graphqlHTTP({
 
 app.listen(LISTEN_PORT, () => {
   console.log(`Listening on http://localhost:${LISTEN_PORT}/users`);
-  console.log(`Listening on http://localhost:${LISTEN_PORT}/auth-info`);
+  console.log(`Listening on http://localhost:${LISTEN_PORT}/auth-sensitive`);
 });

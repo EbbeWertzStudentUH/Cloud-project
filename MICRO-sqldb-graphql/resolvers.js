@@ -1,4 +1,5 @@
 const mysql = require("mysql2/promise");
+const { v4: uuidv4 } = require('uuid');
 const { DB_HOST, DB_DATABASE, DB_USER, DB_PWD, AUTH_SECRET } = process.env;
 
 const pool = mysql.createPool({
@@ -32,6 +33,15 @@ const sensitiveResolvers = {
 		}
 		return rows[0];
 	},
+    createUser: async ({ first_name, last_name, password_hash }) => {
+        const id = uuidv4(); // niet 'uuid()' in de sql query want dan heb ik die hier niet voor de select query
+        await pool.query(
+          'INSERT INTO users (id, first_name, last_name, password_hash) VALUES (?, ?, ?, ?)',
+          [id, first_name, last_name, password_hash]
+        );
+        const [newUser] = await pool.query('SELECT id, first_name, last_name FROM users WHERE id = ?', [id]);
+        return newUser[0];
+      },
 };
 
 const secret_auth = (req, res, next) => {
