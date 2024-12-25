@@ -3,8 +3,8 @@ require('dotenv').config();
 const { graphqlHTTP } = require('express-graphql');
 const { LISTEN_PORT } = process.env;
 
-import { generalSchema, sensitiveSchema } from './graphql_schemas.js';
-import { generalResolvers, sensitiveResolvers, secret_auth} from './resolvers.js';
+const { generalSchema, sensitiveSchema }  = require('./graphql_schemas.js');
+const { generalResolvers, sensitiveResolvers, secret_auth}  = require('./resolvers.js');
 
 const app = express();
 

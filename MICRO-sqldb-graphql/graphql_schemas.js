@@ -23,4 +23,4 @@ const sensitiveSchema = buildSchema(`
       getAuthInfo(id: String!): User
     }`);
 
-export { generalSchema, sensitiveSchema };
+module.exports = { generalSchema, sensitiveSchema };
