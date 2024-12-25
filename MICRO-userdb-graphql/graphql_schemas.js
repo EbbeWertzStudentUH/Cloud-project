@@ -8,7 +8,7 @@ const generalSchema = buildSchema(`
     }
   
     type Query {
-      getUser(id: String!): User
+      user(id: String!): User
     }`);
 
 const sensitiveSchema = buildSchema(`
@@ -20,7 +20,7 @@ const sensitiveSchema = buildSchema(`
     }
   
     type Query {
-      getAuthInfo(id: String!): User
+      user(id: String!): User
     }
     type Mutation {
         createUser(first_name: String!, last_name: String!, password_hash: String!): User

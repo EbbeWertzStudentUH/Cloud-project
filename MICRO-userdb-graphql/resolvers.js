@@ -10,7 +10,7 @@ const pool = mysql.createPool({
 });
 
 const generalResolvers = {
-	getUser: async ({ id }) => {
+	user: async ({ id }) => {
 		const [rows] = await pool.query(
 			"SELECT id, first_name, last_name FROM users WHERE id = ?",
 			[id]
@@ -23,9 +23,9 @@ const generalResolvers = {
 };
 
 const sensitiveResolvers = {
-	getAuthInfo: async ({ id }) => {
+	user: async ({ id }) => {
 		const [rows] = await pool.query(
-			"SELECT id, password_hash FROM users WHERE id = ?",
+			"SELECT id, first_name, last_name , password_hash FROM users WHERE id = ?",
 			[id]
 		);
 		if (rows.length === 0) {
