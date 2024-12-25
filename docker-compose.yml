@@ -31,7 +31,7 @@ services:
       - "cloud-netwerk"
 # mysql database voor user data
   users-db-mysql-svc:
-    image: mysql
+    image: mysql:9.1.0
     restart: always
     container_name: DB-mysql
     environment:
@@ -39,8 +39,10 @@ services:
       MYSQL_PASSWORD: "mysql123"
       MYSQL_ROOT_PASSWORD: "mysql123"
       MYSQL_DATABASE: "cloud_project_db"
-    expose: # staat er gwn om de poort hier te zien, want dit is eig default
-     - "3306"
+    # expose: # staat er gwn om de poort hier te zien, want dit is eig default
+    #  - "3306"
+    ports:
+      - "3306:3306"
     networks:
       - "cloud-netwerk"
 # =========================
@@ -85,13 +87,20 @@ services:
 # =========================
 # MICROSERVICE API'S  
 # =========================
-  auth-rest-svc:
+  # auth-rest-svc:
+  #   build:
+  #     context: ./MICRO-auth-rest
+  #     dockerfile: Dockerfile
+  #   container_name: MICRO-auth-rest
+  #   ports:
+  #     - "4567:4567"
+  userdb-graphql-svc:
     build:
-      context: ./MICRO-auth-rest
+      context: ./MICRO-userdb-graphql
       dockerfile: Dockerfile
-    container_name: MICRO-auth-rest
+    container_name: MICRO-userdb-graphql
     ports:
-      - "4567:4567"
+      - "3002:3002"
 
 networks:
   cloud-netwerk:

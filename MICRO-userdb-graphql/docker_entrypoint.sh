@@ -1,18 +1,18 @@
 #!/bin/sh
 
 echo "=== Docker Container Info ==="
-echo "container: MAIN-CLIENT-svelte"
-echo "service: svelte-app-svc"
-echo "interne poort : 3000"
-echo "externe poort: 80"
+echo "container: MICRO-userdb-graphql"
+echo "service: userdb-graphql-svc"
+echo "interne poort : 3002"
+echo "externe poort: /"
 echo "==============================="
 echo
 echo "=== content van /app ==="
 ls /app
 echo
 echo "=== Server start command: ==="
-echo "node build/index.js"
+echo "node index.js"
 
-node build/index.js
+node index.js
 
 # tail -f /dev/null
