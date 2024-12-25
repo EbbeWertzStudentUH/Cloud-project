@@ -19,8 +19,8 @@ CREATE TABLE `users` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 INSERT INTO `users` (`id`, `first_name`, `last_name`, `password_hash`, `email`) VALUES
-('81952a37-3e69-445f-af99-f2007f74cbf0',	'Robin',	'Lambregts',	'IkHashGeenWachtwoorden',	'robin.lambregts@student.uhasselt.be'),
-('a9078026-c29d-11ef-b558-0242ac180005',	'Mathias',	'IsGay',	'hafbkhfdsbkhfdshbhbfsakhbhkfsbh',	'mathias@isgay.be'),
-('d0633f5b-c29c-11ef-b558-0242ac180005',	'Ebbe',	'Wertz',	'hashed_password',	'ebbe.wertz@student.uhasselt.be');
+('61a2333f-c154-4f53-8f87-67df85bd6217',	'Ebbe',	'Wertz',	'$2a$12$8uD9z5Kjm.NJKSPArC5cO.1JVJCdJg6MKshD1g.bcDj0a6UhkqlWy',	'ebbe.wertz@student.uhasselt.be'),
+('7a2fb106-0ab7-4612-9083-f0ab75b116bc',	'Mathias',	'Houwen',	'$2a$12$rMiC4epCRD7ETCQz7gzIMubB3d3Gl9bY9RuGf3BE/tg1oM8r34/wS',	'mathias.houwen@student.uhasselt.be'),
+('901d1dfc-a39d-4c49-9f81-27944841ecf5',	'Robin',	'Lambregts',	'$2a$12$DgX5OxJJUrYFUQtsWb59WulLuzQH44T99SpRpLdSRCvCEwmkyaAKW',	'robin.lambregts@student.uhasselt.be');
 
--- 2024-12-25 10:23:11
+-- 2024-12-25 20:09:45

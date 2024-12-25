@@ -97,9 +97,9 @@ services:
   #     dockerfile: Dockerfile
   #   container_name: MICRO-auth-rest
   #   expose:
-  #    - "4567"
+  #    - "3003"
   #   ports: # DEBUG
-  #     - "4567:4567"
+  #     - "3003:3003"
   # networks:
   # - "cloud-netwerk"
   userdb-graphql-svc:
