@@ -6,6 +6,6 @@ COPY . .
 
 RUN bundle install
 
-EXPOSE 4567
+EXPOSE 3003
 
 ENTRYPOINT ["/app/docker_entrypoint.sh"]

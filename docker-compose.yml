@@ -91,17 +91,17 @@ services:
 # =========================
 # MICROSERVICE API'S  
 # =========================
-  # auth-rest-svc:
-  #   build:
-  #     context: ./MICRO-auth-rest
-  #     dockerfile: Dockerfile
-  #   container_name: MICRO-auth-rest
-  #   expose:
-  #    - "3003"
-  #   ports: # DEBUG
-  #     - "3003:3003"
-  # networks:
-  # - "cloud-netwerk"
+  auth-rest-svc:
+    build:
+      context: ./MICRO-auth-rest
+      dockerfile: Dockerfile
+    container_name: MICRO-auth-rest
+    # expose:
+    #  - "3003"
+    ports: # DEBUG
+      - "3003:3003"
+  networks:
+  - "cloud-netwerk"
   userdb-graphql-svc:
     build:
       context: ./MICRO-userdb-graphql

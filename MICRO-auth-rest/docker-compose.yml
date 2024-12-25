@@ -7,4 +7,4 @@ services:
       dockerfile: Dockerfile
     container_name: MICRO-auth-rest
     ports:
-      - "4567:4567"
+      - "3003:3003"
