@@ -116,3 +116,5 @@ services:
 
 networks:
   cloud-netwerk:
+volumes:
+  mysql-data:

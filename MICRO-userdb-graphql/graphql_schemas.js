@@ -17,13 +17,14 @@ const sensitiveSchema = buildSchema(`
       first_name: String
       last_name: String
       password_hash: String
+      email: String
     }
   
     type Query {
-      user(id: String!): User
+      user(id: String, email: String): User
     }
     type Mutation {
-        createUser(first_name: String!, last_name: String!, password_hash: String!): User
+        createUser(first_name: String!, last_name: String!, password_hash: String!, email: String!): User
     }
       `);
 
