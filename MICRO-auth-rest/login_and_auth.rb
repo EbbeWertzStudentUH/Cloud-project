@@ -9,6 +9,16 @@ def generate_jwt(user_id)
   JWT.encode(data, secret_key, 'HS256')
 end
 
+def decode_jwt(token)
+  begin
+    decoded = JWT.decode(token, ENV['JWT_SECRET'], true, { algorithm: 'HS256' })
+    data = decoded.first
+    return data['user_id']
+  rescue JWT::DecodeError => e
+    raise "Invalid or expired token: #{e.message}"
+  end
+end
+
 def login(user_data)
   begin
     response = GRAPHQL_CLIENT.query(QUERY_HASH_AND_ID_BY_EMAIL, variables: { email: user_data['email'] })

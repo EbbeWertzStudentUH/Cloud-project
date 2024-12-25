@@ -29,11 +29,16 @@ post '/login' do
   end
 end
 
-post '/logout' do
-end
-
 get '/verify_token' do
-end
+  token = request.env['HTTP_AUTHORIZATION']&.split(' ')&.last  # auth header is "Bearer " en dan token
+  if token.nil?
+    halt 500, { message: "token should be in auth header" }.to_json
+  end
 
-post '/refresh_token' do
+  begin
+    user_id = decode_jwt(token)
+    return { message: "token is valid", valid: true, user_id: user_id }.to_json
+  rescue JWT::StandardError => e
+    halt 500, { message: e.message, valid: false }.to_json
+  end
 end
