@@ -25,8 +25,10 @@ services:
     environment:
       MONGO_INITDB_ROOT_USERNAME: mongo_root
       MONGO_INITDB_ROOT_PASSWORD: mongo123
-    expose: # staat er gwn om de poort hier te zien, want dit is eig default
-      - "27017"
+    # expose:
+    #   - "27017"
+    ports: # DEBUG
+      - "27017:27017"
     networks:
       - "cloud-netwerk"
 # mysql database voor user data
@@ -39,9 +41,9 @@ services:
       MYSQL_PASSWORD: "mysql123"
       MYSQL_ROOT_PASSWORD: "mysql123"
       MYSQL_DATABASE: "cloud_project_db"
-    # expose: # staat er gwn om de poort hier te zien, want dit is eig default
+    # expose:
     #  - "3306"
-    ports:
+    ports: # DEBUG
       - "3306:3306"
     networks:
       - "cloud-netwerk"
@@ -92,14 +94,18 @@ services:
   #     context: ./MICRO-auth-rest
   #     dockerfile: Dockerfile
   #   container_name: MICRO-auth-rest
-  #   ports:
+  #   expose:
+  #    - "4567"
+  #   ports: # DEBUG
   #     - "4567:4567"
   userdb-graphql-svc:
     build:
       context: ./MICRO-userdb-graphql
       dockerfile: Dockerfile
     container_name: MICRO-userdb-graphql
-    ports:
+    expose:
+      - "3002"
+    ports: # DEBUG
       - "3002:3002"
 
 networks:

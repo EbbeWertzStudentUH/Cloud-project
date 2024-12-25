@@ -7,10 +7,7 @@ WORKDIR /app
 COPY . .
 
 # dependencies
-RUN npm install
-
-# build pure js voor Node
-RUN npm run build
+RUN npm install --force
 
 # Node server runt op 3000
 EXPOSE 3002
