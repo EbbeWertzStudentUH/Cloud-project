@@ -10,7 +10,7 @@ def register(user_data)
       email: user_data['email']
     })
     if response.errors.any?
-      raise "GraphQL error: #{response.errors.full_messages.join(', ')}"
+      raise "GraphQL error in register, inserting user: #{response.errors.full_messages.join(', ')}"
     end
     return response.data.to_h['createUser']
   rescue StandardError => e

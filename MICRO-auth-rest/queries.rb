@@ -13,3 +13,12 @@ REGISTER_QUERY = GRAPHQL_CLIENT.parse <<-GRAPHQL
     }
   }
 GRAPHQL
+
+QUERY_HASH_AND_ID_BY_EMAIL = GRAPHQL_CLIENT.parse <<-GRAPHQL
+query($email: String!) {
+  user(email: $email) {
+    id
+    password_hash
+  }
+}
+GRAPHQL
