@@ -1,7 +1,9 @@
 use tokio::net::TcpListener;
 
 pub async fn create_listener() -> TcpListener {
-    let listen_url = std::env::var("LISTEN_URL").expect("PORT bestaat niet in .env");
+    let listen_port = std::env::var("LISTEN_PORT").expect("PORT bestaat niet in .env");
+    let mut listen_url = "0.0.0.0:".to_string();
+    listen_url.push_str(&listen_port);
     let listener = TcpListener::bind(&listen_url)
         .await
         .expect("kon TCP listener niet maken");

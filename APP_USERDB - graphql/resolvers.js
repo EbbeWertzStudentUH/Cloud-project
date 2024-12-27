@@ -1,6 +1,6 @@
 const mysql = require("mysql2/promise");
 const { v4: uuidv4 } = require('uuid');
-const { DB_HOST, DB_DATABASE, DB_USER, DB_PWD, AUTH_SECRET } = process.env;
+const { DB_HOST, DB_DATABASE, DB_USER, DB_PWD, SENSITIVE_ENDPOINT_API_SECRET } = process.env;
 
 const pool = mysql.createPool({
 	host: DB_HOST,
@@ -56,7 +56,7 @@ const sensitiveResolvers = {
 
 const secret_auth = (req, res, next) => {
 	const authHeader = req.headers["authorization"];
-	if (!authHeader || authHeader !== `Bearer ${AUTH_SECRET}`) {
+	if (!authHeader || authHeader !== `Bearer ${SENSITIVE_ENDPOINT_API_SECRET}`) {
 		return res.status(403).json({ message: "Forbidden" });
 	}
 	next();

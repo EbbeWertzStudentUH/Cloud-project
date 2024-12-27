@@ -17,7 +17,7 @@
       </tr>
       <tr class="border-b border-gray-200">
         <td class="py-3 px-6 text-left">
-          <a href="proxy/mysql?server=users-db-mysql-svc&username=mysql_root&db=cloud_project_db" class="text-blue-600 hover:underline">/proxy/mysql</a>
+          <a href="proxy/mysql?server=db-mysql&username=mysql_root&db=cloud_project_db" class="text-blue-600 hover:underline">/proxy/mysql</a>
         </td>
         <td class="py-3 px-6 text-center">8080</td>
       </tr>

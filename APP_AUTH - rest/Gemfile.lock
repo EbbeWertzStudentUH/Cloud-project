@@ -38,6 +38,9 @@ GEM
     minitest (5.25.4)
     mustermann (3.0.3)
       ruby2_keywords (~> 0.0.1)
+    nio4r (2.7.4)
+    puma (6.5.0)
+      nio4r (~> 2.0)
     rack (3.1.8)
     rack-protection (4.1.1)
       base64 (>= 0.1.0)
@@ -45,6 +48,8 @@ GEM
       rack (>= 3.0.0, < 4)
     rack-session (2.0.0)
       rack (>= 3.0.0)
+    rackup (2.2.1)
+      rack (>= 3)
     ruby2_keywords (0.0.5)
     securerandom (0.4.1)
     sinatra (4.1.1)
@@ -68,6 +73,8 @@ DEPENDENCIES
   graphql-client
   json
   jwt
+  puma (~> 6.5)
+  rackup (~> 2.2)
   sinatra
 
 BUNDLED WITH

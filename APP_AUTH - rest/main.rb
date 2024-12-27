@@ -7,6 +7,7 @@ require './register.rb'
 require './login_and_auth.rb'
 
 set :port, ENV['LISTEN_PORT']
+set :bind, '0.0.0.0'
 
 post '/register' do
   content_type :json

@@ -9,8 +9,6 @@ option go_package = "./protobuf_generated";
 
 service AuthService {
     rpc Login (OAuthLoginRequest) returns (LoginResponse);
-    rpc Callback (CallbackRequest) returns (CallbackResponse);
-    rpc Refresh (RefreshRequest) returns (RefreshResponse);
     rpc Logout (LogoutRequest) returns (LogoutResponse);
   }
 // service TaskService {
