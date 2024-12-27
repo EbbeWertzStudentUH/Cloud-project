@@ -14,7 +14,7 @@ def decode_jwt(token)
     decoded = JWT.decode(token, ENV['JWT_SECRET'], true, { algorithm: 'HS256' })
     data = decoded.first
     return data['user_id']
-  rescue JWT::DecodeError => e
+  rescue StandardError => e
     raise "Invalid or expired token: #{e.message}"
   end
 end

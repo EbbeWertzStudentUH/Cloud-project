@@ -39,7 +39,7 @@ get '/verify_token' do
   begin
     user_id = decode_jwt(token)
     return { message: "token is valid", valid: true, user_id: user_id }.to_json
-  rescue JWT::StandardError => e
+  rescue StandardError => e
     halt 500, { message: e.message, valid: false }.to_json
   end
 end
