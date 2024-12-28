@@ -1,10 +1,10 @@
 version: "3.8"
 
 services:
-  app-auth-rest:
+  core-gateway-grpc:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: APP_AUTH-REST
+    container_name: CORE_GATEWAY-GRPC
     ports:
-      - "3003:3003"
+      - "3005:3005"

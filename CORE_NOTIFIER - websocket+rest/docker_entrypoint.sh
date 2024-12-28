@@ -1,17 +1,16 @@
 #!/bin/sh
 
 echo "=== Docker Container Info ==="
-echo "container: CORE_ADAPTER-REST (RUNTIME STAGE)"
-echo "service: core-apapter-rest"
-echo "poort : 3001"
+echo "container: CORE_NOTIFIER-WS-REST"
+echo "service: core-notifier-ws-rest"
+echo "poort : 3004"
 echo "==============================="
 echo
 echo "=== content van /app ==="
 ls /app
 echo
 echo "=== Server start command: ==="
-echo "/app/GATEWAY-rest"
+echo "pyhton main.py"
 
-/app/GATEWAY-rest
-
+pyhton main.py
 # tail -f /dev/null

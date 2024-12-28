@@ -1,10 +1,10 @@
 version: "3.8"
 
 services:
-  app-auth-rest:
+  core-notifier-ws-rest:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: APP_AUTH-REST
+    container_name: CORE_NOTIFIER-WS-REST
     ports:
-      - "3003:3003"
+      - "3004:3004"

@@ -1,8 +1,8 @@
 #!/bin/sh
 
 echo "=== Docker Container Info ==="
-echo "container: GATEWAY-rest (BUILDER STAGE)"
-echo "service: rest-gateway-svc"
+echo "container: CORE_ADAPTER-REST (BUILDER STAGE)"
+echo "service: core-apapter-rest"
 echo "==============================="
 echo
 echo "=== content van /app ==="
