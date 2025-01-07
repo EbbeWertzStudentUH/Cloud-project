@@ -48,6 +48,8 @@ services:
       - "3306:3306"
     networks:
       - "cloud-netwerk"
+    volumes:
+      - mysql-data:/var/lib/mysql
     attach: false # ik hoef geen console logs te zien
 # =========================
 # DATABASE CLIENTS  
