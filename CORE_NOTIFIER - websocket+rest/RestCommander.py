@@ -1,7 +1,6 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
 from NotificationService import NotificationService
-import jwt
 
 
 class MessagePayload(BaseModel):
