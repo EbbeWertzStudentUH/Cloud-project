@@ -8,3 +8,4 @@ services:
     container_name: CORE_NOTIFIER-WS-REST
     ports:
       - "3004:3004"
+      - "3005:3005"
