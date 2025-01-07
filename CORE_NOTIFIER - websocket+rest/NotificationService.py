@@ -28,21 +28,21 @@ class NotificationService:
         @self.fast_api_app.websocket('/ws')
         async def endpoint(websocket: WebSocket): await self._handleEndpoint(websocket)
 
-    async def subscribe(self, user_id:str, topics:set[str]):
+    def subscribe(self, user_id:str, topics:set[str]):
         for topic in topics:
-            SubscriptionManager.subscribe(topic, user_id)
+            self.subscriptionManager.subscribe(topic, user_id)
 
-    async def unsubscribe(self, user_id:str, topics:set[str]):
+    def unsubscribe(self, user_id:str, topics:set[str]):
         for topic in topics:
-            SubscriptionManager.unsubscribe(topic, user_id)
+            self.subscriptionManager.unsubscribe(topic, user_id)
 
     async def publishUpdate(self, topic:str, data):
-        self._broadcastJSON("update", data, self.subscriptionManager.getSubscribedUsers(topic))
+        await self._broadcastJSON("update", data, self.subscriptionManager.getSubscribedUsers(topic))
 
     async def publishNotification(self, topic:str, message:str):
         timestamp = datetime.datetime.now().strftime("%H:%M")
         data = {"message": message, "time":timestamp}
-        self._broadcastJSON("notification", data, self.subscriptionManager.getSubscribedUsers(topic))
+        await self._broadcastJSON("notification", data, self.subscriptionManager.getSubscribedUsers(topic))
 
     async def _handleEndpoint(self, websocket: WebSocket):
         await websocket.accept()
@@ -70,7 +70,7 @@ class NotificationService:
             except Exception as e:
                 print(f"Error sending message to {user_id}: {e}")
 
-    async def _handle_registration(self, token:str, websocket:WebSocket) -> tuple[bool, str]:
+    def _handle_registration(self, token:str, websocket:WebSocket) -> tuple[bool, str]:
         try:
             jwt_data = jwt.decode(token, os.getenv('JWT_SECRET'), algorithms=['HS256'])
             user_id = jwt_data['user_id']
