@@ -1,6 +1,7 @@
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 import jwt
 import os
+import datetime
 
 class SubscriptionManager:
     def __init__(self):
@@ -35,8 +36,13 @@ class NotificationService:
         for topic in topics:
             SubscriptionManager.unsubscribe(topic, user_id)
 
-    async def publish(self, topic:str, message:str):
-        self.broadcast(message, self.subscriptionManager.getSubscribedUsers(topic))
+    async def publishUpdate(self, topic:str, data):
+        self._broadcastJSON("update", data, self.subscriptionManager.getSubscribedUsers(topic))
+
+    async def publishNotification(self, topic:str, message:str):
+        timestamp = datetime.datetime.now().strftime("%H:%M")
+        data = {"message": message, "time":timestamp}
+        self._broadcastJSON("notification", data, self.subscriptionManager.getSubscribedUsers(topic))
 
     async def _handleEndpoint(self, websocket: WebSocket):
         await websocket.accept()
@@ -56,11 +62,11 @@ class NotificationService:
                 self.client_sockets.pop(user_id)
             print(f"Client {user_id} disconnected")
 
-    async def broadcast(self, message:str, users:set[str]):
+    async def _broadcastJSON(self, type:str, data, users:set[str]):
         for user_id in users:
             webSocket:WebSocket = self.client_sockets[user_id]
             try:
-                await webSocket.send_text(message)
+                await webSocket.send_json({"type": type, "data": data})
             except Exception as e:
                 print(f"Error sending message to {user_id}: {e}")
 

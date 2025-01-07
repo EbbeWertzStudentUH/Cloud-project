@@ -17,5 +17,5 @@ class RestCommander:
 
     async def broadcast(self, message: str):
         """Broadcast a message using NotificationService."""
-        await self.notificationService.broadcast(message)
+        await self.notificationService._broadcastUpdateJSON(message)
         return {"status": "success", "message": f"Broadcasted message: {message}"}
