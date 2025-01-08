@@ -2,69 +2,39 @@ syntax = "proto3";
 
 package facade_service;
 option go_package = "./protobuf_generated";
-
+/* command:
+protoc --go_out=. --go-grpc_out=. facade.proto
+*/
 //=================
 // SERVICES
 //=================
 
-service AuthService {
-    rpc Login (OAuthLoginRequest) returns (LoginResponse);
-    rpc Logout (LogoutRequest) returns (LogoutResponse);
-  }
-// service TaskService {
-//     rpc CreateTask(Task) returns (Task);
-//     rpc GetTask(GetByIdRequest) returns (Task);
-//     rpc UpdateTask(Task) returns (Task);
-//     rpc DeleteTask(GetByIdRequest) returns (Empty);
-//     rpc ListTasks(TaskQuery) returns (TaskListResponse);
-// }
-// service CollaborationService {
-//     rpc CreateNote(Note) returns (Note);
-//     rpc GetNote(GetByIdRequest) returns (Note);
-//     rpc UpdateNote(Note) returns (Note);
-//     rpc DeleteNote(GetByIdRequest) returns (Empty);
-//     rpc SubscribeToUpdates(SubscribeRequest) returns (stream UpdateMessage);
-// }
-// service NotificationService {
-//   rpc StreamNotifications(Notification) returns (Empty);
-// }
+service UserService {
+    // auth:login, AuthenticateToken
+    rpc LoginAndAuthenticate (LoginRequest) returns (AuthResponse);
+    // auth:validate_token, userdb:get username
+    rpc AuthenticateToken (TokenRequest) returns (AuthResponse);
+    // auth:register, appdb:make demo project, LoginAndAuthenticate
+    rpc CreateAccount(RegisterRequest) returns (AuthResponse);
+}
 
 //=================
 // MESSAGES
 //=================
 message Empty {}
-message OAuthLoginRequest {
-    string provider = 1;
-    string redirect_uri = 2;
+message LoginRequest {
+    string email = 1;
+    string password = 2;
 }
-message LoginResponse {
-    string authorization_url = 1;
+message TokenRequest {
+    string token = 1;
 }
-message CallbackRequest {
-    string provider = 1;
-    string code = 2;
-    string redirect_uri = 3;
+message RegisterRequest {
+    string email = 1;
+    string password = 2;
+    string username = 3;
 }
-message CallbackResponse {
-    string access_token = 1;
-    string refresh_token = 2;
-    string token_type = 3;
-    int32 expires_in = 4; // seconds
-}
-message RefreshRequest {
-    string provider = 1;
-    string refresh_token = 2;
-}
-message RefreshResponse {
-    string new_access_token = 1;
-    string new_refresh_token = 2;
-    string token_type = 3;
-    int32 expires_in = 4; // seconds
-}
-message LogoutRequest {
-    string provider = 1;
-    string access_token = 2;
-}
-message LogoutResponse {
-    bool success = 1;
+message AuthResponse {
+    bool valid = 1;
+    string username = 2;
 }
