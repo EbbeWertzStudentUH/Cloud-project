@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	pb "facade_service/protobuf_generated"
+	"fmt"
 )
 
 type UserServiceServer struct {
@@ -11,12 +12,12 @@ type UserServiceServer struct {
 }
 
 func (s *UserServiceServer) LoginAndAuthenticate(ctx context.Context, req *pb.LoginRequest) (*pb.AuthResponse, error) {
-	resp, err := s.authClient.Login(req.Email, req.Password)
-	if err != nil {
+	resp, ok := s.authClient.Login(req.Email, req.Password)
+	if !ok {
 		return &pb.AuthResponse{Valid: false}, nil
 	}
-	token := resp["token"].(string)
-	print("token: " + token)
+	token := resp["token"]
+	fmt.Println(token)
 	return &pb.AuthResponse{
 		Valid:     true,
 		FirstName: "dummy_name",
@@ -25,8 +26,8 @@ func (s *UserServiceServer) LoginAndAuthenticate(ctx context.Context, req *pb.Lo
 }
 
 func (s *UserServiceServer) AuthenticateToken(ctx context.Context, req *pb.TokenRequest) (*pb.AuthResponse, error) {
-	resp, err := s.authClient.ValidateToken(req.Token)
-	if err != nil {
+	resp, ok := s.authClient.ValidateToken(req.Token)
+	if !ok {
 		return &pb.AuthResponse{Valid: false}, nil
 	}
 	user_id := resp["user_id"].(string)
