@@ -3,14 +3,14 @@
 echo "=== Docker Container Info ==="
 echo "container: CORE_GATEWAY-GRPC"
 echo "service: core-gateway-grpc"
-echo "poort : 3004"
+echo "poort : 3006"
 echo "==============================="
 echo
 echo "=== content van /app ==="
 ls /app
 echo
 echo "=== Server start command: ==="
-echo "ruby main.rb"
+echo "go run ."
 
-ruby main.rb
+go run .
 # tail -f /dev/null

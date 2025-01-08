@@ -7,4 +7,4 @@ services:
       dockerfile: Dockerfile
     container_name: CORE_GATEWAY-GRPC
     ports:
-      - "3005:3005"
+      - "3006:3006"

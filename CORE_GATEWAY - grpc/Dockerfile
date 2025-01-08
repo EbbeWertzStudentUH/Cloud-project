@@ -1,11 +1,11 @@
-FROM ruby:latest
+FROM golang:latest
 
 WORKDIR /app
 
 COPY . .
 
-RUN bundle install
+RUN go mod tidy
 
-EXPOSE 3003
+EXPOSE 3006
 
 ENTRYPOINT ["/app/docker_entrypoint.sh"]

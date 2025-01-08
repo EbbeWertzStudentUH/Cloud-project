@@ -94,6 +94,28 @@ services:
       - "3001:3001"
     networks:
       - "cloud-netwerk"
+  core-gateway-grpc:
+    build:
+      context: "./CORE_GATEWAY - grpc"
+      dockerfile: Dockerfile
+    container_name: CORE_GATEWAY-GRPC
+    # expose:
+    #   - "3006"
+    ports: # DEBUG
+      - "3006:3006"
+    networks:
+      - "cloud-netwerk"
+  core-notifier-ws-rest:
+    build:
+      context: "./CORE_GATEWAY - grpc"
+      dockerfile: Dockerfile
+    container_name: CORE_NOTIFIER-WS-REST
+    # expose:
+    #   - "3004"
+    #   - "3005"
+    ports:
+      - "3004:3004" #ws
+      - "3005:3005" #rest (debug)
 # =========================
 # APP MICROSERVICES  
 # =========================
@@ -113,8 +135,8 @@ services:
       context: "./APP_USERDB - graphql"
       dockerfile: Dockerfile
     container_name: APP_USERDB-GRAPHQL
-    expose:
-      - "3002"
+    # expose:
+    #   - "3002"
     ports: # DEBUG
       - "3002:3002"
     networks:
