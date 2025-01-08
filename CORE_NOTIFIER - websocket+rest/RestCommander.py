@@ -37,7 +37,7 @@ class RestCommander:
 
         @self.fast_api_app.post("/subscribe")
         def subscribe(data: SubscriptionJSON): return self.subscribe(data)
-        @self.fast_api_app.post("/unsubscribe")
+        @self.fast_api_app.delete("/subscribe")
         def unsubscribe(data: SubscriptionJSON): return self.unsubscribe(data)
         @self.fast_api_app.post("/publish/notification")
         async def publish_notification(data: NotificationJSON): return await self.publishNotification(data)
