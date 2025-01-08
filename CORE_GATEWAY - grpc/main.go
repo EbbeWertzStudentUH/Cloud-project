@@ -23,9 +23,10 @@ func main() {
 	}
 
 	auth_client := NewAuthClient(os.Getenv("AUTH_SERVICE_URL"))
+	userdb_client := NewUserDBClient(os.Getenv("USERDB_SERVICE_URL"))
 
 	grpcServer := grpc.NewServer()
-	pb.RegisterUserServiceServer(grpcServer, &UserServiceServer{authClient: *auth_client})
+	pb.RegisterUserServiceServer(grpcServer, &UserServiceServer{authClient: *auth_client, userdbClient: *userdb_client})
 
 	log.Println("Server is running on port " + os.Getenv("LISTEN_PORT"))
 	err = grpcServer.Serve(lis)

@@ -1,46 +1,52 @@
 package main
 
 import (
-	"context"
 	"fmt"
-	"log"
 
-	"github.com/machinebox/graphql"
+	"github.com/go-resty/resty/v2"
 )
 
-type User struct {
-	Id        string `json:"id"`
-	FirstName string `json:"first_name"`
-	LastName  string `json:"last_name"`
-}
-type GraphQLResponse struct {
-	Data struct {
-		User User `json:"user"`
-	} `json:"data"`
-}
-
 type UserDBClient struct {
-	graphClient *graphql.Client
+	url        string
+	restClient *resty.Client
 }
 
 func NewUserDBClient(url string) *UserDBClient {
 	return &UserDBClient{
-		graphClient: graphql.NewClient(url),
+		url:        url,
+		restClient: resty.New(),
 	}
 }
 
-func (u *UserDBClient) Query(query string, vars map[string]interface{}) (*User, bool) {
-	req := graphql.NewRequest(query)
-	for name, val := range vars {
-		req.Var(name, val)
-	}
-	var response GraphQLResponse
-	err := u.graphClient.Run(context.Background(), req, &response)
+func (u *UserDBClient) QueryUSernames(user_id string) (map[string]interface{}, bool) {
+	query := `query($id: String!) {
+  		user(id: $id) {
+    		first_name
+    		last_name
+  		}
+	}`
+	vars := map[string]interface{}{"id": user_id}
+	resp, ok := u.Query(query, vars)
+	return resp["user"], ok
+}
 
-	if err != nil {
-		log.Fatalf("Failed to execute query: %v", err)
-		return nil, false
+func (a *UserDBClient) Query(query string, vars map[string]interface{}) (map[string]map[string]interface{}, bool) {
+	data := map[string]interface{}{
+		"query":     query,
+		"variables": vars,
 	}
-	fmt.Println("STATUS | USERDB service | Query OK")
-	return &response.Data.User, true
+	var responseMap map[string]map[string]map[string]interface{}
+	resp, err := a.restClient.R().
+		SetHeader("Content-Type", "application/json").
+		SetBody(data).
+		ForceContentType("application/json").
+		SetResult(&responseMap).
+		Post(a.url + "/users")
+	fmt.Println("STATUS | UserDB service | Query User", resp.Status())
+
+	if err != nil || resp.Status() != "200 OK" {
+		fmt.Println("Error:", err)
+		return map[string]map[string]interface{}{}, false
+	}
+	return responseMap["data"], true
 }
