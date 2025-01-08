@@ -12,7 +12,11 @@ def register(user_data)
     if response.errors.any?
       raise "GraphQL error in register, inserting user: #{response.errors.full_messages.join(', ')}"
     end
-    return response.data.to_h['createUser']
+    data = response.data.to_h['createUser']
+    if data == nil
+      raise "No user got returned. This user probably already exists"
+    end
+    return data
   rescue StandardError => e
     raise "Could not register user: #{e.message}"
   end

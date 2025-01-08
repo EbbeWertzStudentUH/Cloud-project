@@ -32,9 +32,11 @@ message TokenRequest {
 message RegisterRequest {
     string email = 1;
     string password = 2;
-    string username = 3;
+    string first_name = 3;
+    string last_name = 4;
 }
 message AuthResponse {
     bool valid = 1;
-    string username = 2;
+    string first_name = 3;
+    string last_name = 4;
 }

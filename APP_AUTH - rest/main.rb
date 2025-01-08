@@ -14,7 +14,9 @@ post '/register' do
   data = JSON.parse(request.body.read)
   begin
     user = register(data)
-    return { message: "new user succesfully registered", user: user }.to_json
+    resp = { message: "new user succesfully registered", user: user }.to_json
+    puts resp.inspect
+    return resp
   rescue StandardError => e
     halt 500, { message: e.message }.to_json
   end

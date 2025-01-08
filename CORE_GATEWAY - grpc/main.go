@@ -22,8 +22,10 @@ func main() {
 		log.Fatalf("Failed to listen: %v", err)
 	}
 
+	auth_client := NewAuthClient(os.Getenv("AUTH_SERVICE_URL"))
+
 	grpcServer := grpc.NewServer()
-	pb.RegisterUserServiceServer(grpcServer, &UserServiceServer{})
+	pb.RegisterUserServiceServer(grpcServer, &UserServiceServer{authClient: *auth_client})
 
 	log.Println("Server is running on port " + os.Getenv("LISTEN_PORT"))
 	err = grpcServer.Serve(lis)
