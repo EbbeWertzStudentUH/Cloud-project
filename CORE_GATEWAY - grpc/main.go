@@ -1,28 +1,34 @@
 package main
 
 import (
+	"google.golang.org/grpc"
+
 	pb "facade_service/protobuf_generated"
 	"log"
 	"net"
+	"os"
 
-	"google.golang.org/grpc"
+	"github.com/joho/godotenv"
 )
 
 func main() {
-	// Listen on a port
-	lis, err := net.Listen("tcp", ":50051")
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatalf("Error loading .env file %v", err)
+	}
+
+	lis, err := net.Listen("tcp", ":"+os.Getenv("LISTEN_PORT"))
 	if err != nil {
 		log.Fatalf("Failed to listen: %v", err)
 	}
 
-	// Create a new gRPC server
 	grpcServer := grpc.NewServer()
-
-	// Register the UserService
 	pb.RegisterUserServiceServer(grpcServer, &UserServiceServer{})
 
-	log.Println("Server is running on port 50051...")
-	if err := grpcServer.Serve(lis); err != nil {
+	log.Println("Server is running on port " + os.Getenv("LISTEN_PORT"))
+	err = grpcServer.Serve(lis)
+	if err != nil {
 		log.Fatalf("Failed to serve: %v", err)
 	}
+
 }

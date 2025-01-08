@@ -5,18 +5,15 @@ import (
 	pb "facade_service/protobuf_generated"
 )
 
-// UserServiceServer implementation
 type UserServiceServer struct {
 	pb.UnimplementedUserServiceServer
 }
 
-// LoginAndAuthenticate implementation
 func (s *UserServiceServer) LoginAndAuthenticate(ctx context.Context, req *pb.LoginRequest) (*pb.AuthResponse, error) {
-	// Mock implementation
-	if req.Email == "test@example.com" && req.Password == "password" {
+	if req.Email == "a@b.com" && req.Password == "pwd" {
 		return &pb.AuthResponse{
 			Valid:    true,
-			Username: "test_user",
+			Username: "iemand",
 		}, nil
 	}
 	return &pb.AuthResponse{
@@ -25,13 +22,11 @@ func (s *UserServiceServer) LoginAndAuthenticate(ctx context.Context, req *pb.Lo
 	}, nil
 }
 
-// AuthenticateToken implementation
 func (s *UserServiceServer) AuthenticateToken(ctx context.Context, req *pb.TokenRequest) (*pb.AuthResponse, error) {
-	// Mock token validation
 	if req.Token == "valid-token" {
 		return &pb.AuthResponse{
 			Valid:    true,
-			Username: "test_user",
+			Username: "iemand",
 		}, nil
 	}
 	return &pb.AuthResponse{
@@ -40,9 +35,7 @@ func (s *UserServiceServer) AuthenticateToken(ctx context.Context, req *pb.Token
 	}, nil
 }
 
-// CreateAccount implementation
 func (s *UserServiceServer) CreateAccount(ctx context.Context, req *pb.RegisterRequest) (*pb.AuthResponse, error) {
-	// Mock account creation
 	return &pb.AuthResponse{
 		Valid:    true,
 		Username: req.Username,

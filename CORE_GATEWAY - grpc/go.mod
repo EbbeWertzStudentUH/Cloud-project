@@ -3,6 +3,7 @@ module facade_service
 go 1.23.4
 
 require (
+	github.com/joho/godotenv v1.5.1 // indirect
 	golang.org/x/net v0.33.0 // indirect
 	golang.org/x/sys v0.28.0 // indirect
 	golang.org/x/text v0.21.0 // indirect
