@@ -10,7 +10,7 @@ echo "=== content van /app ==="
 ls /app
 echo
 echo "=== Server start command: ==="
-echo "pyhton main.py"
+echo "python main.py"
 
-pyhton main.py
+python main.py
 # tail -f /dev/null

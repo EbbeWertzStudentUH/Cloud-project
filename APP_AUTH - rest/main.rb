@@ -9,6 +9,7 @@ require './login_and_auth.rb'
 set :port, ENV['LISTEN_PORT']
 set :bind, '0.0.0.0'
 
+
 post '/register' do
   content_type :json
   data = JSON.parse(request.body.read)
@@ -23,6 +24,7 @@ post '/register' do
 end
 
 post '/login' do
+  content_type :json
   data = JSON.parse(request.body.read)
   begin
     token = login(data)
@@ -33,6 +35,7 @@ post '/login' do
 end
 
 get '/verify_token' do
+  content_type :json
   token = request.env['HTTP_AUTHORIZATION']&.split(' ')&.last  # auth header is "Bearer " en dan token
   if token.nil?
     halt 500, { message: "token should be in auth header" }.to_json

@@ -107,7 +107,7 @@ services:
       - "cloud-netwerk"
   core-notifier-ws-rest:
     build:
-      context: "./CORE_GATEWAY - grpc"
+      context: "./CORE_NOTIFIER - websocket+rest"
       dockerfile: Dockerfile
     container_name: CORE_NOTIFIER-WS-REST
     # expose:
@@ -116,6 +116,8 @@ services:
     ports:
       - "3004:3004" #ws
       - "3005:3005" #rest (debug)
+    networks:
+      - "cloud-netwerk"
 # =========================
 # APP MICROSERVICES  
 # =========================
