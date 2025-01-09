@@ -1,7 +1,7 @@
-use actix_web::{web, App, HttpServer};
+use actix_web::{App, HttpServer};
 use tokio::sync::Mutex;
 use std::sync::Arc;
-use tonic::{client, transport::Channel};
+use tonic::{transport::Channel};
 use once_cell::sync::Lazy;
 use crate::proto_generated::user_service_client::UserServiceClient;
 
