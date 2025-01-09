@@ -1,32 +1,51 @@
 use actix_web::{post, get, web, HttpResponse, Responder, HttpRequest};
-use crate::schemas::{LoginRequest, RegisterRequest, AuthResponse};
+use crate::schemas::user::{LoginRequest, RegisterRequest, AuthResponse};
+use crate::proto_generated::user_service_client::UserServiceClient;
+use crate::proto_generated::{
+    LoginRequest as GrpcLoginRequest,
+    TokenRequest as GrpcTokenRequest,
+    RegisterRequest as GrpcRegisterRequest};
+use tonic::transport::Channel;
+use tokio::sync::Mutex;
+use std::sync::Arc;
+
 
 // POST /user/authenticate
 #[post("/user/authenticate")]
-async fn authenticate(_body: web::Json<LoginRequest>) -> impl Responder {
-    // Add your authentication logic here
-    let response = AuthResponse {
-        valid: true,
-        token: "example_token".to_string(),
-        first_name: "John".to_string(),
-        last_name: "Doe".to_string(),
-    };
-    HttpResponse::Ok().json(response)
+async fn authenticate(body: web::Json<LoginRequest>, grpc_client: web::Data<Arc<Mutex<UserServiceClient<Channel>>>>) -> impl Responder {
+    let grpc_request: GrpcLoginRequest = body.into_inner().into();
+    let mut grpc_client = grpc_client.lock().await;
+    match grpc_client.login_and_authenticate(grpc_request).await {
+        Ok(response) => {
+            let http_response: AuthResponse = response.into_inner().into();
+            HttpResponse::Ok().json(http_response)
+        }
+        Err(err) => {
+            eprintln!("gRPC call failed: {}", err);
+            HttpResponse::InternalServerError().body("Failed to authenticate")
+        }
+    }
 }
 
 // GET /user/authenticate
 #[get("/user/authenticate")]
-async fn authenticate_token(req: HttpRequest) -> impl Responder {
+async fn authenticate_token(req: HttpRequest, grpc_client: web::Data<Arc<Mutex<UserServiceClient<Channel>>>>) -> impl Responder {
     let (ok, token) = extract_bearer_token(req);
     if !ok { HttpResponse::Unauthorized().body("Unauthorized, could not find bearer token in header");}
-
-    let response = AuthResponse {
-        valid: true,
-        token: token.to_string(),
-        first_name: "John".to_string(),
-        last_name: "Doe".to_string(),
+    let grpc_request = GrpcTokenRequest{
+        token: token
     };
-    return HttpResponse::Ok().json(response);
+    let mut grpc_client = grpc_client.lock().await;
+    match grpc_client.authenticate_token(grpc_request).await {
+        Ok(response) => {
+            let http_response: AuthResponse = response.into_inner().into();
+            HttpResponse::Ok().json(http_response)
+        }
+        Err(err) => {
+            eprintln!("gRPC call failed: {}", err);
+            HttpResponse::InternalServerError().body("Failed to authenticate")
+        }
+    }
 }
 
 fn extract_bearer_token(req: HttpRequest) -> (bool, String) {
@@ -44,15 +63,19 @@ fn extract_bearer_token(req: HttpRequest) -> (bool, String) {
 
 // POST /user/create_account
 #[post("/user/create_account")]
-async fn create_account(body: web::Json<RegisterRequest>) -> impl Responder {
-    // Add your account creation logic here
-    let response = AuthResponse {
-        valid: true,
-        token: "new_user_token".to_string(),
-        first_name: body.first_name.clone(),
-        last_name: body.last_name.clone(),
-    };
-    HttpResponse::Created().json(response)
+async fn create_account(body: web::Json<RegisterRequest>, grpc_client: web::Data<Arc<Mutex<UserServiceClient<Channel>>>>) -> impl Responder {
+    let grpc_request: GrpcRegisterRequest = body.into_inner().into();
+    let mut grpc_client = grpc_client.lock().await;
+    match grpc_client.create_account(grpc_request).await {
+        Ok(response) => {
+            let http_response: AuthResponse = response.into_inner().into();
+            HttpResponse::Ok().json(http_response)
+        }
+        Err(err) => {
+            eprintln!("gRPC call failed: {}", err);
+            HttpResponse::InternalServerError().body("Failed to create account")
+        }
+    }
 }
 
 // Configure routes

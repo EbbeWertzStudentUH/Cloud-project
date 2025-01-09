@@ -1,7 +1,7 @@
 use actix_web::{web, App, HttpServer};
 mod routes;
 mod schemas;
-mod grpc_connect;
+mod grpc_client;
 mod proto_generated {
     tonic::include_proto!("facade_service");
 }
@@ -16,7 +16,7 @@ async fn main() -> std::io::Result<()> {
     listen_url.push_str(&listen_port);
     println!("running on {listen_url}");
 
-    let grpc_client = grpc_connect::try_to_connect(gateway_url.as_str()).await;
+    let grpc_client = grpc_client::try_to_connect(gateway_url.as_str()).await;
     println!("connected to grpc");
 
     let grpc_client_data = web::Data::new(grpc_client);

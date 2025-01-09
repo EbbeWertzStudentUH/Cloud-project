@@ -1,6 +1,10 @@
 use tonic::transport::Channel;
 use crate::proto_generated::user_service_client::UserServiceClient;
 use tokio::time::{sleep, Duration};
+use tokio::sync::Mutex;
+use std::sync::Arc;
+use actix_web::{web, HttpResponse, Responder, HttpRequest};
+
 
 pub async fn try_to_connect(gateway_url: &str) -> UserServiceClient<Channel> {
     loop {
