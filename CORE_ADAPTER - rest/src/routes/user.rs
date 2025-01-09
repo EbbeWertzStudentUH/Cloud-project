@@ -5,26 +5,30 @@ use crate::proto_generated::{
     LoginRequest as GrpcLoginRequest,
     TokenRequest as GrpcTokenRequest,
     RegisterRequest as GrpcRegisterRequest};
+use crate::GRPC_CLIENT_USERSERVICE;
 use tonic::transport::Channel;
-use tokio::sync::Mutex;
 use std::sync::Arc;
+use tokio::sync::Mutex;
+
+
 
 
 // POST /user/authenticate
 #[post("/user/authenticate")]
-async fn authenticate(body: web::Json<LoginRequest>, grpc_client: web::Data<Arc<Mutex<UserServiceClient<Channel>>>>) -> impl Responder {
+async fn authenticate(body: web::Json<LoginRequest>) -> impl Responder {
+    let email = body.email.clone();
     let grpc_request: GrpcLoginRequest = body.into_inner().into();
-    let mut grpc_client = grpc_client.lock().await;
+    if let Some(grpc_client) = &mut *GRPC_CLIENT_USERSERVICE.lock().await {
     match grpc_client.login_and_authenticate(grpc_request).await {
         Ok(response) => {
             let http_response: AuthResponse = response.into_inner().into();
-            HttpResponse::Ok().json(http_response)
+            return HttpResponse::Ok().json(http_response)
         }
         Err(err) => {
             eprintln!("gRPC call failed: {}", err);
-            HttpResponse::InternalServerError().body("Failed to authenticate")
         }
-    }
+    }} else {eprintln!("gRPC client not initalised");}
+    HttpResponse::InternalServerError().body("Failed to authenticate")
 }
 
 // GET /user/authenticate

@@ -8,6 +8,3 @@ services:
     container_name: CORE_ADAPTER-REST
     ports:
       - "3001:3001"
-    environment: # geen idee waarom maar deze service wil zen env zelf niet laden
-      LISTEN_PORT: 3001
-      GATEWAY_URL: http://core-gateway-grpc:3006

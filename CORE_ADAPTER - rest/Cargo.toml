@@ -11,6 +11,7 @@ tokio = { version = "1.43", features = ["full"] }  # Async runtime needed for ac
 dotenvy = "0.15.7"
 tonic = "0.12.3"
 prost = "0.13.4"
+once_cell = "1.20.2"
 
 [build-dependencies]
 tonic-build = "0.12.3"
