@@ -8,11 +8,9 @@ async fn main() -> std::io::Result<()> {
     let listen_port = std::env::var("LISTEN_PORT").expect("PORT bestaat niet in .env");
     let mut listen_url = "0.0.0.0:".to_string();
     listen_url.push_str(&listen_port);
+    print!("running on {}", listen_url);
     HttpServer::new(|| {
         App::new()
             .configure(routes::user::config) // Configure user routes
-    })
-    .bind(listen_url)?
-    .run()
-    .await
+    }).bind(listen_url)?.run().await
 }
