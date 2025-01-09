@@ -1,0 +1,43 @@
+syntax = "proto3";
+
+package facade_service;
+option go_package = "./protobuf_generated";
+/* command:
+protoc --go_out=. --go-grpc_out=. facade.proto
+*/
+//=================
+// SERVICES
+//=================
+
+service UserService {
+    // auth:login, AuthenticateToken
+    rpc LoginAndAuthenticate (LoginRequest) returns (AuthResponse);
+    // auth:validate_token, userdb:get username
+    rpc AuthenticateToken (TokenRequest) returns (AuthResponse);
+    // auth:register, appdb:make demo project, LoginAndAuthenticate
+    rpc CreateAccount(RegisterRequest) returns (AuthResponse);
+}
+
+//=================
+// MESSAGES
+//=================
+message Empty {}
+message LoginRequest {
+    string email = 1;
+    string password = 2;
+}
+message TokenRequest {
+    string token = 1;
+}
+message RegisterRequest {
+    string email = 1;
+    string password = 2;
+    string first_name = 3;
+    string last_name = 4;
+}
+message AuthResponse {
+    bool valid = 1;
+    string token = 2;
+    string first_name = 3;
+    string last_name = 4;
+}

@@ -1,8 +1,6 @@
 use actix_web::{post, get, web, HttpResponse, Responder, HttpRequest};
 use crate::schemas::{LoginRequest, RegisterRequest, AuthResponse};
 
-
-
 // POST /user/authenticate
 #[post("/user/authenticate")]
 async fn authenticate(_body: web::Json<LoginRequest>) -> impl Responder {
