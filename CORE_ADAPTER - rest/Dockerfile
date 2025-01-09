@@ -22,8 +22,7 @@ FROM ubuntu:latest AS runtime
 WORKDIR /app
 COPY --from=builder /app/target/release/ADAPTER-rest .
 COPY ./docker_entrypoint_runtime.sh ./docker_entrypoint_runtime.sh
-COPY ./.env ./.env
-
+# env hoef niet copied want docker load .env files automatisch in environment
 EXPOSE 3001
 
 ENTRYPOINT ["/app/docker_entrypoint_runtime.sh"]

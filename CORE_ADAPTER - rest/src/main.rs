@@ -9,7 +9,7 @@ mod proto_generated {
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-    dotenvy::dotenv().expect("kan .env niet vinden");
+    dotenvy::dotenv().ok(); // ok negeert errors want .env is enkel voor local. In docker word .env in environment geload en is er geen .env file (docker kan .env files niet eens COPY-en)
     let listen_port = std::env::var("LISTEN_PORT").expect("PORT bestaat niet in .env");
     let gateway_url = std::env::var("GATEWAY_URL").expect("GATEWAY_URL bestaat niet in .env");
     let mut listen_url = "0.0.0.0:".to_string();
