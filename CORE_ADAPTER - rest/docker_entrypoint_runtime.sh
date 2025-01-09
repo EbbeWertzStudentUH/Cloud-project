@@ -10,8 +10,8 @@ echo "=== content van /app ==="
 ls /app
 echo
 echo "=== Server start command: ==="
-echo "/app/GATEWAY-rest"
+echo "/app/ADAPTER-rest"
 
-/app/GATEWAY-rest
+/app/ADAPTER-rest
 
 # tail -f /dev/null

@@ -1,5 +1,5 @@
 [package]
-name = "GATEWAY-rest"
+name = "ADAPTER-rest"
 version = "0.1.0"
 edition = "2021" # editie van cargo, de 2024 editie doet raar
 
