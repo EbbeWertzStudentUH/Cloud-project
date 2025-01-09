@@ -1,19 +1,18 @@
-use axum::Router;
-use tokio::net::TcpListener;
-use crate::rest_listener::create_listener;
-use crate::rest_router::create_router;
-mod rest_listener;
-mod rest_router;
+use actix_web::{App, HttpServer};
+mod routes;
+mod schemas;
 
-#[tokio::main]
-async fn main() {
-    // Expose .env variables naar echte environment
+#[actix_web::main]
+async fn main() -> std::io::Result<()> {
     dotenvy::dotenv().expect("kan .env niet vinden");
-
-    let listener: TcpListener = create_listener().await;
-    let app: Router = create_router();
-
-    axum::serve(listener, app)
-        .await
-        .expect("Kon app niet serven");
+    let listen_port = std::env::var("LISTEN_PORT").expect("PORT bestaat niet in .env");
+    let mut listen_url = "0.0.0.0:".to_string();
+    listen_url.push_str(&listen_port);
+    HttpServer::new(|| {
+        App::new()
+            .configure(routes::user::config) // Configure user routes
+    })
+    .bind(listen_url)?
+    .run()
+    .await
 }

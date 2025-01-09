@@ -1,18 +1,11 @@
 [package]
 name = "GATEWAY-rest"
 version = "0.1.0"
-edition = "2021"
+edition = "2021" # editie van cargo, de 2024 editie doet raar
 
 [dependencies]
-axum = "0.7.9" # rest api
-tower = "0.5.2" # web components
-tokio = { version = "1.42.0", features = ["full"] } # async runtime
-serde = { version = "1.0.216", features = ["derive"] }
-dotenvy = "0.15.7" # .env expose
-url = "2.5.4" # url parser
-
-# tonic = "0.12.3"
-# hyper = "1.5.2"
-
-# [build-dependencies]
-# tonic-build = "0.8.4"
+actix-web = "4.0"           # The web framework for handling HTTP requests
+serde = { version = "1.0", features = ["derive"] }   # Serialization and deserialization library
+serde_json = "1.0"          # For working with JSON
+tokio = { version = "1.43", features = ["full"] }  # Async runtime needed for actix-web
+dotenvy = "0.15.7"
