@@ -113,7 +113,7 @@ async fn get_friend_requests(query: web::Query<UserIDQueryParams>) -> impl Respo
 }
 
 // POST /user/friend-request
-#[post("/user/friend-request")]
+#[post("/user/friend-requests")]
 async fn add_friend_request(body: web::Json<FriendEditRequest>) -> impl Responder {
     let grpc_request: GrpcFriendEditRequest = body.into_inner().into();
     
@@ -132,7 +132,7 @@ async fn add_friend_request(body: web::Json<FriendEditRequest>) -> impl Responde
 }
 
 // POST /user/friend
-#[post("/user/friend")]
+#[post("/user/friends")]
 async fn add_friend(body: web::Json<FriendEditRequest>) -> impl Responder {
     let grpc_request: GrpcFriendEditRequest = body.into_inner().into();
 
@@ -150,8 +150,8 @@ async fn add_friend(body: web::Json<FriendEditRequest>) -> impl Responder {
     HttpResponse::InternalServerError().body("Failed to add friend")
 }
 
-// DELETE /user/remove-friend-request
-#[delete("/user/remove-friend-request")]
+// DELETE /user/friend-request
+#[delete("/user/friend-requests")]
 async fn remove_friend_request(body: web::Json<FriendEditRequest>) -> impl Responder {
     let grpc_request: GrpcFriendEditRequest = body.into_inner().into();
     
@@ -169,8 +169,8 @@ async fn remove_friend_request(body: web::Json<FriendEditRequest>) -> impl Respo
     HttpResponse::InternalServerError().body("Failed to remove friend request")
 }
 
-// DELETE /user/remove-friend
-#[delete("/user/remove-friend")]
+// DELETE /user/friend
+#[delete("/user/friends")]
 async fn remove_friend(body: web::Json<FriendEditRequest>) -> impl Responder {
     let grpc_request: GrpcFriendEditRequest = body.into_inner().into();
 
@@ -204,5 +204,11 @@ fn extract_bearer_token(req: HttpRequest) -> (bool, String) {
 pub fn config(cfg: &mut web::ServiceConfig) {
     cfg.service(authenticate)
         .service(authenticate_token)
-        .service(create_account);
+        .service(create_account)
+        .service(get_friends)
+        .service(get_friend_requests)
+        .service(add_friend)
+        .service(add_friend_request)
+        .service(remove_friend)
+        .service(remove_friend_request);
 }

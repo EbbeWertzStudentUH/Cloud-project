@@ -84,12 +84,10 @@ func (s *UserServiceServer) RemoveFriend(ctx context.Context, req *pb.FriendEdit
 	return resp, err
 }
 func (s *UserServiceServer) AddFriendRequest(ctx context.Context, req *pb.FriendEditRequest) (*pb.FriendsResponse, error) {
-	s.RemoveOrAddFriendsOrRequests(req.FriendId, req.UserId, "addFriendRequest")
 	resp, err := s.RemoveOrAddFriendsOrRequests(req.UserId, req.FriendId, "addFriendRequest")
 	return resp, err
 }
 func (s *UserServiceServer) RemoveFriendRequest(ctx context.Context, req *pb.FriendEditRequest) (*pb.FriendsResponse, error) {
-	s.RemoveOrAddFriendsOrRequests(req.FriendId, req.UserId, "removeFriendRequest")
 	resp, err := s.RemoveOrAddFriendsOrRequests(req.UserId, req.FriendId, "removeFriendRequest")
 	return resp, err
 }
