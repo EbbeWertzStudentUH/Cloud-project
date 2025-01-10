@@ -27,7 +27,7 @@ func main() {
 	notifier_client := NewNotifierClient(os.Getenv("NOTIFIER_SERVICE_URL"))
 
 	grpcServer := grpc.NewServer()
-	user_service := &UserServiceServer{authClient: *auth_client, userdbClient: *userdb_client}
+	user_service := &UserServiceServer{authClient: *auth_client, userdbClient: *userdb_client, notifierClient: *notifier_client}
 	pb.RegisterUserServiceServer(grpcServer, user_service)
 	pb.RegisterNotificationServiceServer(grpcServer, &NotificationServiceServer{notifierClient: *notifier_client, userService: user_service})
 

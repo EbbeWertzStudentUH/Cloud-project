@@ -7,8 +7,9 @@ import (
 
 type UserServiceServer struct {
 	pb.UnimplementedUserServiceServer
-	authClient   AuthClient
-	userdbClient UserDBClient
+	authClient     AuthClient
+	userdbClient   UserDBClient
+	notifierClient NotifierClient
 }
 
 func (s *UserServiceServer) LoginAndAuthenticate(ctx context.Context, req *pb.LoginRequest) (*pb.AuthResponse, error) {
@@ -76,6 +77,12 @@ func (s *UserServiceServer) GetFriendRequests(ctx context.Context, req *pb.UserI
 func (s *UserServiceServer) AddFriend(ctx context.Context, req *pb.FriendEditRequest) (*pb.FriendsResponse, error) {
 	s.RemoveOrAddFriendsOrRequests(req.FriendId, req.UserId, "addFriend")
 	resp, err := s.RemoveOrAddFriendsOrRequests(req.UserId, req.FriendId, "addFriend")
+	user, ok := s.userdbClient.QueryUser(req.UserId)
+	if !ok {
+		return &pb.FriendsResponse{Users: []*pb.User{}}, nil
+	}
+	message := user["first_name"].(string) + " is nu je vriend!"
+	s.notifierClient.SendNotification(req.FriendId, message)
 	return resp, err
 }
 func (s *UserServiceServer) RemoveFriend(ctx context.Context, req *pb.FriendEditRequest) (*pb.FriendsResponse, error) {
@@ -85,6 +92,12 @@ func (s *UserServiceServer) RemoveFriend(ctx context.Context, req *pb.FriendEdit
 }
 func (s *UserServiceServer) AddFriendRequest(ctx context.Context, req *pb.FriendEditRequest) (*pb.FriendsResponse, error) {
 	resp, err := s.RemoveOrAddFriendsOrRequests(req.UserId, req.FriendId, "addFriendRequest")
+	user, ok := s.userdbClient.QueryUser(req.UserId)
+	if !ok {
+		return &pb.FriendsResponse{Users: []*pb.User{}}, nil
+	}
+	message := user["first_name"].(string) + " " + user["last_name"].(string) + " heeft je een vriendverzoek gestuurd!"
+	s.notifierClient.SendNotification(req.FriendId, message)
 	return resp, err
 }
 func (s *UserServiceServer) RemoveFriendRequest(ctx context.Context, req *pb.FriendEditRequest) (*pb.FriendsResponse, error) {
