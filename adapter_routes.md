@@ -22,7 +22,7 @@
 >
 #### GET
 > get vriendenlijst
-- ```JSON {id}```
+- ```QUERYPARAM {user_id}```
 - ```-> JSON [{first_name, last_name, id}]```
 ---
 #### POST
@@ -39,7 +39,7 @@
 >
 #### GET
 > get friend requests lijst
-- ```JSON {id}```
+- ```QUERYPARAM {user_id}```
 - ```-> JSON [{first_name, last_name, id}]```
 ---
 #### POST
