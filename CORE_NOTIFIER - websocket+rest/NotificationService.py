@@ -2,6 +2,10 @@ from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 import jwt
 import os
 import datetime
+import logging
+logging.basicConfig(level=logging.DEBUG, format="%(levelname)s: %(message)s")
+
+
 
 class SubscriptionManager:
     def __init__(self):
@@ -47,6 +51,7 @@ class NotificationService:
         async def endpoint(websocket: WebSocket): await self._handleEndpoint(websocket)
 
     async def subscribe(self, user_id:str, topics:set[tuple[str, str]]):
+        logging.info(f"subscribe {user_id, topics}")
         online_users = set() # users die dezelfde uuid hebben als de topic
         topic_name = ''
         for topic in topics:
@@ -58,23 +63,28 @@ class NotificationService:
             await self._send_topic_equals_user_message(user_id, online_users, topic_name)
 
     def unsubscribe(self, user_id:str, topics:set[tuple[str, str]]):
+        logging.info(f"unsubscribe {user_id, topics}")
         for topic in topics:
             self.subscriptionManager.unsubscribe(topic, user_id)
 
     async def publishUpdate(self, topics:set[tuple[str, str]], update):
+        logging.info(f"publish update {topics}")
         for topic in topics:
             await self._broadcastJSON("update", update, self.subscriptionManager.getSubscribedUsers(topic))
 
     async def publishNotification(self, topics:set[tuple[str, str]], notification):
+        logging.info(f"publish notification {topics}")
         timestamp = datetime.datetime.now().strftime("%H:%M")
         data = {"message": notification.message, "time":timestamp}
         for topic in topics:
             await self._broadcastJSON("notification", data, self.subscriptionManager.getSubscribedUsers(topic))
     
     async def sendUpdate(self, user_id:str, update):
+        logging.info(f"send update {user_id, update}")
         await self._broadcastJSON("update", update, [user_id])
 
     async def sendNotification(self, user_id:str, notification):
+        logging.info(f"send notification {user_id, notification}")
         timestamp = datetime.datetime.now().strftime("%H:%M")
         data = {"message": notification.message, "time":timestamp}
         await self._broadcastJSON("notification", data, [user_id])
@@ -82,11 +92,13 @@ class NotificationService:
     async def _handleEndpoint(self, websocket: WebSocket):
         user_id = None
         await websocket.accept()
+        logging.info("new unregistered client")
         await websocket.send_json({"type":"connection_status", "data":{"message":"Connected. Send token to authorise connection.", "ok":True}})
         try:
             authenticated = False
             while True:
                 message = await websocket.receive_text()
+                logging.info(f"got message: {message}")
                 if message and not authenticated:
                     authenticated, user_id = self._handle_registration(message, websocket)
                     await websocket.send_json({"type":"connection_status", "data":{"message":f"Connection fully registered. UserID:{user_id}", "ok":True}})
@@ -99,7 +111,7 @@ class NotificationService:
             if user_id and user_id in self.client_sockets:
                 await self._notify_other_users_about_status_change(user_id, "offline")
                 self.client_sockets.pop(user_id)
-            print(f"Client {user_id} disconnected")
+            logging.info(f"Client {user_id} disconnected")
 
     async def _broadcastJSON(self, type:str, data, users:set[str]):
         for user_id in users:
@@ -135,6 +147,8 @@ class NotificationService:
             jwt_data = jwt.decode(token, os.getenv('JWT_SECRET'), algorithms=['HS256'])
             user_id = jwt_data['user_id']
             self.client_sockets[user_id] = websocket
-            print(f"Client {user_id} connected and authenticated")
+            logging.info(f"Client {user_id} connected and authenticated")
             return True, user_id
-        except: return False, ''
+        except:
+            logging.info(f"could not validate token {token}")
+            return False, ''

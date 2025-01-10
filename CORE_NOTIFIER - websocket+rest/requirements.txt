@@ -3,4 +3,4 @@ fastapi
 pydantic
 uvicorn
 python-dotenv
-jwt
+PyJWT

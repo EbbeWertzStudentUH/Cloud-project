@@ -3,7 +3,7 @@ require 'jwt'
 def generate_jwt(user_id)
   data = {
     user_id: user_id,
-    exp: Time.now.to_i + 3600 # 1 uur
+    exp: Time.now.to_i + 43200 # 12 uur
   }
   secret_key = ENV['JWT_SECRET']
   JWT.encode(data, secret_key, 'HS256')

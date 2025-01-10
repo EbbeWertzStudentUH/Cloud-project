@@ -20,9 +20,11 @@ func NewNotifierClient(url string) *NotifierClient {
 
 func (n *NotifierClient) Subscribe(user_id string, topic_name string, topic_ids []string) bool {
 	data := map[string]interface{}{
-		"user_id":    user_id,
-		"topic_name": topic_name,
-		"topic_ids":  topic_ids,
+		"user_id": user_id,
+		"topic": map[string]interface{}{
+			"name": topic_name,
+			"ids":  topic_ids,
+		},
 	}
 	resp, err := n.restClient.R().
 		SetHeader("Content-Type", "application/json").

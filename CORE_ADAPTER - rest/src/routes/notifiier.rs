@@ -10,8 +10,8 @@ struct TokenContent {
     user_id: String,
 }
 
-// PUT /notifier/subscribe
-#[put("/notifier/subscribe_friends")]
+// PUT /notifier/subscribe-friends
+#[put("/notifier/subscribe-friends")]
 async fn subscribe_friends(req: HttpRequest) -> impl Responder {
     let (ok, user_id) = get_and_decode_token(req);
     if !ok {return HttpResponse::InternalServerError().body("Failed to subscribe friends list")}
