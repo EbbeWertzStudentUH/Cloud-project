@@ -1,4 +1,6 @@
 use actix_web::{App, HttpServer};
+use actix_cors::Cors;
+
 use tokio::sync::Mutex;
 use std::sync::Arc;
 use tonic::transport::Channel;
@@ -38,6 +40,13 @@ async fn main() -> std::io::Result<()> {
 
     HttpServer::new(move || {
         App::new()
+            .wrap(
+            Cors::default()
+                .allow_any_origin()
+                .allow_any_method()
+                .allow_any_header()
+                .max_age(3600),
+            )
             .configure(routes::user::config)
     }).bind(listen_url)?.run().await
 }
