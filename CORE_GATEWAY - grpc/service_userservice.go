@@ -74,19 +74,23 @@ func (s *UserServiceServer) GetFriendRequests(ctx context.Context, req *pb.UserI
 	return resp, err
 }
 func (s *UserServiceServer) AddFriend(ctx context.Context, req *pb.FriendEditRequest) (*pb.FriendsResponse, error) {
-	resp, err := s.RemoveOrAddFriendsOrRequests(req, "addFriend")
+	s.RemoveOrAddFriendsOrRequests(req.FriendId, req.UserId, "addFriend")
+	resp, err := s.RemoveOrAddFriendsOrRequests(req.UserId, req.FriendId, "addFriend")
 	return resp, err
 }
 func (s *UserServiceServer) RemoveFriend(ctx context.Context, req *pb.FriendEditRequest) (*pb.FriendsResponse, error) {
-	resp, err := s.RemoveOrAddFriendsOrRequests(req, "removeFriend")
+	s.RemoveOrAddFriendsOrRequests(req.FriendId, req.UserId, "removeFriend")
+	resp, err := s.RemoveOrAddFriendsOrRequests(req.UserId, req.FriendId, "removeFriend")
 	return resp, err
 }
 func (s *UserServiceServer) AddFriendRequest(ctx context.Context, req *pb.FriendEditRequest) (*pb.FriendsResponse, error) {
-	resp, err := s.RemoveOrAddFriendsOrRequests(req, "addFriendRequest")
+	s.RemoveOrAddFriendsOrRequests(req.FriendId, req.UserId, "addFriendRequest")
+	resp, err := s.RemoveOrAddFriendsOrRequests(req.UserId, req.FriendId, "addFriendRequest")
 	return resp, err
 }
 func (s *UserServiceServer) RemoveFriendRequest(ctx context.Context, req *pb.FriendEditRequest) (*pb.FriendsResponse, error) {
-	resp, err := s.RemoveOrAddFriendsOrRequests(req, "removeFriendRequest")
+	s.RemoveOrAddFriendsOrRequests(req.FriendId, req.UserId, "removeFriendRequest")
+	resp, err := s.RemoveOrAddFriendsOrRequests(req.UserId, req.FriendId, "removeFriendRequest")
 	return resp, err
 }
 
@@ -109,8 +113,8 @@ func (s *UserServiceServer) GetFriendsOrRequests(req *pb.UserID, graphqltype str
 	}, nil
 }
 
-func (s *UserServiceServer) RemoveOrAddFriendsOrRequests(req *pb.FriendEditRequest, graphqltype string) (*pb.FriendsResponse, error) {
-	resp, ok := s.userdbClient.RemoveOrAddFriendsOrRequests(req.UserId, req.FriendId, graphqltype)
+func (s *UserServiceServer) RemoveOrAddFriendsOrRequests(userID string, friendID string, graphqltype string) (*pb.FriendsResponse, error) {
+	resp, ok := s.userdbClient.RemoveOrAddFriendsOrRequests(userID, friendID, graphqltype)
 	if !ok {
 		return &pb.FriendsResponse{Users: []*pb.User{}}, nil
 	}

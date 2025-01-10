@@ -16,17 +16,20 @@ service UserService {
     rpc AuthenticateToken (TokenRequest) returns (AuthResponse);
     // auth:register, appdb:make demo project, LoginAndAuthenticate
     rpc CreateAccount(RegisterRequest) returns (AuthResponse);
+
     // userdb: friends
     rpc getFriends(UserID) returns (FriendsResponse);
     // userdb: friend_requests
     rpc getFriendRequests(UserID) returns (FriendsResponse);
-    // userdb: addFriendRequest
+
+    // userdb: addFriendRequest bij ene, addFriendRequest bij andere
     rpc addFriendRequest(FriendEditRequest) returns (FriendsResponse);
-    // userdb: addFriend
+    // userdb: addFriend bij ene, addFriend bij andere
     rpc addFriend(FriendEditRequest) returns (FriendsResponse);
-    // userdb: removeFriendRequest
+
+    // userdb: removeFriendRequest bij ene, removeFriendRequest bij andere
     rpc removeFriendRequest(FriendEditRequest) returns (FriendsResponse);
-    // userdb: removeFriend
+    // userdb: removeFriend bij ene, removeFriend bij andere
     rpc removeFriend(FriendEditRequest) returns (FriendsResponse);
 }
 

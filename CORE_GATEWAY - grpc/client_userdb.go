@@ -50,7 +50,7 @@ func (u *UserDBClient) RemoveOrAddFriendsOrRequests(user_id string, friend_id, g
     		last_name
   		}
 	}`
-	vars := map[string]interface{}{"id": user_id}
+	vars := map[string]interface{}{"user_id": user_id, "friend_id": friend_id}
 	resp, ok := u.QueryMultiple(query, vars)
 	return resp[graphql_type], ok
 }
