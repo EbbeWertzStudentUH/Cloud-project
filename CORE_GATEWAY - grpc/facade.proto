@@ -16,12 +16,39 @@ service UserService {
     rpc AuthenticateToken (TokenRequest) returns (AuthResponse);
     // auth:register, appdb:make demo project, LoginAndAuthenticate
     rpc CreateAccount(RegisterRequest) returns (AuthResponse);
+    // userdb: friends
+    rpc getFriends(UserID) returns (FriendsResponse);
+    // userdb: friend_requests
+    rpc getFriendRequests(UserID) returns (FriendsResponse);
+    // userdb: addFriendRequest
+    rpc addFriendRequest(FriendEditRequest) returns (FriendsResponse);
+    // userdb: addFriend
+    rpc addFriend(FriendEditRequest) returns (FriendsResponse);
+    // userdb: removeFriendRequest
+    rpc removeFriendRequest(FriendEditRequest) returns (FriendsResponse);
+    // userdb: removeFriend
+    rpc removeFriend(FriendEditRequest) returns (FriendsResponse);
 }
 
 //=================
 // MESSAGES
 //=================
 message Empty {}
+message FriendEditRequest{
+    string user_id = 1;
+    string friend_id = 2;
+}
+message UserID{
+    string user_id = 1;
+}
+message User{
+    string first_name = 1;
+    string last_name = 2;
+    string id = 3;
+}
+message FriendsResponse{
+    repeated User users = 1;
+}
 message LoginRequest {
     string email = 1;
     string password = 2;
@@ -38,6 +65,5 @@ message RegisterRequest {
 message AuthResponse {
     bool valid = 1;
     string token = 2;
-    string first_name = 3;
-    string last_name = 4;
+    User user = 3;
 }
