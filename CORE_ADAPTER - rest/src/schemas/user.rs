@@ -76,7 +76,13 @@ impl From<GrpcAuthResponse> for AuthResponse {
         AuthResponse {
             valid: grpc.valid,
             token: grpc.token,
-            user: grpc.user.unwrap().into()
+            user: grpc.user
+            .map(|u| u.into())
+            .unwrap_or_else(|| User {
+                first_name: String::new(),
+                last_name: String::new(),
+                id: String::new(),
+            }),
         }
     }
 }

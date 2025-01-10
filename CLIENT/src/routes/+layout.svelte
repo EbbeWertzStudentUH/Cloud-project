@@ -1,5 +1,7 @@
 <script>
 	import { onMount } from 'svelte';
+	import { goto } from '$app/navigation';
+
 	import '../app.css';
 
 	export let data;

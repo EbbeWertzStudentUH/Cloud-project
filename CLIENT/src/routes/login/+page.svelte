@@ -9,10 +9,10 @@
   let error = '';
 
   async function login() {
-    const returneduser = await POST({email, password}, 'user/authenticate');
-    if(returneduser.valid){
-      localStorage.setItem('authToken', returneduser.token);
-      data.user.set(returneduser);
+    const resp = await POST({email, password}, 'user/authenticate');
+    if(resp.valid){
+      localStorage.setItem('authToken', resp.token);
+      data.user.set(resp.user);
       goto('/');
     } else {
       error = 'invalid credidentials'

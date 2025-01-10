@@ -15,11 +15,11 @@ async function fetchUser() {
         console.log("token is not present, going to login page");
         goto('/login');
     } else {
-        console.log("validating token ...");
+        console.log(`validating token ${token}...`);
         let data = await GETwithToken('user/authenticate');
         if (data.valid){
             console.log("token valid!");
-            user.set(data);
+            user.set(data.user);
         } else {
             console.log("token did not validate, going to login page");
             localStorage.removeItem('authToken');

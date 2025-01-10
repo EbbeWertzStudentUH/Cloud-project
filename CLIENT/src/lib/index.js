@@ -1,7 +1,7 @@
 import { goto } from '$app/navigation';
 
 export async function GETwithToken(path) {
-    const token = await getToken();
+    const token = getToken();
 	try {
 		const res = await fetch('http://localhost:3001/' + path, {
 			method: 'GET',
@@ -38,7 +38,7 @@ export async function POST(body, path) {
       }
     }
 
-export async function getToken() {
+export function getToken() {
 	{
 		const token = localStorage.getItem('authToken');
 		if (!token) {
