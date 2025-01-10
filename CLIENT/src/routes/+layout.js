@@ -12,12 +12,16 @@ export async function load() {
 async function fetchUser() {
     const token = localStorage.getItem('authToken');
     if (!token) {
+        console.log("token is not present, going to login page");
         goto('/login');
     } else {
+        console.log("validating token ...");
         let data = await GETwithToken('user/authenticate');
         if (data.valid){
+            console.log("token valid!");
             user.set(data);
         } else {
+            console.log("token did not validate, going to login page");
             localStorage.removeItem('authToken');
             goto('/login');
         }

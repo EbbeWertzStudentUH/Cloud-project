@@ -1,7 +1,7 @@
 import { goto } from '$app/navigation';
 
 export async function GETwithToken(path) {
-    const token = getToken();
+    const token = await getToken();
 	try {
 		const res = await fetch('http://localhost:3001/' + path, {
 			method: 'GET',
@@ -42,6 +42,7 @@ export async function getToken() {
 	{
 		const token = localStorage.getItem('authToken');
 		if (!token) {
+            console.log("token is not present, going to login page");
 			goto('/login');
 		} else {
 			return token;

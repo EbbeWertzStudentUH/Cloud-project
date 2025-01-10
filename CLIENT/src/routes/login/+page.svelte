@@ -11,6 +11,7 @@
   async function login() {
     const returneduser = await POST({email, password}, 'user/authenticate');
     if(returneduser.valid){
+      localStorage.setItem('authToken', returneduser.token);
       data.user.set(returneduser);
       goto('/');
     } else {
