@@ -4,7 +4,6 @@ use crate::proto_generated::{
     LoginRequest as GrpcLoginRequest,
     RegisterRequest as GrpcRegisterRequest,
     User as GrpcUser,
-    UserId as GrpcUserID,
     FriendsResponse as GrpcFriendsResponse,
     FriendEditRequest as GrpcFriendEditRequest
 };
@@ -90,22 +89,6 @@ impl From<GrpcAuthResponse> for AuthResponse {
 
 // REST
 
-#[derive(Serialize, Deserialize)]
-pub struct UserID {
-    pub user_id: String,
-}
-
-// REST -> GRPC
-impl From<UserID> for GrpcUserID {
-    fn from(rest: UserID) -> Self {
-        GrpcUserID {
-            user_id: rest.user_id,
-        }
-    }
-}
-
-// REST
-
 #[derive(Serialize)]
 pub struct FriendsResponse {
     pub users: Vec<User>,
@@ -126,7 +109,6 @@ impl From<GrpcFriendsResponse> for FriendsResponse {
 
 #[derive(Deserialize)]
 pub struct FriendEditRequest {
-    pub user_id: String,
     pub friend_id: String,
 }
 
@@ -134,7 +116,7 @@ pub struct FriendEditRequest {
 impl From<FriendEditRequest> for GrpcFriendEditRequest {
     fn from(rest: FriendEditRequest) -> Self {
         GrpcFriendEditRequest {
-            user_id: rest.user_id,
+            user_id: String::new(),
             friend_id: rest.friend_id,
         }
     }

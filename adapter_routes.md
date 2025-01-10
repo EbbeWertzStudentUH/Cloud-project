@@ -22,32 +22,32 @@
 >
 #### GET
 > get vriendenlijst
-- ```QUERYPARAM {user_id}```
+- ```HEADER{Authorisation:Bearer token}```
 - ```-> JSON [{first_name, last_name, id}]```
 ---
 #### POST
 > add wederzijds nieuwe vriend en krijg ge-update vriendenlijst
-- ```JSON {user_id, friend_id}```
+- ```HEADER{Authorisation:Bearer token}, JSON {friend_id}```
 - ```-> JSON [{first_name, last_name, id}]```
 ---
 #### DELETE
 > verwijder wederzijds vriend en krijg ge-update vriendenlijst
-- ```JSON {user_id, friend_id}```
+- ```HEADER{Authorisation:Bearer token}, JSON {friend_id}```
 - ```-> JSON [{first_name, last_name, id}]```
     
 ### /user/friend-requests
 >
 #### GET
 > get friend requests lijst
-- ```QUERYPARAM {user_id}```
+- ```HEADER{Authorisation:Bearer token}```
 - ```-> JSON [{first_name, last_name, id}]```
 ---
 #### POST
 > add nieuwe vriend en krijg ge-update friend requests lijst
-- ```JSON {user_id, friend_id}```
+- ```HEADER{Authorisation:Bearer token}, JSON {friend_id}```
 - ```-> JSON [{first_name, last_name, id}]```
 ---
 #### DELETE
 > verwijder vriend en krijg ge-update friend requests lijst
-- ```JSON {user_id, friend_id}```
+- ```HEADER{Authorisation:Bearer token}, JSON {friend_id}```
 - ```-> JSON [{first_name, last_name, id}]```

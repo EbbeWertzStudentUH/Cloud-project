@@ -1,5 +1,7 @@
 use actix_web::{post, get, delete, web, HttpResponse, Responder, HttpRequest};
 use crate::schemas::user::{LoginRequest, RegisterRequest, AuthResponse, FriendEditRequest, FriendsResponse};
+use jsonwebtoken::{decode, DecodingKey, Validation, Algorithm};
+use serde::Deserialize;
 use crate::proto_generated::{
     LoginRequest as GrpcLoginRequest,
     TokenRequest as GrpcTokenRequest,
@@ -7,15 +9,12 @@ use crate::proto_generated::{
     UserId as GrpcUserID,
     FriendEditRequest as GrpcFriendEditRequest,
 };
-use serde::Deserialize;
 
 use crate::GRPC_CLIENT_USERSERVICE;
-
-#[derive(Deserialize)]
-struct UserIDQueryParams {
+#[derive(Debug, Deserialize)]
+struct TokenContent {
     user_id: String,
 }
-
 
 // POST /user/authenticate
 #[post("/user/authenticate")]
@@ -76,8 +75,10 @@ async fn create_account(body: web::Json<RegisterRequest>) -> impl Responder {
 
 // GET /user/friends
 #[get("/user/friends")]
-async fn get_friends(query: web::Query<UserIDQueryParams>) -> impl Responder {
-    let grpc_request: GrpcUserID = GrpcUserID { user_id: query.user_id.clone() };
+async fn get_friends(req: HttpRequest) -> impl Responder {
+    let (ok, user_id) = get_and_decode_token(req);
+    if !ok {return HttpResponse::InternalServerError().body("Failed to fetch friends")}
+    let grpc_request: GrpcUserID = GrpcUserID { user_id: user_id.clone() };
     
     if let Some(grpc_client) = &mut *GRPC_CLIENT_USERSERVICE.lock().await {
         match grpc_client.get_friends(grpc_request).await {
@@ -95,8 +96,10 @@ async fn get_friends(query: web::Query<UserIDQueryParams>) -> impl Responder {
 
 // GET /user/friend-requests
 #[get("/user/friend-requests")]
-async fn get_friend_requests(query: web::Query<UserIDQueryParams>) -> impl Responder {
-    let grpc_request: GrpcUserID = GrpcUserID { user_id: query.user_id.clone() };
+async fn get_friend_requests(req: HttpRequest) -> impl Responder {
+    let (ok, user_id) = get_and_decode_token(req);
+    if !ok {return HttpResponse::InternalServerError().body("Failed to fetch friend requests")}
+    let grpc_request: GrpcUserID = GrpcUserID { user_id: user_id.clone() };
 
     if let Some(grpc_client) = &mut *GRPC_CLIENT_USERSERVICE.lock().await {
         match grpc_client.get_friend_requests(grpc_request).await {
@@ -114,9 +117,11 @@ async fn get_friend_requests(query: web::Query<UserIDQueryParams>) -> impl Respo
 
 // POST /user/friend-request
 #[post("/user/friend-requests")]
-async fn add_friend_request(body: web::Json<FriendEditRequest>) -> impl Responder {
-    let grpc_request: GrpcFriendEditRequest = body.into_inner().into();
-    
+async fn add_friend_request(body: web::Json<FriendEditRequest>, req: HttpRequest) -> impl Responder {
+    let (ok, user_id) = get_and_decode_token(req);
+    if !ok {return HttpResponse::InternalServerError().body("Failed to add friend request")}
+    let mut grpc_request: GrpcFriendEditRequest = body.into_inner().into();
+    grpc_request.user_id = user_id;
     if let Some(grpc_client) = &mut *GRPC_CLIENT_USERSERVICE.lock().await {
         match grpc_client.add_friend_request(grpc_request).await {
             Ok(response) => {
@@ -133,9 +138,11 @@ async fn add_friend_request(body: web::Json<FriendEditRequest>) -> impl Responde
 
 // POST /user/friend
 #[post("/user/friends")]
-async fn add_friend(body: web::Json<FriendEditRequest>) -> impl Responder {
-    let grpc_request: GrpcFriendEditRequest = body.into_inner().into();
-
+async fn add_friend(body: web::Json<FriendEditRequest>, req: HttpRequest) -> impl Responder {
+    let (ok, user_id) = get_and_decode_token(req);
+    if !ok {return HttpResponse::InternalServerError().body("Failed to add friend")}
+    let mut grpc_request: GrpcFriendEditRequest = body.into_inner().into();
+    grpc_request.user_id = user_id;
     if let Some(grpc_client) = &mut *GRPC_CLIENT_USERSERVICE.lock().await {
         match grpc_client.add_friend(grpc_request).await {
             Ok(response) => {
@@ -152,9 +159,11 @@ async fn add_friend(body: web::Json<FriendEditRequest>) -> impl Responder {
 
 // DELETE /user/friend-request
 #[delete("/user/friend-requests")]
-async fn remove_friend_request(body: web::Json<FriendEditRequest>) -> impl Responder {
-    let grpc_request: GrpcFriendEditRequest = body.into_inner().into();
-    
+async fn remove_friend_request(body: web::Json<FriendEditRequest>, req: HttpRequest) -> impl Responder {
+    let (ok, user_id) = get_and_decode_token(req);
+    if !ok {return HttpResponse::InternalServerError().body("Failed to remove friend request")}
+    let mut grpc_request: GrpcFriendEditRequest = body.into_inner().into();
+    grpc_request.user_id = user_id;
     if let Some(grpc_client) = &mut *GRPC_CLIENT_USERSERVICE.lock().await {
         match grpc_client.remove_friend_request(grpc_request).await {
             Ok(response) => {
@@ -171,9 +180,11 @@ async fn remove_friend_request(body: web::Json<FriendEditRequest>) -> impl Respo
 
 // DELETE /user/friend
 #[delete("/user/friends")]
-async fn remove_friend(body: web::Json<FriendEditRequest>) -> impl Responder {
-    let grpc_request: GrpcFriendEditRequest = body.into_inner().into();
-
+async fn remove_friend(body: web::Json<FriendEditRequest>, req: HttpRequest) -> impl Responder {
+    let (ok, user_id) = get_and_decode_token(req);
+    if !ok {return HttpResponse::InternalServerError().body("Failed to remove friend")}
+    let mut grpc_request: GrpcFriendEditRequest = body.into_inner().into();
+    grpc_request.user_id = user_id;
     if let Some(grpc_client) = &mut *GRPC_CLIENT_USERSERVICE.lock().await {
         match grpc_client.remove_friend(grpc_request).await {
             Ok(response) => {
@@ -198,6 +209,26 @@ fn extract_bearer_token(req: HttpRequest) -> (bool, String) {
         }
     }
     return (false, "".to_string());
+}
+
+fn get_and_decode_token(req: HttpRequest) -> (bool, String) {
+    let (ok, token) = extract_bearer_token(req);
+    if !ok {
+        return (false, "".to_string());
+    }
+    let secret = std::env::var("JWT_SECRET").expect("JWT_SECRET bestaat niet in .env");
+    let decoded = decode::<TokenContent>(
+        token.as_str(),
+        &DecodingKey::from_secret(secret.as_ref()),
+        &Validation::new(Algorithm::HS256),
+    );
+    match decoded {
+        Ok(data) => (true, data.claims.user_id),
+        Err(err) => {
+            eprintln!("Failed to decode token: {}", err);
+            (false, "".to_string())
+        }
+    }
 }
 
 // Configure routes
