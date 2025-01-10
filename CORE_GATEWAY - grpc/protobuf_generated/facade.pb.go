@@ -572,9 +572,15 @@ var file_facade_proto_rawDesc = []byte{
 	0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x2e, 0x46, 0x72, 0x69, 0x65, 0x6e, 0x64, 0x45, 0x64, 0x69,
 	0x74, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x1f, 0x2e, 0x66, 0x61, 0x63, 0x61, 0x64,
 	0x65, 0x5f, 0x73, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x2e, 0x46, 0x72, 0x69, 0x65, 0x6e, 0x64,
-	0x73, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x42, 0x16, 0x5a, 0x14, 0x2e, 0x2f, 0x70,
-	0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66, 0x5f, 0x67, 0x65, 0x6e, 0x65, 0x72, 0x61, 0x74, 0x65,
-	0x64, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x73, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x32, 0x5b, 0x0a, 0x13, 0x4e, 0x6f, 0x74,
+	0x69, 0x66, 0x69, 0x63, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x53, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65,
+	0x12, 0x44, 0x0a, 0x13, 0x73, 0x75, 0x62, 0x73, 0x63, 0x72, 0x69, 0x62, 0x65, 0x46, 0x72, 0x69,
+	0x65, 0x6e, 0x64, 0x4c, 0x69, 0x73, 0x74, 0x12, 0x16, 0x2e, 0x66, 0x61, 0x63, 0x61, 0x64, 0x65,
+	0x5f, 0x73, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x2e, 0x55, 0x73, 0x65, 0x72, 0x49, 0x44, 0x1a,
+	0x15, 0x2e, 0x66, 0x61, 0x63, 0x61, 0x64, 0x65, 0x5f, 0x73, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65,
+	0x2e, 0x45, 0x6d, 0x70, 0x74, 0x79, 0x42, 0x16, 0x5a, 0x14, 0x2e, 0x2f, 0x70, 0x72, 0x6f, 0x74,
+	0x6f, 0x62, 0x75, 0x66, 0x5f, 0x67, 0x65, 0x6e, 0x65, 0x72, 0x61, 0x74, 0x65, 0x64, 0x62, 0x06,
+	0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -613,17 +619,19 @@ var file_facade_proto_depIdxs = []int32{
 	1,  // 8: facade_service.UserService.addFriend:input_type -> facade_service.FriendEditRequest
 	1,  // 9: facade_service.UserService.removeFriendRequest:input_type -> facade_service.FriendEditRequest
 	1,  // 10: facade_service.UserService.removeFriend:input_type -> facade_service.FriendEditRequest
-	8,  // 11: facade_service.UserService.LoginAndAuthenticate:output_type -> facade_service.AuthResponse
-	8,  // 12: facade_service.UserService.AuthenticateToken:output_type -> facade_service.AuthResponse
-	8,  // 13: facade_service.UserService.CreateAccount:output_type -> facade_service.AuthResponse
-	4,  // 14: facade_service.UserService.getFriends:output_type -> facade_service.FriendsResponse
-	4,  // 15: facade_service.UserService.getFriendRequests:output_type -> facade_service.FriendsResponse
-	4,  // 16: facade_service.UserService.addFriendRequest:output_type -> facade_service.FriendsResponse
-	4,  // 17: facade_service.UserService.addFriend:output_type -> facade_service.FriendsResponse
-	4,  // 18: facade_service.UserService.removeFriendRequest:output_type -> facade_service.FriendsResponse
-	4,  // 19: facade_service.UserService.removeFriend:output_type -> facade_service.FriendsResponse
-	11, // [11:20] is the sub-list for method output_type
-	2,  // [2:11] is the sub-list for method input_type
+	2,  // 11: facade_service.NotificationService.subscribeFriendList:input_type -> facade_service.UserID
+	8,  // 12: facade_service.UserService.LoginAndAuthenticate:output_type -> facade_service.AuthResponse
+	8,  // 13: facade_service.UserService.AuthenticateToken:output_type -> facade_service.AuthResponse
+	8,  // 14: facade_service.UserService.CreateAccount:output_type -> facade_service.AuthResponse
+	4,  // 15: facade_service.UserService.getFriends:output_type -> facade_service.FriendsResponse
+	4,  // 16: facade_service.UserService.getFriendRequests:output_type -> facade_service.FriendsResponse
+	4,  // 17: facade_service.UserService.addFriendRequest:output_type -> facade_service.FriendsResponse
+	4,  // 18: facade_service.UserService.addFriend:output_type -> facade_service.FriendsResponse
+	4,  // 19: facade_service.UserService.removeFriendRequest:output_type -> facade_service.FriendsResponse
+	4,  // 20: facade_service.UserService.removeFriend:output_type -> facade_service.FriendsResponse
+	0,  // 21: facade_service.NotificationService.subscribeFriendList:output_type -> facade_service.Empty
+	12, // [12:22] is the sub-list for method output_type
+	2,  // [2:12] is the sub-list for method input_type
 	2,  // [2:2] is the sub-list for extension type_name
 	2,  // [2:2] is the sub-list for extension extendee
 	0,  // [0:2] is the sub-list for field type_name
@@ -642,7 +650,7 @@ func file_facade_proto_init() {
 			NumEnums:      0,
 			NumMessages:   9,
 			NumExtensions: 0,
-			NumServices:   1,
+			NumServices:   2,
 		},
 		GoTypes:           file_facade_proto_goTypes,
 		DependencyIndexes: file_facade_proto_depIdxs,

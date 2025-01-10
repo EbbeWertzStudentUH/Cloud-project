@@ -33,6 +33,10 @@ service UserService {
     rpc removeFriend(FriendEditRequest) returns (FriendsResponse);
 }
 
+service NotificationService {
+    rpc subscribeFriendList(UserID) returns (Empty);
+}
+
 //=================
 // MESSAGES
 //=================

@@ -44,13 +44,13 @@ type UserServiceClient interface {
 	GetFriends(ctx context.Context, in *UserID, opts ...grpc.CallOption) (*FriendsResponse, error)
 	// userdb: friend_requests
 	GetFriendRequests(ctx context.Context, in *UserID, opts ...grpc.CallOption) (*FriendsResponse, error)
-	// userdb: addFriendRequest
+	// userdb: addFriendRequest bij ene, addFriendRequest bij andere
 	AddFriendRequest(ctx context.Context, in *FriendEditRequest, opts ...grpc.CallOption) (*FriendsResponse, error)
-	// userdb: addFriend
+	// userdb: addFriend bij ene, addFriend bij andere
 	AddFriend(ctx context.Context, in *FriendEditRequest, opts ...grpc.CallOption) (*FriendsResponse, error)
-	// userdb: removeFriendRequest
+	// userdb: removeFriendRequest bij ene, removeFriendRequest bij andere
 	RemoveFriendRequest(ctx context.Context, in *FriendEditRequest, opts ...grpc.CallOption) (*FriendsResponse, error)
-	// userdb: removeFriend
+	// userdb: removeFriend bij ene, removeFriend bij andere
 	RemoveFriend(ctx context.Context, in *FriendEditRequest, opts ...grpc.CallOption) (*FriendsResponse, error)
 }
 
@@ -166,13 +166,13 @@ type UserServiceServer interface {
 	GetFriends(context.Context, *UserID) (*FriendsResponse, error)
 	// userdb: friend_requests
 	GetFriendRequests(context.Context, *UserID) (*FriendsResponse, error)
-	// userdb: addFriendRequest
+	// userdb: addFriendRequest bij ene, addFriendRequest bij andere
 	AddFriendRequest(context.Context, *FriendEditRequest) (*FriendsResponse, error)
-	// userdb: addFriend
+	// userdb: addFriend bij ene, addFriend bij andere
 	AddFriend(context.Context, *FriendEditRequest) (*FriendsResponse, error)
-	// userdb: removeFriendRequest
+	// userdb: removeFriendRequest bij ene, removeFriendRequest bij andere
 	RemoveFriendRequest(context.Context, *FriendEditRequest) (*FriendsResponse, error)
-	// userdb: removeFriend
+	// userdb: removeFriend bij ene, removeFriend bij andere
 	RemoveFriend(context.Context, *FriendEditRequest) (*FriendsResponse, error)
 	mustEmbedUnimplementedUserServiceServer()
 }
@@ -436,6 +436,108 @@ var UserService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "removeFriend",
 			Handler:    _UserService_RemoveFriend_Handler,
+		},
+	},
+	Streams:  []grpc.StreamDesc{},
+	Metadata: "facade.proto",
+}
+
+const (
+	NotificationService_SubscribeFriendList_FullMethodName = "/facade_service.NotificationService/subscribeFriendList"
+)
+
+// NotificationServiceClient is the client API for NotificationService service.
+//
+// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
+type NotificationServiceClient interface {
+	SubscribeFriendList(ctx context.Context, in *UserID, opts ...grpc.CallOption) (*Empty, error)
+}
+
+type notificationServiceClient struct {
+	cc grpc.ClientConnInterface
+}
+
+func NewNotificationServiceClient(cc grpc.ClientConnInterface) NotificationServiceClient {
+	return &notificationServiceClient{cc}
+}
+
+func (c *notificationServiceClient) SubscribeFriendList(ctx context.Context, in *UserID, opts ...grpc.CallOption) (*Empty, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(Empty)
+	err := c.cc.Invoke(ctx, NotificationService_SubscribeFriendList_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// NotificationServiceServer is the server API for NotificationService service.
+// All implementations must embed UnimplementedNotificationServiceServer
+// for forward compatibility.
+type NotificationServiceServer interface {
+	SubscribeFriendList(context.Context, *UserID) (*Empty, error)
+	mustEmbedUnimplementedNotificationServiceServer()
+}
+
+// UnimplementedNotificationServiceServer must be embedded to have
+// forward compatible implementations.
+//
+// NOTE: this should be embedded by value instead of pointer to avoid a nil
+// pointer dereference when methods are called.
+type UnimplementedNotificationServiceServer struct{}
+
+func (UnimplementedNotificationServiceServer) SubscribeFriendList(context.Context, *UserID) (*Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SubscribeFriendList not implemented")
+}
+func (UnimplementedNotificationServiceServer) mustEmbedUnimplementedNotificationServiceServer() {}
+func (UnimplementedNotificationServiceServer) testEmbeddedByValue()                             {}
+
+// UnsafeNotificationServiceServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to NotificationServiceServer will
+// result in compilation errors.
+type UnsafeNotificationServiceServer interface {
+	mustEmbedUnimplementedNotificationServiceServer()
+}
+
+func RegisterNotificationServiceServer(s grpc.ServiceRegistrar, srv NotificationServiceServer) {
+	// If the following call pancis, it indicates UnimplementedNotificationServiceServer was
+	// embedded by pointer and is nil.  This will cause panics if an
+	// unimplemented method is ever invoked, so we test this at initialization
+	// time to prevent it from happening at runtime later due to I/O.
+	if t, ok := srv.(interface{ testEmbeddedByValue() }); ok {
+		t.testEmbeddedByValue()
+	}
+	s.RegisterService(&NotificationService_ServiceDesc, srv)
+}
+
+func _NotificationService_SubscribeFriendList_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UserID)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(NotificationServiceServer).SubscribeFriendList(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: NotificationService_SubscribeFriendList_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(NotificationServiceServer).SubscribeFriendList(ctx, req.(*UserID))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+// NotificationService_ServiceDesc is the grpc.ServiceDesc for NotificationService service.
+// It's only intended for direct use with grpc.RegisterService,
+// and not to be introspected or modified (even as a copy)
+var NotificationService_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "facade_service.NotificationService",
+	HandlerType: (*NotificationServiceServer)(nil),
+	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "subscribeFriendList",
+			Handler:    _NotificationService_SubscribeFriendList_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
