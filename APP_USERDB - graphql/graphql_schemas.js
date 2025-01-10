@@ -5,8 +5,6 @@ const generalSchema = buildSchema(`
       id: String
       first_name: String
       last_name: String
-      friends: [User!]!
-      friend_requests: [User!]!
     }
   
     type Query {
@@ -17,6 +15,8 @@ const generalSchema = buildSchema(`
     type Mutation {
       addFriendRequest(user_id: String!, friend_id: String!): [User!]!
       addFriend(user_id: String!, friend_id: String!): [User!]!
+      removeFriendRequest(user_id: String!, friend_id: String!): [User!]!
+      removeFriend(user_id: String!, friend_id: String!): [User!]!
 }  
     `
   );
