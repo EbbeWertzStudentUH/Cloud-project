@@ -21,6 +21,56 @@ const generalResolvers = {
 		console.log(rows);
 		return rows[0];
 	},
+	friends: async ({id}) => {
+		const [rows] = await pool.query(
+			`SELECT u.id, u.first_name, u.last_name
+			FROM friends f
+			JOIN users u ON u.id = f.friend_id
+			WHERE f.user_id = ?;
+			`[id]			
+		);
+		console.log(rows);
+		return rows;
+	},
+	friendRequests: async ({id}) => {
+		const [rows] = await pool.query(
+			`SELECT u.id, u.first_name, u.last_name
+			FROM friends_requests f
+			JOIN users u ON u.id = f.friend_id
+			WHERE f.user_id = ?;
+			`[id]			
+		);
+		console.log(rows);
+		return rows;
+	},
+	addFriendRequest: async ({user_id, friend_id}) => {
+		await pool.query(
+			'INSERT INTO friend_requests (user_id, friend_user_id) VALUES (?, ?)',
+			[user_id, friend_id]
+		  );
+		  const [rows] = await pool.query(
+			`SELECT u.id, u.first_name, u.last_name
+			FROM friends_requests f
+			JOIN users u ON u.id = f.friend_id
+			WHERE f.user_id = ?;
+			`[id]			
+		);
+		return rows;
+	},
+	addFriend: async ({user_id, friend_id}) => {
+		await pool.query(
+			'INSERT INTO friends (user_id, friend_user_id) VALUES (?, ?)',
+			[user_id, friend_id]
+		  );
+		  const [rows] = await pool.query(
+			`SELECT u.id, u.first_name, u.last_name
+			FROM friends f
+			JOIN users u ON u.id = f.friend_id
+			WHERE f.user_id = ?;
+			`[id]
+		);
+		return rows;
+	}
 };
 
 const sensitiveResolvers = {
