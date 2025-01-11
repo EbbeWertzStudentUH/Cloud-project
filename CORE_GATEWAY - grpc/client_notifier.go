@@ -83,3 +83,24 @@ func (n *NotifierClient) Subscribe(user_id string, topic_name string, topic_ids 
 	}
 	return true
 }
+func (n *NotifierClient) UnSubscribe(user_id string, topic_name string, topic_ids []string) bool {
+	data := map[string]interface{}{
+		"user_id": user_id,
+		"topic": map[string]interface{}{
+			"name": topic_name,
+			"ids":  topic_ids,
+		},
+	}
+	resp, err := n.restClient.R().
+		SetHeader("Content-Type", "application/json").
+		SetBody(data).
+		ForceContentType("application/json").
+		Delete(n.url + "/subscribe")
+	fmt.Println("STATUS | Notifier service | subscribe", resp.Status())
+
+	if err != nil || resp.Status() != "200 OK" {
+		fmt.Println("Error:", err)
+		return false
+	}
+	return true
+}

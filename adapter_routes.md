@@ -51,3 +51,10 @@
 > verwijder vriendverzoek en krijg ge-update friend requests lijst
 - ```HEADER{Authorisation:Bearer token}, JSON {friend_id}```
 - ```-> JSON [{first_name, last_name, id}]```
+
+# NOTIFIIER SERVICE
+### /notifier/subscribe-friends
+#### PUT
+> subscribe de notifier connectie naar de friends list
+- ```HEADER{Authorisation:Bearer token}```
+- ```-> JSON (leeg/message)```

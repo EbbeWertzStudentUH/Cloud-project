@@ -86,9 +86,15 @@ func (s *UserServiceServer) AcceptFriendRequest(ctx context.Context, req *pb.Fri
 	if !ok {
 		return &pb.FriendsResponse{Users: []*pb.User{}}, nil
 	}
+	// stuur bericht
 	message := user["first_name"].(string) + " is nu je vriend!"
 	s.notifierClient.SendNotification(req.FriendId, message)
+	// breng friend op de hoogte van nieuwe friends lijst
 	s.notifierClient.SendUpdate(req.FriendId, "new_friend", req.UserId, user)
+	// subscribe friend om updates te krijgen over jouw
+	s.notifierClient.Subscribe(req.FriendId, "friends", []string{req.UserId})
+	// subscribe jezelf om updates te krijgen over friend
+	s.notifierClient.Subscribe(req.UserId, "friends", []string{req.FriendId})
 	return resp, err
 }
 func (s *UserServiceServer) RemoveFriend(ctx context.Context, req *pb.FriendEditRequest) (*pb.FriendsResponse, error) {
@@ -101,7 +107,12 @@ func (s *UserServiceServer) RemoveFriend(ctx context.Context, req *pb.FriendEdit
 	if !ok {
 		return &pb.FriendsResponse{Users: []*pb.User{}}, nil
 	}
+	// breng friend op de hoogte van nieuwe friends lijst
 	s.notifierClient.SendUpdate(req.FriendId, "removed_friend", req.UserId, user)
+	// unsubscribe friend van updates over jouw
+	s.notifierClient.UnSubscribe(req.FriendId, "friends", []string{req.UserId})
+	// unsubscribe jezelf van updates over friend
+	s.notifierClient.UnSubscribe(req.UserId, "friends", []string{req.FriendId})
 	return resp, err
 }
 func (s *UserServiceServer) SendFriendRequest(ctx context.Context, req *pb.FriendEditRequest) (*pb.Empty, error) {

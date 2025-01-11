@@ -20,7 +20,7 @@ class SubscriptionManager:
             self.topic_subscriptions[(topic_name, topic_id)] = set()
         self.topic_subscriptions[(topic_name, topic_id)].add(user_id)
         # voeg subscription toe aan de reverse map
-        if user_id not in self.user_id_subscriptions:
+        if topic_id not in self.user_id_subscriptions:
             self.user_id_subscriptions[topic_id] = set()
         self.user_id_subscriptions[topic_id].add((topic_name, user_id))
 
