@@ -2,11 +2,10 @@
 	import { goto } from '$app/navigation';
 
     export let data;
-    const { friend } = data; // Assume the friend object comes from the load function
+    const { friend } = data;
 
     async function sendFriendRequest() {
         await data.sendRequest(friend.id);
-        alert(`Friend request sent`);
         goto('/');
     }
 </script>

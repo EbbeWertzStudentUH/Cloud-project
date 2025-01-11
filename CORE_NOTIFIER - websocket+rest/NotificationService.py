@@ -139,9 +139,9 @@ class NotificationService:
                 message = {
                     "message":"You are subscribed to a topic which contains a user id that changed status",
                     "topic":topic_name,
-                    "users":{"id":user_id, "status":status},
+                    "users":[{"id":user_id, "status":status}],
                 }
-                await self._broadcastJSON("subscribed_to_users", message, [other_user])
+                await self._broadcastJSON("subscribed_users_status", message, [other_user])
         
 
     def _handle_registration(self, token:str, websocket:WebSocket) -> tuple[bool, str]:

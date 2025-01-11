@@ -1,6 +1,7 @@
 <script>
   import { goto } from '$app/navigation';
-	import { POST } from '$lib';
+	import { initializeWebSocket, POST } from '$lib';
+	import { updateUser } from '../../stores/user.js';
 
   export let data;
 
@@ -9,22 +10,17 @@
   let error = '';
 
   async function login() {
-    const resp = await POST({email, password}, 'user/authenticate');
+    const resp = await POST({email, password}, '/user/authenticate');
     if(resp.valid){
       localStorage.setItem('authToken', resp.token);
-      data.user.update((u) => {
-				return {
-					...u,
-					id: resp.user.id,
-					first_name: resp.user.first_name,
-					last_name: resp.user.last_name
-				};
-			});
+      const { id, first_name, last_name } = resp.user;
+			updateUser({ id, first_name, last_name });
+      initializeWebSocket();
       goto('/');
     } else {
       error = 'invalid credidentials'
     }
-    await data.getFriendsListStuff();
+    await data.doInitialRequests();
   }
 </script>
 
@@ -37,11 +33,11 @@
     <form on:submit|preventDefault={login}>
       <label class="block mb-2">
         Email:
-        <input type="email" class="{error? "border-4  border-red-500" : ""} p-2 w-full rounded text-slate-950" bind:value={email} required />
+        <input type="email" class="{error? "border-4  border-red-500" : ""} p-2 w-full rounded text-slate-950" bind:value={email} required autocomplete="email" />
       </label>
       <label class="block mb-4">
         Password:
-        <input type="password" class="{error? "border-4  border-red-500" : ""} p-2 w-full rounded text-slate-950" bind:value={password} required />
+        <input type="password" class="{error? "border-4  border-red-500" : ""} p-2 w-full rounded text-slate-950" bind:value={password} required autocomplete="current-password" />
       </label>
       <button type="submit" class="w-full bg-emerald-600 text-white py-2 rounded">Login</button>
     </form>

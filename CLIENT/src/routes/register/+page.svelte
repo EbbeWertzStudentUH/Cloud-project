@@ -1,6 +1,8 @@
 <script>
     import { goto } from '$app/navigation';
-      import { POST } from '$lib';
+    import { POST } from '$lib';
+    import { updateUser } from '../../stores/user.js';
+
   
     export let data;
   
@@ -10,10 +12,11 @@
     let last_name = '';
   
     async function register() {
-      const resp = await POST({email, password, first_name, last_name}, 'user/create_account');
+      const resp = await POST({email, password, first_name, last_name}, '/user/create_account');
       if(resp.valid){
         localStorage.setItem('authToken', resp.token);
-        data.user.set(resp.user);
+        const { id, first_name, last_name } = data.user;
+			  updateUser({ id, first_name, last_name });
         goto('/');
       } else {
         error = 'invalid credidentials'
