@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	pb "facade_service/protobuf_generated"
+	"log"
 )
 
 type UserServiceServer struct {
@@ -65,6 +66,20 @@ func (s *UserServiceServer) CreateAccount(ctx context.Context, req *pb.RegisterR
 	return authResp, nil
 }
 
+func (s *UserServiceServer) GetUserName(ctx context.Context, req *pb.UserID) (*pb.User, error) {
+	// query user info
+	log.Println(req.UserId)
+	resp, ok := s.userdbClient.QueryUser(req.UserId)
+	if !ok {
+		return &pb.User{}, nil
+	}
+	return &pb.User{
+		FirstName: resp["first_name"].(string),
+		LastName:  resp["last_name"].(string),
+		Id:        resp["id"].(string),
+	}, nil
+}
+
 func (s *UserServiceServer) GetFriends(ctx context.Context, req *pb.UserID) (*pb.FriendsResponse, error) {
 	resp, err := s.GetFriendsOrRequests(req, "friends")
 	return resp, err
@@ -74,11 +89,12 @@ func (s *UserServiceServer) GetFriendRequests(ctx context.Context, req *pb.UserI
 	resp, err := s.GetFriendsOrRequests(req, "friendRequests")
 	return resp, err
 }
+
 func (s *UserServiceServer) AcceptFriendRequest(ctx context.Context, req *pb.FriendEditRequest) (*pb.FriendsResponse, error) {
-	// remove friend request bij user
-	s.RemoveOrAddFriendsOrRequests(req.UserId, req.FriendId, "removeFriendRequest")
-	// add friend bij user (resultaat bijhouden want dit is updated nieuwe vriendenlijst)
-	resp, err := s.RemoveOrAddFriendsOrRequests(req.UserId, req.FriendId, "addFriend")
+	// remove friend request bij user (resultaat bijhouden want dit is updated nieuwe friend requests lijst)
+	resp, err := s.RemoveOrAddFriendsOrRequests(req.UserId, req.FriendId, "removeFriendRequest")
+	// add friend bij user
+	s.RemoveOrAddFriendsOrRequests(req.UserId, req.FriendId, "addFriend")
 	// add user bij friend
 	s.RemoveOrAddFriendsOrRequests(req.FriendId, req.UserId, "addFriend")
 

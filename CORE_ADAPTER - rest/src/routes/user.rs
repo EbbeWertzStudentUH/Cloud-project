@@ -1,20 +1,21 @@
 use actix_web::{post, get, delete, web, HttpResponse, Responder, HttpRequest};
 use crate::schemas::notifier::SimpleResponse;
-use crate::schemas::user::{LoginRequest, RegisterRequest, AuthResponse, FriendEditRequest, FriendsResponse};
+use crate::schemas::user::{LoginRequest, RegisterRequest, AuthResponse, FriendEditRequest, FriendsResponse, User};
 use jsonwebtoken::{decode, DecodingKey, Validation, Algorithm};
 use serde::Deserialize;
 use crate::proto_generated::{
-    LoginRequest as GrpcLoginRequest,
-    TokenRequest as GrpcTokenRequest,
-    RegisterRequest as GrpcRegisterRequest,
-    UserId as GrpcUserID,
-    FriendEditRequest as GrpcFriendEditRequest,
+    FriendEditRequest as GrpcFriendEditRequest, LoginRequest as GrpcLoginRequest, RegisterRequest as GrpcRegisterRequest, TokenRequest as GrpcTokenRequest, UserId as GrpcUserID
 };
 
 use crate::GRPC_CLIENT_USERSERVICE;
 #[derive(Debug, Deserialize)]
 struct TokenContent {
     user_id: String,
+}
+
+#[derive(Deserialize)]
+struct UserIDQueryParam {
+    id: String,
 }
 
 // POST /user/authenticate
@@ -54,6 +55,26 @@ async fn authenticate_token(req: HttpRequest) -> impl Responder {
         }
     }}
     HttpResponse::InternalServerError().body("Failed to authenticate")
+}
+
+// GET /user?id
+#[get("/user")]
+async fn get_user_name(query: web::Query<UserIDQueryParam>) -> impl Responder {
+    let grpc_request = GrpcUserID{
+        user_id: query.id.to_string()
+    };
+    if let Some(grpc_client) = &mut *GRPC_CLIENT_USERSERVICE.lock().await {
+        match grpc_client.get_user_name(grpc_request).await {
+        Ok(response) => {
+            let http_response: User = response.into_inner().into();
+            return HttpResponse::Ok().json(http_response);
+        }
+        Err(err) => {
+            eprintln!("gRPC call failed: {}", err);
+            
+        }
+    }}
+    HttpResponse::InternalServerError().body("Failed to get user info")
 }
 
 // POST /user/create_account
@@ -243,5 +264,6 @@ pub fn config(cfg: &mut web::ServiceConfig) {
         .service(send_friend_request)
         .service(accept_friend_request)
         .service(remove_friend)
-        .service(reject_friend_request);
+        .service(reject_friend_request)
+        .service(get_user_name);
 }

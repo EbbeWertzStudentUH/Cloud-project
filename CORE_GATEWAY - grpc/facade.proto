@@ -22,6 +22,9 @@ service UserService {
     // userdb: friend_requests
     rpc getFriendRequests(UserID) returns (FriendsResponse);
 
+    // userdb: get username
+    rpc GetUserName(UserID) returns (User);
+
     // userdb: addFriendRequest bij friend
     rpc sendFriendRequest(FriendEditRequest) returns (Empty);
     // userdb: addFriend bij user, remove request bij user, addFriend bij friend

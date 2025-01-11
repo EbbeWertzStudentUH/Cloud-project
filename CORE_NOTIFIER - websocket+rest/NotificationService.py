@@ -116,6 +116,7 @@ class NotificationService:
 
     async def _broadcastJSON(self, type:str, data, users:set[str]):
         for user_id in users:
+            if user_id not in self.client_sockets: return
             webSocket:WebSocket = self.client_sockets[user_id]
             try:
                 await webSocket.send_json({"type": type, "data": data})

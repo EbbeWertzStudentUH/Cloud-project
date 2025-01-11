@@ -24,6 +24,7 @@ const (
 	UserService_CreateAccount_FullMethodName        = "/facade_service.UserService/CreateAccount"
 	UserService_GetFriends_FullMethodName           = "/facade_service.UserService/getFriends"
 	UserService_GetFriendRequests_FullMethodName    = "/facade_service.UserService/getFriendRequests"
+	UserService_GetUserName_FullMethodName          = "/facade_service.UserService/GetUserName"
 	UserService_SendFriendRequest_FullMethodName    = "/facade_service.UserService/sendFriendRequest"
 	UserService_AcceptFriendRequest_FullMethodName  = "/facade_service.UserService/acceptFriendRequest"
 	UserService_RejectFriendRequest_FullMethodName  = "/facade_service.UserService/RejectFriendRequest"
@@ -44,6 +45,8 @@ type UserServiceClient interface {
 	GetFriends(ctx context.Context, in *UserID, opts ...grpc.CallOption) (*FriendsResponse, error)
 	// userdb: friend_requests
 	GetFriendRequests(ctx context.Context, in *UserID, opts ...grpc.CallOption) (*FriendsResponse, error)
+	// userdb: get username
+	GetUserName(ctx context.Context, in *UserID, opts ...grpc.CallOption) (*User, error)
 	// userdb: addFriendRequest bij friend
 	SendFriendRequest(ctx context.Context, in *FriendEditRequest, opts ...grpc.CallOption) (*Empty, error)
 	// userdb: addFriend bij user, remove request bij user, addFriend bij friend
@@ -112,6 +115,16 @@ func (c *userServiceClient) GetFriendRequests(ctx context.Context, in *UserID, o
 	return out, nil
 }
 
+func (c *userServiceClient) GetUserName(ctx context.Context, in *UserID, opts ...grpc.CallOption) (*User, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(User)
+	err := c.cc.Invoke(ctx, UserService_GetUserName_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *userServiceClient) SendFriendRequest(ctx context.Context, in *FriendEditRequest, opts ...grpc.CallOption) (*Empty, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(Empty)
@@ -166,6 +179,8 @@ type UserServiceServer interface {
 	GetFriends(context.Context, *UserID) (*FriendsResponse, error)
 	// userdb: friend_requests
 	GetFriendRequests(context.Context, *UserID) (*FriendsResponse, error)
+	// userdb: get username
+	GetUserName(context.Context, *UserID) (*User, error)
 	// userdb: addFriendRequest bij friend
 	SendFriendRequest(context.Context, *FriendEditRequest) (*Empty, error)
 	// userdb: addFriend bij user, remove request bij user, addFriend bij friend
@@ -198,6 +213,9 @@ func (UnimplementedUserServiceServer) GetFriends(context.Context, *UserID) (*Fri
 }
 func (UnimplementedUserServiceServer) GetFriendRequests(context.Context, *UserID) (*FriendsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetFriendRequests not implemented")
+}
+func (UnimplementedUserServiceServer) GetUserName(context.Context, *UserID) (*User, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetUserName not implemented")
 }
 func (UnimplementedUserServiceServer) SendFriendRequest(context.Context, *FriendEditRequest) (*Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SendFriendRequest not implemented")
@@ -322,6 +340,24 @@ func _UserService_GetFriendRequests_Handler(srv interface{}, ctx context.Context
 	return interceptor(ctx, in, info, handler)
 }
 
+func _UserService_GetUserName_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UserID)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServiceServer).GetUserName(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: UserService_GetUserName_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServiceServer).GetUserName(ctx, req.(*UserID))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _UserService_SendFriendRequest_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(FriendEditRequest)
 	if err := dec(in); err != nil {
@@ -420,6 +456,10 @@ var UserService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "getFriendRequests",
 			Handler:    _UserService_GetFriendRequests_Handler,
+		},
+		{
+			MethodName: "GetUserName",
+			Handler:    _UserService_GetUserName_Handler,
 		},
 		{
 			MethodName: "sendFriendRequest",

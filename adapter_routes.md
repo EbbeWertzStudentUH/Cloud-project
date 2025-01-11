@@ -1,4 +1,11 @@
 # USER SERVICE
+### /user
+#### GET
+> get user name
+ - ``` QUERY PARAM {userID}```
+ - ```-> JSON {first_name, last_name, id}```
+
+
 ### /user/authenticate
 >
 #### POST
