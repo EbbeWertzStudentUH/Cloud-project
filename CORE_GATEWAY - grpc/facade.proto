@@ -22,15 +22,15 @@ service UserService {
     // userdb: friend_requests
     rpc getFriendRequests(UserID) returns (FriendsResponse);
 
-    // userdb: addFriendRequest bij ene, addFriendRequest bij andere
-    rpc addFriendRequest(FriendEditRequest) returns (FriendsResponse);
-    // userdb: addFriend bij ene, addFriend bij andere
-    rpc addFriend(FriendEditRequest) returns (FriendsResponse);
-
-    // userdb: removeFriendRequest bij ene, removeFriendRequest bij andere
-    rpc removeFriendRequest(FriendEditRequest) returns (FriendsResponse);
-    // userdb: removeFriend bij ene, removeFriend bij andere
+    // userdb: addFriendRequest bij friend
+    rpc sendFriendRequest(FriendEditRequest) returns (Empty);
+    // userdb: addFriend bij user, remove request bij user, addFriend bij friend
+    rpc acceptFriendRequest(FriendEditRequest) returns (FriendsResponse);
+    // userdb: remove request bij user
+    rpc RejectFriendRequest(FriendEditRequest) returns (FriendsResponse);
+    // userdb: removeFriend bij user, removeFriend bij friend
     rpc removeFriend(FriendEditRequest) returns (FriendsResponse);
+
 }
 
 service NotificationService {

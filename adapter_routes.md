@@ -25,11 +25,6 @@
 - ```HEADER{Authorisation:Bearer token}```
 - ```-> JSON [{first_name, last_name, id}]```
 ---
-#### POST
-> add wederzijds nieuwe vriend en krijg ge-update vriendenlijst
-- ```HEADER{Authorisation:Bearer token}, JSON {friend_id}```
-- ```-> JSON [{first_name, last_name, id}]```
----
 #### DELETE
 > verwijder wederzijds vriend en krijg ge-update vriendenlijst
 - ```HEADER{Authorisation:Bearer token}, JSON {friend_id}```
@@ -42,12 +37,17 @@
 - ```HEADER{Authorisation:Bearer token}```
 - ```-> JSON [{first_name, last_name, id}]```
 ---
-#### POST
-> add nieuwe vriend en krijg ge-update friend requests lijst
+#### POST /user/friend-requests/send
+> stuur vriendverzoek naar iemand
+- ```HEADER{Authorisation:Bearer token}, JSON {friend_id}```
+- ```-> JSON (leeg/message)```
+---
+#### POST /user/friend-requests/accept
+> verwijder vriendverzoek en voeg elkaar als vriend toe, en krijg ge-update vrienden lijst
 - ```HEADER{Authorisation:Bearer token}, JSON {friend_id}```
 - ```-> JSON [{first_name, last_name, id}]```
 ---
-#### DELETE
-> verwijder vriend en krijg ge-update friend requests lijst
+#### DELETE /user/friend-requests/reject
+> verwijder vriendverzoek en krijg ge-update friend requests lijst
 - ```HEADER{Authorisation:Bearer token}, JSON {friend_id}```
 - ```-> JSON [{first_name, last_name, id}]```

@@ -3,6 +3,7 @@ import jwt
 import os
 import datetime
 import logging
+from typing import Any
 logging.basicConfig(level=logging.DEBUG, format="%(levelname)s: %(message)s")
 
 
@@ -67,26 +68,26 @@ class NotificationService:
         for topic in topics:
             self.subscriptionManager.unsubscribe(topic, user_id)
 
-    async def publishUpdate(self, topics:set[tuple[str, str]], update):
+    async def publishUpdate(self, topics:set[tuple[str, str]], update:dict[str, Any]):
         logging.info(f"publish update {topics}")
         for topic in topics:
             await self._broadcastJSON("update", update, self.subscriptionManager.getSubscribedUsers(topic))
 
-    async def publishNotification(self, topics:set[tuple[str, str]], notification):
+    async def publishNotification(self, topics:set[tuple[str, str]], notification:dict[str, Any]):
         logging.info(f"publish notification {topics}")
         timestamp = datetime.datetime.now().strftime("%H:%M")
-        data = {"message": notification.message, "time":timestamp}
+        data = {"message": notification["message"], "time":timestamp}
         for topic in topics:
             await self._broadcastJSON("notification", data, self.subscriptionManager.getSubscribedUsers(topic))
     
-    async def sendUpdate(self, user_id:str, update):
+    async def sendUpdate(self, user_id:str, update:dict[str, Any]):
         logging.info(f"send update {user_id, update}")
         await self._broadcastJSON("update", update, [user_id])
 
-    async def sendNotification(self, user_id:str, notification):
+    async def sendNotification(self, user_id:str, notification:dict[str, Any]):
         logging.info(f"send notification {user_id, notification}")
         timestamp = datetime.datetime.now().strftime("%H:%M")
-        data = {"message": notification.message, "time":timestamp}
+        data = {"message": notification["message"], "time":timestamp}
         await self._broadcastJSON("notification", data, [user_id])
 
     async def _handleEndpoint(self, websocket: WebSocket):

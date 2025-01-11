@@ -74,33 +74,51 @@ func (s *UserServiceServer) GetFriendRequests(ctx context.Context, req *pb.UserI
 	resp, err := s.GetFriendsOrRequests(req, "friendRequests")
 	return resp, err
 }
-func (s *UserServiceServer) AddFriend(ctx context.Context, req *pb.FriendEditRequest) (*pb.FriendsResponse, error) {
-	s.RemoveOrAddFriendsOrRequests(req.FriendId, req.UserId, "addFriend")
+func (s *UserServiceServer) AcceptFriendRequest(ctx context.Context, req *pb.FriendEditRequest) (*pb.FriendsResponse, error) {
+	// remove friend request bij user
+	s.RemoveOrAddFriendsOrRequests(req.UserId, req.FriendId, "removeFriendRequest")
+	// add friend bij user (resultaat bijhouden want dit is updated nieuwe vriendenlijst)
 	resp, err := s.RemoveOrAddFriendsOrRequests(req.UserId, req.FriendId, "addFriend")
+	// add user bij friend
+	s.RemoveOrAddFriendsOrRequests(req.FriendId, req.UserId, "addFriend")
+
 	user, ok := s.userdbClient.QueryUser(req.UserId)
 	if !ok {
 		return &pb.FriendsResponse{Users: []*pb.User{}}, nil
 	}
 	message := user["first_name"].(string) + " is nu je vriend!"
 	s.notifierClient.SendNotification(req.FriendId, message)
+	s.notifierClient.SendUpdate(req.FriendId, "new_friend", req.UserId, user)
 	return resp, err
 }
 func (s *UserServiceServer) RemoveFriend(ctx context.Context, req *pb.FriendEditRequest) (*pb.FriendsResponse, error) {
+	// remove user bij friend
 	s.RemoveOrAddFriendsOrRequests(req.FriendId, req.UserId, "removeFriend")
+	// remove friend bij user
 	resp, err := s.RemoveOrAddFriendsOrRequests(req.UserId, req.FriendId, "removeFriend")
-	return resp, err
-}
-func (s *UserServiceServer) AddFriendRequest(ctx context.Context, req *pb.FriendEditRequest) (*pb.FriendsResponse, error) {
-	resp, err := s.RemoveOrAddFriendsOrRequests(req.UserId, req.FriendId, "addFriendRequest")
+
 	user, ok := s.userdbClient.QueryUser(req.UserId)
 	if !ok {
 		return &pb.FriendsResponse{Users: []*pb.User{}}, nil
 	}
-	message := user["first_name"].(string) + " " + user["last_name"].(string) + " heeft je een vriendverzoek gestuurd!"
-	s.notifierClient.SendNotification(req.FriendId, message)
+	s.notifierClient.SendUpdate(req.FriendId, "removed_friend", req.UserId, user)
 	return resp, err
 }
-func (s *UserServiceServer) RemoveFriendRequest(ctx context.Context, req *pb.FriendEditRequest) (*pb.FriendsResponse, error) {
+func (s *UserServiceServer) SendFriendRequest(ctx context.Context, req *pb.FriendEditRequest) (*pb.Empty, error) {
+	// voeg bij friend een request toe met als friend user
+	s.RemoveOrAddFriendsOrRequests(req.FriendId, req.UserId, "addFriendRequest")
+	// haal naam van user
+	user, ok := s.userdbClient.QueryUser(req.UserId)
+	if !ok {
+		return &pb.Empty{}, nil
+	}
+	// stuur bericht naar friend
+	message := user["first_name"].(string) + " " + user["last_name"].(string) + " heeft je een vriendverzoek gestuurd!"
+	s.notifierClient.SendNotification(req.FriendId, message)
+	s.notifierClient.SendUpdate(req.FriendId, "new_friend_request", req.UserId, user)
+	return &pb.Empty{}, nil
+}
+func (s *UserServiceServer) RejectFriendRequest(ctx context.Context, req *pb.FriendEditRequest) (*pb.FriendsResponse, error) {
 	resp, err := s.RemoveOrAddFriendsOrRequests(req.UserId, req.FriendId, "removeFriendRequest")
 	return resp, err
 }

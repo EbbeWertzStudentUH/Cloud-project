@@ -1,7 +1,7 @@
+from typing import Any
 from fastapi import FastAPI
 from pydantic import BaseModel
 from NotificationService import NotificationService
-
 
 class TopicJSON(BaseModel):
     name: str   # friends / projects
@@ -11,7 +11,7 @@ class TopicJSON(BaseModel):
 class UpdateJSON(BaseModel):
     type: str # edit/ status change / delete / new
     subject: str # edited/new/changed object id
-    data: str # wat new? wat changed?
+    data: dict[str, Any] # wat new? wat changed?
 
 class NotificationJSON(BaseModel):
     message: str
@@ -70,20 +70,20 @@ class RestCommander:
 
     async def publishNotification(self, data:NotificationPublishRequestJSON):
         topic = self._tuplifyTopic(data.topic)
-        await self.notificationService.publishNotification(topic, data.notification)
+        await self.notificationService.publishNotification(topic, data.notification.model_dump())
         return {"message":f"sent notification to users subscribed to topic", "topic":data.topic}
     
     async def publishUpdate(self, data:UpdatePublishRequestJSON):
         topic = self._tuplifyTopic(data.topic)
-        await self.notificationService.publishUpdate(topic, data.update)
+        await self.notificationService.publishUpdate(topic, data.update.model_dump())
         return {"message":f"sent updates to users subscribed to topic", "topic":data.topic}
     
     async def sendNotification(self, data:NotificationSendRequestJSON):
-        await self.notificationService.sendNotification(data.user_id, data.notification)
+        await self.notificationService.sendNotification(data.user_id, data.notification.model_dump())
         return {"message":f"sent notification to user {data.user_id}"}
     
     async def sendUpdate(self, data:UpdateSendRequestJSON):
-        await self.notificationService.sendUpdate(data.user_id, data.update)
+        await self.notificationService.sendUpdate(data.user_id, data.update.model_dump())
         return {"message":f"sent update to user {data.user_id}"}
 
     def _tuplifyTopic(self, topic:TopicJSON) -> list[tuple[str, str]]:

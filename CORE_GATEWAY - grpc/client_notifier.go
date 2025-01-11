@@ -19,14 +19,40 @@ func NewNotifierClient(url string) *NotifierClient {
 }
 
 func (n *NotifierClient) SendNotification(user_id string, message string) bool {
-	data := map[string]string{
-		"messaage": message,
+	data := map[string]interface{}{
+		"user_id": user_id,
+		"notification": map[string]interface{}{
+			"message": message,
+		},
 	}
 	resp, err := n.restClient.R().
 		SetHeader("Content-Type", "application/json").
 		SetBody(data).
 		ForceContentType("application/json").
 		Post(n.url + "/send/notification")
+	fmt.Println("STATUS | Notifier service | send notification", resp.Status())
+
+	if err != nil || resp.Status() != "200 OK" {
+		fmt.Println("Error:", err)
+		return false
+	}
+	return true
+}
+
+func (n *NotifierClient) SendUpdate(user_id string, update_type string, subject string, update_data map[string]interface{}) bool {
+	data := map[string]interface{}{
+		"user_id": user_id,
+		"update": map[string]interface{}{
+			"type":    update_type,
+			"subject": subject,
+			"data":    update_data,
+		},
+	}
+	resp, err := n.restClient.R().
+		SetHeader("Content-Type", "application/json").
+		SetBody(data).
+		ForceContentType("application/json").
+		Post(n.url + "/send/update")
 	fmt.Println("STATUS | Notifier service | send notification", resp.Status())
 
 	if err != nil || resp.Status() != "200 OK" {

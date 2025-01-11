@@ -24,9 +24,9 @@ const (
 	UserService_CreateAccount_FullMethodName        = "/facade_service.UserService/CreateAccount"
 	UserService_GetFriends_FullMethodName           = "/facade_service.UserService/getFriends"
 	UserService_GetFriendRequests_FullMethodName    = "/facade_service.UserService/getFriendRequests"
-	UserService_AddFriendRequest_FullMethodName     = "/facade_service.UserService/addFriendRequest"
-	UserService_AddFriend_FullMethodName            = "/facade_service.UserService/addFriend"
-	UserService_RemoveFriendRequest_FullMethodName  = "/facade_service.UserService/removeFriendRequest"
+	UserService_SendFriendRequest_FullMethodName    = "/facade_service.UserService/sendFriendRequest"
+	UserService_AcceptFriendRequest_FullMethodName  = "/facade_service.UserService/acceptFriendRequest"
+	UserService_RejectFriendRequest_FullMethodName  = "/facade_service.UserService/RejectFriendRequest"
 	UserService_RemoveFriend_FullMethodName         = "/facade_service.UserService/removeFriend"
 )
 
@@ -44,13 +44,13 @@ type UserServiceClient interface {
 	GetFriends(ctx context.Context, in *UserID, opts ...grpc.CallOption) (*FriendsResponse, error)
 	// userdb: friend_requests
 	GetFriendRequests(ctx context.Context, in *UserID, opts ...grpc.CallOption) (*FriendsResponse, error)
-	// userdb: addFriendRequest bij ene, addFriendRequest bij andere
-	AddFriendRequest(ctx context.Context, in *FriendEditRequest, opts ...grpc.CallOption) (*FriendsResponse, error)
-	// userdb: addFriend bij ene, addFriend bij andere
-	AddFriend(ctx context.Context, in *FriendEditRequest, opts ...grpc.CallOption) (*FriendsResponse, error)
-	// userdb: removeFriendRequest bij ene, removeFriendRequest bij andere
-	RemoveFriendRequest(ctx context.Context, in *FriendEditRequest, opts ...grpc.CallOption) (*FriendsResponse, error)
-	// userdb: removeFriend bij ene, removeFriend bij andere
+	// userdb: addFriendRequest bij friend
+	SendFriendRequest(ctx context.Context, in *FriendEditRequest, opts ...grpc.CallOption) (*Empty, error)
+	// userdb: addFriend bij user, remove request bij user, addFriend bij friend
+	AcceptFriendRequest(ctx context.Context, in *FriendEditRequest, opts ...grpc.CallOption) (*FriendsResponse, error)
+	// userdb: remove request bij user
+	RejectFriendRequest(ctx context.Context, in *FriendEditRequest, opts ...grpc.CallOption) (*FriendsResponse, error)
+	// userdb: removeFriend bij user, removeFriend bij friend
 	RemoveFriend(ctx context.Context, in *FriendEditRequest, opts ...grpc.CallOption) (*FriendsResponse, error)
 }
 
@@ -112,30 +112,30 @@ func (c *userServiceClient) GetFriendRequests(ctx context.Context, in *UserID, o
 	return out, nil
 }
 
-func (c *userServiceClient) AddFriendRequest(ctx context.Context, in *FriendEditRequest, opts ...grpc.CallOption) (*FriendsResponse, error) {
+func (c *userServiceClient) SendFriendRequest(ctx context.Context, in *FriendEditRequest, opts ...grpc.CallOption) (*Empty, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(FriendsResponse)
-	err := c.cc.Invoke(ctx, UserService_AddFriendRequest_FullMethodName, in, out, cOpts...)
+	out := new(Empty)
+	err := c.cc.Invoke(ctx, UserService_SendFriendRequest_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *userServiceClient) AddFriend(ctx context.Context, in *FriendEditRequest, opts ...grpc.CallOption) (*FriendsResponse, error) {
+func (c *userServiceClient) AcceptFriendRequest(ctx context.Context, in *FriendEditRequest, opts ...grpc.CallOption) (*FriendsResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(FriendsResponse)
-	err := c.cc.Invoke(ctx, UserService_AddFriend_FullMethodName, in, out, cOpts...)
+	err := c.cc.Invoke(ctx, UserService_AcceptFriendRequest_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *userServiceClient) RemoveFriendRequest(ctx context.Context, in *FriendEditRequest, opts ...grpc.CallOption) (*FriendsResponse, error) {
+func (c *userServiceClient) RejectFriendRequest(ctx context.Context, in *FriendEditRequest, opts ...grpc.CallOption) (*FriendsResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(FriendsResponse)
-	err := c.cc.Invoke(ctx, UserService_RemoveFriendRequest_FullMethodName, in, out, cOpts...)
+	err := c.cc.Invoke(ctx, UserService_RejectFriendRequest_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -166,13 +166,13 @@ type UserServiceServer interface {
 	GetFriends(context.Context, *UserID) (*FriendsResponse, error)
 	// userdb: friend_requests
 	GetFriendRequests(context.Context, *UserID) (*FriendsResponse, error)
-	// userdb: addFriendRequest bij ene, addFriendRequest bij andere
-	AddFriendRequest(context.Context, *FriendEditRequest) (*FriendsResponse, error)
-	// userdb: addFriend bij ene, addFriend bij andere
-	AddFriend(context.Context, *FriendEditRequest) (*FriendsResponse, error)
-	// userdb: removeFriendRequest bij ene, removeFriendRequest bij andere
-	RemoveFriendRequest(context.Context, *FriendEditRequest) (*FriendsResponse, error)
-	// userdb: removeFriend bij ene, removeFriend bij andere
+	// userdb: addFriendRequest bij friend
+	SendFriendRequest(context.Context, *FriendEditRequest) (*Empty, error)
+	// userdb: addFriend bij user, remove request bij user, addFriend bij friend
+	AcceptFriendRequest(context.Context, *FriendEditRequest) (*FriendsResponse, error)
+	// userdb: remove request bij user
+	RejectFriendRequest(context.Context, *FriendEditRequest) (*FriendsResponse, error)
+	// userdb: removeFriend bij user, removeFriend bij friend
 	RemoveFriend(context.Context, *FriendEditRequest) (*FriendsResponse, error)
 	mustEmbedUnimplementedUserServiceServer()
 }
@@ -199,14 +199,14 @@ func (UnimplementedUserServiceServer) GetFriends(context.Context, *UserID) (*Fri
 func (UnimplementedUserServiceServer) GetFriendRequests(context.Context, *UserID) (*FriendsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetFriendRequests not implemented")
 }
-func (UnimplementedUserServiceServer) AddFriendRequest(context.Context, *FriendEditRequest) (*FriendsResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method AddFriendRequest not implemented")
+func (UnimplementedUserServiceServer) SendFriendRequest(context.Context, *FriendEditRequest) (*Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SendFriendRequest not implemented")
 }
-func (UnimplementedUserServiceServer) AddFriend(context.Context, *FriendEditRequest) (*FriendsResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method AddFriend not implemented")
+func (UnimplementedUserServiceServer) AcceptFriendRequest(context.Context, *FriendEditRequest) (*FriendsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method AcceptFriendRequest not implemented")
 }
-func (UnimplementedUserServiceServer) RemoveFriendRequest(context.Context, *FriendEditRequest) (*FriendsResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method RemoveFriendRequest not implemented")
+func (UnimplementedUserServiceServer) RejectFriendRequest(context.Context, *FriendEditRequest) (*FriendsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method RejectFriendRequest not implemented")
 }
 func (UnimplementedUserServiceServer) RemoveFriend(context.Context, *FriendEditRequest) (*FriendsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method RemoveFriend not implemented")
@@ -322,56 +322,56 @@ func _UserService_GetFriendRequests_Handler(srv interface{}, ctx context.Context
 	return interceptor(ctx, in, info, handler)
 }
 
-func _UserService_AddFriendRequest_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _UserService_SendFriendRequest_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(FriendEditRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(UserServiceServer).AddFriendRequest(ctx, in)
+		return srv.(UserServiceServer).SendFriendRequest(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: UserService_AddFriendRequest_FullMethodName,
+		FullMethod: UserService_SendFriendRequest_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(UserServiceServer).AddFriendRequest(ctx, req.(*FriendEditRequest))
+		return srv.(UserServiceServer).SendFriendRequest(ctx, req.(*FriendEditRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _UserService_AddFriend_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _UserService_AcceptFriendRequest_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(FriendEditRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(UserServiceServer).AddFriend(ctx, in)
+		return srv.(UserServiceServer).AcceptFriendRequest(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: UserService_AddFriend_FullMethodName,
+		FullMethod: UserService_AcceptFriendRequest_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(UserServiceServer).AddFriend(ctx, req.(*FriendEditRequest))
+		return srv.(UserServiceServer).AcceptFriendRequest(ctx, req.(*FriendEditRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _UserService_RemoveFriendRequest_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _UserService_RejectFriendRequest_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(FriendEditRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(UserServiceServer).RemoveFriendRequest(ctx, in)
+		return srv.(UserServiceServer).RejectFriendRequest(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: UserService_RemoveFriendRequest_FullMethodName,
+		FullMethod: UserService_RejectFriendRequest_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(UserServiceServer).RemoveFriendRequest(ctx, req.(*FriendEditRequest))
+		return srv.(UserServiceServer).RejectFriendRequest(ctx, req.(*FriendEditRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -422,16 +422,16 @@ var UserService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _UserService_GetFriendRequests_Handler,
 		},
 		{
-			MethodName: "addFriendRequest",
-			Handler:    _UserService_AddFriendRequest_Handler,
+			MethodName: "sendFriendRequest",
+			Handler:    _UserService_SendFriendRequest_Handler,
 		},
 		{
-			MethodName: "addFriend",
-			Handler:    _UserService_AddFriend_Handler,
+			MethodName: "acceptFriendRequest",
+			Handler:    _UserService_AcceptFriendRequest_Handler,
 		},
 		{
-			MethodName: "removeFriendRequest",
-			Handler:    _UserService_RemoveFriendRequest_Handler,
+			MethodName: "RejectFriendRequest",
+			Handler:    _UserService_RejectFriendRequest_Handler,
 		},
 		{
 			MethodName: "removeFriend",
