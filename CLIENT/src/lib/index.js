@@ -10,6 +10,8 @@ export async function GETwithToken(path) {
 
 		if (res.ok) {
 			const data = await res.json();
+      console.log(" ===== GET RESULT ===== ");
+      console.log(data);
 			return data;
 		} else {
             console.error('fetch GET with token gave error response: ', res.status, res.body);
@@ -17,6 +19,24 @@ export async function GETwithToken(path) {
 	} catch (err) {
 		console.error('Failed to fetch GET with token:', err);
 	}
+}
+
+export async function GET(path) {
+try {
+  const res = await fetch('http://localhost:3001/'+path, {
+    method: 'GET',
+  });
+  if (res.ok) {
+    const data = await res.json();
+    console.log(" ===== GET RESULT ===== ");
+    console.log(data);
+    return data;
+  } else {
+          console.error('fetch GET gave error response: ', res.status, res.body);
+      }
+} catch (err) {
+  console.error('Failed to fetch GET:', err);
+}
 }
 
 export async function DELETEwithToken(body, path) {
@@ -33,6 +53,8 @@ try {
 
   if (res.ok) {
     const data = await res.json();
+    console.log(" ===== DELETE RESULT ===== ");
+      console.log(data);
     return data;
   } else {
           console.error('fetch GET with token gave error response: ', res.status, res.body);
@@ -52,6 +74,8 @@ export async function POST(body, path) {
     
         if (res.ok) {
           const data = await res.json();
+          console.log(" ===== POST RESULT ===== ");
+          console.log(data);
           return data;
         } else {
             console.error('fetch POST gave error response: ', res.status, res.body);
@@ -74,6 +98,8 @@ export async function POST(body, path) {
     
         if (res.ok) {
           const data = await res.json();
+          console.log(" ===== POST RESULT ===== ");
+          console.log(data);
           return data;
         } else {
             console.error('fetch POST gave error response: ', res.status, res.body);

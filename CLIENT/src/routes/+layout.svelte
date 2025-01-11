@@ -16,9 +16,6 @@
 		await data.getFriendsListStuff();
 	});
 
-	function acceptFriendRequest(requestId) {
-	}
-
 	function copyInviteLink() {
 		navigator.clipboard.writeText(`${window.location.origin}/invite/${currentUser.id}`).then(() => {
 			alert('Invite link gekopieerd!');
@@ -60,11 +57,12 @@
 						<li class="flex justify-between items-center mt-2">
 							<span>{request.first_name} {request.last_name}</span>
 							<button
-								on:click={() => acceptFriendRequest(request.id)}
+								on:click={() => data.acceptFriendRequest(request.id)}
 								class="bg-emerald-600 text-white px-2 py-1 rounded"
 							>
 								Accept
 							</button>
+							<button on:click={() => data.rejectFriendRequest(request.id)} class="text-red-800">X</button>
 						</li>
 					{/each}
 				</ul>

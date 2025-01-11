@@ -11,7 +11,7 @@ const user = writable({
 });
 
 export async function load() {
-	return { user, fetchUser, logout, removeFriend, getFriendsListStuff };
+	return { user, fetchUser, logout, removeFriend, getFriendsListStuff, acceptFriendRequest, rejectFriendRequest };
 }
 
 async function fetchUser() {
@@ -73,5 +73,23 @@ async function getFriendsListStuff() {
 	});
 	user.update((u) => {
 		return { ...u, friends: friends, friend_requests: friend_requests };
+	});
+}
+
+async function acceptFriendRequest(friend_id){
+	let friends_resp = await POSTWithToken({friend_id:friend_id},'/user/friend-requests/accept');
+	let friends = friends_resp.users;
+	friends.forEach((f) => {
+		f.online = false;
+	});
+	user.update((u) => {
+		return { ...u, friends: friends };
+	});
+}
+async function rejectFriendRequest(friend_id){
+	let friends_requests_resp = await DELETEwithToken({friend_id:friend_id},'/user/friend-requests/reject');
+	let friend_requests = friends_requests_resp.users;
+	user.update((u) => {
+		return { ...u, friend_requests: friend_requests };
 	});
 }
