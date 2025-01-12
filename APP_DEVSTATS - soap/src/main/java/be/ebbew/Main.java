@@ -62,7 +62,7 @@ public class Main {
     public static void main(String[] args) {
         Dotenv dotenv = Dotenv.configure().load();
         String port = dotenv.get("LISTEN_PORT", "8080");
-        String url = "http://localhost:" + port + "/devstats";
+        String url = "http://0.0.0.0:" + port + "/devstats";
         System.out.println("Starting SOAP Service at " + url);
         Main service = new Main();
         Endpoint.publish(url, service);
