@@ -3,7 +3,7 @@
 echo "=== Docker Container Info ==="
 echo "container: APP_PROJECT_DB-REST"
 echo "service: app-project-db-rest"
-echo "poort : 3008 WS"
+echo "poort : 3009"
 echo "==============================="
 echo
 echo "=== content van /app ==="
