@@ -21,7 +21,7 @@ func NewUserDBClient(url string, dsc *DevstatClient) *UserDBClient {
 }
 
 func (u *UserDBClient) QueryUser(user_id string) (map[string]interface{}, bool) {
-	dsc_id := u.dsc.Start("User Database", "REST", "Query: user")
+	dsc_id := u.dsc.Start("User Database", "GRAPHQL", "Query: user")
 	query := `query($id: String!) {
   		user(id: $id) {
 			id
@@ -35,7 +35,7 @@ func (u *UserDBClient) QueryUser(user_id string) (map[string]interface{}, bool) 
 	return resp["user"], ok
 }
 func (u *UserDBClient) QueryFriendsOrRequests(user_id string, graphql_type string) ([]map[string]interface{}, bool) {
-	dsc_id := u.dsc.Start("User Database", "REST", "Query: "+graphql_type)
+	dsc_id := u.dsc.Start("User Database", "GRAPHQL", "Query: "+graphql_type)
 	query := `query($id: String!) {
   		` + graphql_type + `(id: $id) {
 			id
@@ -49,7 +49,7 @@ func (u *UserDBClient) QueryFriendsOrRequests(user_id string, graphql_type strin
 	return resp[graphql_type], ok
 }
 func (u *UserDBClient) RemoveOrAddFriendsOrRequests(user_id string, friend_id, graphql_type string) ([]map[string]interface{}, bool) {
-	dsc_id := u.dsc.Start("User Database", "REST", "Mutate: "+graphql_type)
+	dsc_id := u.dsc.Start("User Database", "GRAPHQL", "Mutate: "+graphql_type)
 
 	query := `mutation($user_id: String!, $friend_id: String!) {
   		` + graphql_type + `(user_id: $user_id, friend_id: $friend_id) {
