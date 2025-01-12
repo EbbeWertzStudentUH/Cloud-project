@@ -1,0 +1,10 @@
+version: "3.8"
+
+services:
+  app-project-db-rest:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: APP_PROJECT_DB-REST
+    ports:
+      - "3008:3008"
