@@ -1,0 +1,16 @@
+plugins {
+    id 'java'
+}
+
+group = 'be.ebbew'
+version = '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation group: 'jakarta.xml.ws', name: 'jakarta.xml.ws-api', version: '4.0.2'
+    implementation group: 'com.sun.xml.ws', name: 'jaxws-rt', version: '4.0.3'
+    implementation group: 'io.github.cdimascio', name: 'dotenv-java', version: '3.1.0'
+}
