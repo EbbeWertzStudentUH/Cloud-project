@@ -1,21 +1,31 @@
 package be.ebbew;
 
-public class OutgoingRequestCount {
+public class OutgoingStats {
     private String serviceType;
     private String identifier;
     private String serviceName;
     private int count;
     private int rpm; // avarage requests per minute
+    private int requestTime;
 
-    public OutgoingRequestCount() {
+    public OutgoingStats() {
     }
 
-    public OutgoingRequestCount(String serviceType, String identifier, int count, String serviceName, int rpm) {
+    public OutgoingStats(String serviceType, String identifier, int count, String serviceName, int rpm, int requestTime) {
         this.serviceType = serviceType;
         this.identifier = identifier;
         this.count = count;
         this.serviceName = serviceName;
         this.rpm = rpm;
+        this.requestTime = requestTime;
+    }
+
+    public int getRequestTime() {
+        return requestTime;
+    }
+
+    public void setRequestTime(int requestTime) {
+        this.requestTime = requestTime;
     }
 
     public String getServiceType() {

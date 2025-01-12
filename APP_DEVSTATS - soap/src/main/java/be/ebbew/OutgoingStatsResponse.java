@@ -4,14 +4,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public class OutgoingRequestCountsResponse {
-    private List<OutgoingRequestCount> counts;
+public class OutgoingStatsResponse {
+    private List<OutgoingStats> counts;
 
-    public OutgoingRequestCountsResponse() {
+    public OutgoingStatsResponse() {
         this.counts = new ArrayList<>();
     }
 
-    public OutgoingRequestCountsResponse(Map<String, Integer> countsMap, Map<String, Integer> avgRequestsPerMinute) {
+    public OutgoingStatsResponse(Map<String, Integer> countsMap, Map<String, Integer> avgRequestsPerMinute, Map<String, Integer> timeMap) {
         this.counts = new ArrayList<>();
         for(String key : countsMap.keySet()) {
             String[] parts = key.split(":", 3);
@@ -20,15 +20,16 @@ public class OutgoingRequestCountsResponse {
             String identifier = parts[2];
             int count = countsMap.get(key);
             int rpm = avgRequestsPerMinute.get(key);
-            this.counts.add(new OutgoingRequestCount(serviceType, identifier, count, serviceName, rpm));
+            int avgtime = timeMap.getOrDefault(key, -1);
+            this.counts.add(new OutgoingStats(serviceType, identifier, count, serviceName, rpm, avgtime));
         }
     }
 
-    public List<OutgoingRequestCount> getCounts() {
+    public List<OutgoingStats> getCounts() {
         return counts;
     }
 
-    public void setCounts(List<OutgoingRequestCount> counts) {
+    public void setCounts(List<OutgoingStats> counts) {
         this.counts = counts;
     }
 }

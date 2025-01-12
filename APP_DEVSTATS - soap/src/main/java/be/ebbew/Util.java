@@ -16,6 +16,13 @@ public class Util {
         return countsMap;
     }
 
+    public static Map<String, Integer> convertToAvgTimes(ConcurrentHashMap<String, AvarageTime> avarageTimesMap){
+        Map<String, Integer> timeMap = avarageTimesMap.entrySet().stream()
+                .collect(ConcurrentHashMap::new,
+                        (map, entry) -> map.put(entry.getKey(), entry.getValue().getAverageTime()),
+                        ConcurrentHashMap::putAll);
+        return timeMap;
+    }
 
     public static Map<String, Integer> calculateRMP(ConcurrentHashMap<String, List<Long>> requestTimestamps){
         Map<String, Integer> rpmMap = new HashMap<>();
