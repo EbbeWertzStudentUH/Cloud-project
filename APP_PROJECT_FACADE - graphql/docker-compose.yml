@@ -1,0 +1,10 @@
+version: "3.8"
+
+services:
+  app-project-facade-graphql:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: APP_PROJECT_FACADE-GRAPHQL
+    ports:
+      - "3009:3009"
