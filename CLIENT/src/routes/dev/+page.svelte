@@ -11,6 +11,12 @@
     <tbody class="text-gray-700 text-sm">
       <tr class="border-b border-gray-200">
         <td class="py-3 px-6 text-left">
+          <a href="/proxy/soap" class="text-blue-600 hover:underline">/proxy/soap</a>
+        </td>
+        <td class="py-3 px-6 text-center">8082</td>
+      </tr>
+      <tr class="border-b border-gray-200">
+        <td class="py-3 px-6 text-left">
           <a href="/proxy/mongo" class="text-blue-600 hover:underline">/proxy/mongo</a>
         </td>
         <td class="py-3 px-6 text-center">8081</td>

@@ -7,6 +7,7 @@ export default defineConfig({
 		proxy: {
 			'/proxy/mongo': 'http://localhost:8081',
 			'/proxy/mysql': 'http://localhost:8080',
+			'/proxy/soap': 'http://localhost:8082',
 		},
 	}
 });

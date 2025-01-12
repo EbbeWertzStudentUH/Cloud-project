@@ -1,0 +1,10 @@
+version: "3.8"
+
+services:
+  client-devstats:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: CLIENT_DEVSTATS
+    ports:
+      - "8082:80"

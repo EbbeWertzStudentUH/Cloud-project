@@ -14,6 +14,16 @@ services:
       - "80:3000"
     networks:
       - "cloud-netwerk"
+  client-devstats:
+    build:
+      context: "./CLIENT_DEVSTATS"
+      dockerfile: Dockerfile
+    container_name: CLIENT_DEVSTATS
+    ports:
+      - "8082:80"
+    networks:
+      - "cloud-netwerk"
+    attach: false # ik hoef geen console logs te zien
 # =========================
 # DATABASES
 # =========================

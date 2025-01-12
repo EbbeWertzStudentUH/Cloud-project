@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Service Stats</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f9f9f9;
+        }
+
+        h2 {
+            color: #333;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: #fff;
+            margin-top: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        table, th, td {
+            border: 3px solid #0f0c2e;
+        }
+
+        th {
+            background-color: #2a4c66;
+            padding: 10px;
+            text-align: left;
+            color: white;
+        }
+
+        tr {
+            padding: 10px;
+            text-align: left;
+            background-color: #e2f5fa;
+        }
+
+        tr:nth-child(even) {
+            background-color: #d3d6d8;
+        }
+
+        .highlight {
+            background-color: #dcb338;
+            transition: background-color 0.5s ease-in-out;
+        }
+    </style>
+</head>
+<body>
+
+<h2>Outgoing Request Stats</h2>
+
+<table id="statsTable">
+    <thead>
+        <tr>
+            <th>Service</th>
+            <th>Type</th>
+            <th>endpoint/call</th>
+            <th>Count</th>
+            <th>Avarage Request Time (ms)</th>
+            <th>Avarage Requests per minute</th>
+        </tr>
+    </thead>
+    <tbody>
+        <!-- JavaScript injects data here -->
+    </tbody>
+</table>
+
+<script>
+let previousData = {}; // Store the previous state of the data
+
+function fetchStats() {
+    fetch('soapclient.php')
+        .then(response => response.json())
+        .then(data => {
+            const tableBody = document.querySelector("#statsTable tbody");
+            tableBody.innerHTML = ""; // Clear the table
+
+            // Iterate over the data and update the table
+            data.forEach(item => {
+                const row = document.createElement("tr");
+
+                // Check for changes and add the 'highlight' class if needed
+                const rowContent = `
+                    <td class="${hasChanged(item.serviceName, 'serviceName', item)}">${item.serviceName}</td>
+                    <td class="${hasChanged(item.serviceType, 'serviceType', item)}">${item.serviceType}</td>
+                    <td class="${hasChanged(item.identifier, 'identifier', item)}">${item.identifier}</td>
+                    <td class="${hasChanged(item.count, 'count', item)}">${item.count}</td>
+                    <td class="${hasChanged(item.requestTime, 'requestTime', item)}">${item.requestTime} ms</td>
+                    <td class="${hasChanged(item.rpm, 'rpm', item)}">${item.rpm}</td>
+                `;
+                row.innerHTML = rowContent;
+
+                tableBody.appendChild(row);
+            });
+
+            // Update previousData after the table is updated
+            updatePreviousData(data);
+        })
+        .catch(error => console.error('Error fetching data:', error));
+}
+
+function hasChanged(value, key, item) {
+    const identifier = item.identifier;
+    const prev = previousData[identifier] ? previousData[identifier][key] : null;
+
+    // Highlight if the value has changed
+    return prev !== value ? 'highlight' : '';
+}
+
+function updatePreviousData(data) {
+    previousData = {};
+    data.forEach(item => {
+        previousData[item.identifier] = item;
+    });
+}
+
+// Update every 2 seconds
+setInterval(fetchStats, 2000);
+fetchStats();
+</script>
+
+</body>
+</html>
