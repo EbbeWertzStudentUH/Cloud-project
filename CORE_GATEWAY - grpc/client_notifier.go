@@ -9,16 +9,19 @@ import (
 type NotifierClient struct {
 	url        string
 	restClient *resty.Client
+	dsc        *DevstatClient
 }
 
-func NewNotifierClient(url string) *NotifierClient {
+func NewNotifierClient(url string, dsc *DevstatClient) *NotifierClient {
 	return &NotifierClient{
 		url:        url,
 		restClient: resty.New(),
+		dsc:        dsc,
 	}
 }
 
 func (n *NotifierClient) SendNotification(user_id string, message string) bool {
+	dsc_id := n.dsc.Start("Notifier", "REST", "SendNotification")
 	data := map[string]interface{}{
 		"user_id": user_id,
 		"notification": map[string]interface{}{
@@ -36,10 +39,13 @@ func (n *NotifierClient) SendNotification(user_id string, message string) bool {
 		fmt.Println("Error:", err)
 		return false
 	}
+	n.dsc.End(dsc_id)
 	return true
 }
 
 func (n *NotifierClient) SendUpdate(user_id string, update_type string, subject string, update_data map[string]interface{}) bool {
+	dsc_id := n.dsc.Start("Notifier", "REST", "SendUpdate")
+
 	data := map[string]interface{}{
 		"user_id": user_id,
 		"update": map[string]interface{}{
@@ -59,10 +65,13 @@ func (n *NotifierClient) SendUpdate(user_id string, update_type string, subject 
 		fmt.Println("Error:", err)
 		return false
 	}
+	n.dsc.End(dsc_id)
 	return true
 }
 
 func (n *NotifierClient) Subscribe(user_id string, topic_name string, topic_ids []string) bool {
+	dsc_id := n.dsc.Start("Notifier", "REST", "Subscribe")
+
 	data := map[string]interface{}{
 		"user_id": user_id,
 		"topic": map[string]interface{}{
@@ -81,9 +90,12 @@ func (n *NotifierClient) Subscribe(user_id string, topic_name string, topic_ids 
 		fmt.Println("Error:", err)
 		return false
 	}
+	n.dsc.End(dsc_id)
 	return true
 }
 func (n *NotifierClient) UnSubscribe(user_id string, topic_name string, topic_ids []string) bool {
+	dsc_id := n.dsc.Start("Notifier", "REST", "UnSubscribe")
+
 	data := map[string]interface{}{
 		"user_id": user_id,
 		"topic": map[string]interface{}{
@@ -102,5 +114,6 @@ func (n *NotifierClient) UnSubscribe(user_id string, topic_name string, topic_id
 		fmt.Println("Error:", err)
 		return false
 	}
+	n.dsc.End(dsc_id)
 	return true
 }

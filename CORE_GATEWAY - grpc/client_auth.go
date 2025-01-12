@@ -9,16 +9,19 @@ import (
 type AuthClient struct {
 	url        string
 	restClient *resty.Client
+	dsc        *DevstatClient
 }
 
-func NewAuthClient(url string) *AuthClient {
+func NewAuthClient(url string, dsc *DevstatClient) *AuthClient {
 	return &AuthClient{
 		url:        url,
 		restClient: resty.New(),
+		dsc:        dsc,
 	}
 }
 
 func (a *AuthClient) Register(first_name string, last_name string, email string, pwd string) (map[string]interface{}, bool) {
+	dsc_id := a.dsc.Start("Auth", "REST", "Register")
 	data := map[string]string{
 		"first_name": first_name,
 		"last_name":  last_name,
@@ -38,10 +41,12 @@ func (a *AuthClient) Register(first_name string, last_name string, email string,
 		fmt.Println("Error:", err)
 		return map[string]interface{}{}, false
 	}
+	a.dsc.End(dsc_id)
 	return responseMap, true
 }
 
 func (a *AuthClient) Login(email string, pwd string) (map[string]interface{}, bool) {
+	dsc_id := a.dsc.Start("Auth", "REST", "Login")
 	data := map[string]string{
 		"email":    email,
 		"password": pwd,
@@ -59,10 +64,12 @@ func (a *AuthClient) Login(email string, pwd string) (map[string]interface{}, bo
 		fmt.Println("Error:", err)
 		return map[string]interface{}{}, false
 	}
+	a.dsc.End(dsc_id)
 	return responseMap, true
 }
 
 func (a *AuthClient) ValidateToken(token string) (map[string]interface{}, bool) {
+	dsc_id := a.dsc.Start("Auth", "REST", "ValidateToken")
 	var responseMap map[string]interface{}
 	resp, err := a.restClient.R().
 		SetHeader("Authorization", "Bearer "+token).
@@ -75,5 +82,6 @@ func (a *AuthClient) ValidateToken(token string) (map[string]interface{}, bool) 
 		fmt.Println("Error:", err)
 		return map[string]interface{}{}, false
 	}
+	a.dsc.End(dsc_id)
 	return responseMap, true
 }

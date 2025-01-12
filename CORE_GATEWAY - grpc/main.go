@@ -22,9 +22,10 @@ func main() {
 		log.Fatalf("Failed to listen: %v", err)
 	}
 
-	auth_client := NewAuthClient(os.Getenv("AUTH_SERVICE_URL"))
-	userdb_client := NewUserDBClient(os.Getenv("USERDB_SERVICE_URL"))
-	notifier_client := NewNotifierClient(os.Getenv("NOTIFIER_SERVICE_URL"))
+	devstats_client := NewDevstatClient(os.Getenv("SOAP_WSDL_URL"))
+	auth_client := NewAuthClient(os.Getenv("AUTH_SERVICE_URL"), devstats_client)
+	userdb_client := NewUserDBClient(os.Getenv("USERDB_SERVICE_URL"), devstats_client)
+	notifier_client := NewNotifierClient(os.Getenv("NOTIFIER_SERVICE_URL"), devstats_client)
 
 	grpcServer := grpc.NewServer()
 	user_service := &UserServiceServer{authClient: *auth_client, userdbClient: *userdb_client, notifierClient: *notifier_client}

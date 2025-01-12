@@ -9,16 +9,19 @@ import (
 type UserDBClient struct {
 	url        string
 	restClient *resty.Client
+	dsc        *DevstatClient
 }
 
-func NewUserDBClient(url string) *UserDBClient {
+func NewUserDBClient(url string, dsc *DevstatClient) *UserDBClient {
 	return &UserDBClient{
 		url:        url,
 		restClient: resty.New(),
+		dsc:        dsc,
 	}
 }
 
 func (u *UserDBClient) QueryUser(user_id string) (map[string]interface{}, bool) {
+	dsc_id := u.dsc.Start("User Database", "REST", "Query: user")
 	query := `query($id: String!) {
   		user(id: $id) {
 			id
@@ -28,9 +31,11 @@ func (u *UserDBClient) QueryUser(user_id string) (map[string]interface{}, bool) 
 	}`
 	vars := map[string]interface{}{"id": user_id}
 	resp, ok := u.QuerySingle(query, vars)
+	u.dsc.End(dsc_id)
 	return resp["user"], ok
 }
 func (u *UserDBClient) QueryFriendsOrRequests(user_id string, graphql_type string) ([]map[string]interface{}, bool) {
+	dsc_id := u.dsc.Start("User Database", "REST", "Query: "+graphql_type)
 	query := `query($id: String!) {
   		` + graphql_type + `(id: $id) {
 			id
@@ -40,9 +45,12 @@ func (u *UserDBClient) QueryFriendsOrRequests(user_id string, graphql_type strin
 	}`
 	vars := map[string]interface{}{"id": user_id}
 	resp, ok := u.QueryMultiple(query, vars)
+	u.dsc.End(dsc_id)
 	return resp[graphql_type], ok
 }
 func (u *UserDBClient) RemoveOrAddFriendsOrRequests(user_id string, friend_id, graphql_type string) ([]map[string]interface{}, bool) {
+	dsc_id := u.dsc.Start("User Database", "REST", "Mutate: "+graphql_type)
+
 	query := `mutation($user_id: String!, $friend_id: String!) {
   		` + graphql_type + `(user_id: $user_id, friend_id: $friend_id) {
 			id
@@ -52,6 +60,7 @@ func (u *UserDBClient) RemoveOrAddFriendsOrRequests(user_id string, friend_id, g
 	}`
 	vars := map[string]interface{}{"user_id": user_id, "friend_id": friend_id}
 	resp, ok := u.QueryMultiple(query, vars)
+	u.dsc.End(dsc_id)
 	return resp[graphql_type], ok
 }
 

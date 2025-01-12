@@ -1,0 +1,1 @@
+gowsdl -o "soap_generated.go" -p "soap_generated" soap.wsdl
