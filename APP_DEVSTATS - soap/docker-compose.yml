@@ -1,0 +1,10 @@
+version: "3.8"
+
+services:
+  app-devstats-soap:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: APP_DEVSTATS-SOAP
+    ports:
+      - "3007:3007"

@@ -121,6 +121,18 @@ services:
 # =========================
 # APP MICROSERVICES  
 # =========================
+  app-devstats-soap:
+    build:
+      context: "./APP_DEVSTATS - soap"
+      dockerfile: Dockerfile
+    container_name: APP_DEVSTATS-SOAP
+    # expose:
+    #  - "3007"
+    ports: # DEBUG
+      - "3007:3007"
+    networks:
+      - "cloud-netwerk"
+      
   app-auth-rest:
     build:
       context: "./APP_AUTH - rest"
