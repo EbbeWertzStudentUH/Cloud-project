@@ -36,18 +36,18 @@ class Problem(BaseModel):
     posted_at: str
 
 class Task(BaseModel):
-    _id: Optional[ObjectId] = None
+    id: str = str(uuid.uuid4())
     name: str
     status: str
     user: Optional[str] = None
     active_period: Optional[ActivePeriod] = None
-    problems: Optional[List[Problem]] = []
+    problems: List[Problem] = []
 
 class Milestone(BaseModel):
     id: str = str(uuid.uuid4())
     name: str
     deadline: str
-    tasks: Optional[List[str]] = [] #ID's
+    tasks: List[str] = [] #ID's
 
 class Project(BaseModel):
     id: str = str(uuid.uuid4())
@@ -55,13 +55,14 @@ class Project(BaseModel):
     deadline: str
     github_repo: str
     users: List[str] #ID's
-    milestones: Optional[List[str]] = [] #ID's
+    milestones: List[str] = [] #ID's
     
 class AddUserRequest(BaseModel):
     user_id: str
 class AddMilestoneRequest(BaseModel):
     milestone_id: str
-
+class AddTaskRequest(BaseModel):
+    task_id: str
 # ======================================================================
 # 
 #       PROJECTS
@@ -118,10 +119,17 @@ def get_milestone_by_id(milestone_id: str):
     return milestone
 
 @app.get("/milestones/project/{project_id}")
-def list_milestones_from_project(project_id: str):
+def get_milestones_from_project(project_id: str):
     ids = db.projects.find_one({"id": project_id}, {'milestones':1, '_id':0})['milestones']
     milestones = db.milestones.find({"id": {"$in": ids}}, {'_id':0})
     return list(milestones)
+
+@app.post("/milestones/{milestone_id}/tasks")
+def add_task_to_milestone(milestone_id: str, add_req: AddTaskRequest):
+    result = db.milestones.update_one({"id": milestone_id}, {"$addToSet": {"tasks": add_req.task_id}})
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Project not found")
+    return {"message": "Milestone added to project"}
 
 # ======================================================================
 # 
@@ -129,7 +137,23 @@ def list_milestones_from_project(project_id: str):
 # 
 # ======================================================================
 
+@app.post("/tasks")
+def create_task(task: Task):
+    db.tasks.insert_one(task.model_dump())
+    return task
 
+@app.get("/tasks/{task_id}")
+def get_task_by_id(task_id: str):
+    task = db.tasks.find_one({"id": task_id}, {'_id':0})
+    if not task:
+        raise HTTPException(status_code=404, detail="Milestone not found")
+    return task
+
+@app.get("/tasks/milestone/{milestone_id}")
+def get_tasks_from_milestone(milestone_id: str):
+    ids = db.milestones.find_one({"id": milestone_id}, {'tasks':1, '_id':0})['tasks']
+    tasks = db.tasks.find({"id": {"$in": ids}}, {'_id':0})
+    return list(tasks)
 
 
 
