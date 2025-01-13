@@ -18,6 +18,7 @@ func main() {
 	service := NewProjectService(db_client)
 	rpc.Register(service)
 	rpc.HandleHTTP()
+	log.Println("listening on " + "0.0.0.0:" + os.Getenv("LISTEN_PORT"))
 	err = http.ListenAndServe(":"+os.Getenv("LISTEN_PORT"), nil)
 	if err != nil {
 		log.Fatal("Error starting the RPC server: ", err)

@@ -14,129 +14,116 @@ func NewProjectService(db *ProjectDBClient) *ProjectService {
 	}
 }
 
-func (p *ProjectService) CreateProject(user_id string, name string, deadline string, github_repo string) (map[string]interface{}, bool) {
+func (p *ProjectService) CreateProject(req *CreateProjectRequest, res *JSONResponse) error {
 	data := map[string]interface{}{
-		"name":        name,
-		"deadline":    deadline,
-		"github_repo": github_repo,
-		"users":       []string{user_id},
+		"name":        req.Name,
+		"deadline":    req.Deadline,
+		"github_repo": req.Github_repo,
+		"users":       []string{req.User_id},
 	}
-	return p.db.POST("/projects", data)
+	jsonRes, _ := p.db.POST("/projects", data)
+	res.Data = jsonRes
+	return nil
 }
-func (p *ProjectService) GetProjectById(proj_id string) (map[string]interface{}, bool) {
-	project, ok := p.db.GET("/projects/" + proj_id)
-	if !ok {
-		return map[string]interface{}{}, false
-	}
-	milestones, ok := p.db.GET("/milestones/project/" + proj_id)
-	if !ok {
-		return map[string]interface{}{}, false
-	}
+func (p *ProjectService) GetProjectById(req *GetProjectByIdRequest, res *JSONResponse) error {
+	project, _ := p.db.GET("/projects/" + req.Proj_id)
+	milestones, _ := p.db.GET("/milestones/project/" + req.Proj_id)
 	project["milestones"] = milestones
-	return project, true
+	res.Data = project
+	return nil
 }
-func (p *ProjectService) GetProjectsFromUser(user_id string) (map[string]interface{}, bool) {
-	return p.db.GET("/projects/user/" + user_id)
+func (p *ProjectService) GetProjectsFromUser(req *GetProjectsFromUserRequest, res *JSONResponse) error {
+	jsonRes, _ := p.db.GET("/projects/user/" + req.User_id)
+	res.Data = jsonRes
+	return nil
 }
-func (p *ProjectService) AddUserToProject(proj_id string, user_id string) (map[string]interface{}, bool) {
+func (p *ProjectService) AddUserToProject(req *AddUserToProjectRequest, res *EmptyResponse) error {
 	data := map[string]interface{}{
-		"user_id": user_id,
+		"user_id": req.User_id,
 	}
-	return p.db.POST("/projects/"+proj_id+"/users", data)
+	p.db.POST("/projects/"+req.Proj_id+"/users", data)
+	return nil
 }
-func (p *ProjectService) CreateMilestoneInProject(proj_id string, name string, deadline string) (map[string]interface{}, bool) {
+func (p *ProjectService) CreateMilestoneInProject(req *CreateMilestoneInProjectRequest, res *JSONResponse) error {
 	data := map[string]interface{}{
-		"name":     name,
-		"deadline": deadline,
+		"name":     req.Name,
+		"deadline": req.Deadline,
 	}
-	milestone, ok := p.db.POST("/milestones", data)
-	if !ok {
-		return map[string]interface{}{}, false
-	}
+	milestone, _ := p.db.POST("/milestones", data)
 	data = map[string]interface{}{
 		"milestone_id": milestone["id"],
 	}
-	return p.db.POST("/projects/"+proj_id+"/milestones", data)
+	p.db.POST("/projects/"+req.Proj_id+"/milestones", data)
+	res.Data = milestone
+	return nil
 }
-func (p *ProjectService) GetMilestoneById(milestone_id string) (map[string]interface{}, bool) {
-	milestone, ok := p.db.GET("/milestones/" + milestone_id)
-	if !ok {
-		return map[string]interface{}{}, false
-	}
-	tasks, ok := p.db.GET("/tasks/milestone/" + milestone_id)
-	if !ok {
-		return map[string]interface{}{}, false
-	}
+func (p *ProjectService) GetMilestoneById(req *GetMilestoneByIdRequest, res *JSONResponse) error {
+	milestone, _ := p.db.GET("/milestones/" + req.Milestone_id)
+	tasks, _ := p.db.GET("/tasks/milestone/" + req.Milestone_id)
 	milestone["tasks"] = tasks
-	return milestone, true
+	res.Data = milestone
+	return nil
 }
-func (p *ProjectService) CreateTaskInMilestone(milestone_id string, name string) (map[string]interface{}, bool) {
+func (p *ProjectService) CreateTaskInMilestone(req *CreateTaskInMilestoneRequest, res *JSONResponse) error {
 	data := map[string]interface{}{
-		"name":   name,
+		"name":   req.Name,
 		"status": "open",
 	}
-	task, ok := p.db.POST("/tasks", data)
-	if !ok {
-		return map[string]interface{}{}, false
-	}
+	task, _ := p.db.POST("/tasks", data)
 	data = map[string]interface{}{
 		"task_id": task["id"],
 	}
-	return p.db.POST("/milestones/"+milestone_id+"/tasks", data)
+	p.db.POST("/milestones/"+req.Milestone_id+"/tasks", data)
+	res.Data = task
+	return nil
 }
-func (p *ProjectService) GetTaskById(task_id string) (map[string]interface{}, bool) {
-	return p.db.GET("/tasks/" + task_id)
+func (p *ProjectService) GetTaskById(req *GetTaskByIdRequest, res *JSONResponse) error {
+	jsonRes, _ := p.db.GET("/tasks/" + req.Task_id)
+	res.Data = jsonRes
+	return nil
 }
-func (p *ProjectService) AddProblemToTask(task_id string, problem string) (map[string]interface{}, bool) {
+func (p *ProjectService) AddProblemToTask(req *AddProblemToTaskRequest, res *EmptyResponse) error {
 	currentTime := time.Now()
 	data := map[string]interface{}{
-		"problem":   problem,
+		"name":      req.Problem_name,
 		"posted_at": currentTime.Format("2006-01-02"), // GEEN IDEE WAAROM, maar go MOET deze exacte datum hebben als format
 	}
-	return p.db.POST("/tasks/"+task_id+"/problems", data)
+	p.db.POST("/tasks/"+req.Task_id+"/problems", data)
+	return nil
 }
-func (p *ProjectService) ResolveProblem(task_id string, problem_id string) (map[string]interface{}, bool) {
+func (p *ProjectService) ResolveProblem(req *ResolveProblemRequest, res *EmptyResponse) error {
 	data := map[string]interface{}{
-		"problem_id": problem_id,
+		"problem_id": req.Problem_id,
 	}
-	return p.db.DELETE_WITH_BODY("/tasks/"+task_id+"/problems", data)
+	p.db.DELETE_WITH_BODY("/tasks/"+req.Task_id+"/problems", data)
+	return nil
 }
-func (p *ProjectService) AssignTask(task_id string, user_id string) (map[string]interface{}, bool) {
+func (p *ProjectService) AssignTask(req *AssignTaskRequest, res *EmptyResponse) error {
 	data := map[string]interface{}{
-		"user_id": user_id,
+		"user_id": req.User_id,
 	}
-	_, ok := p.db.PUT("/tasks/"+task_id+"/user", data)
-	if !ok {
-		return map[string]interface{}{}, false
-	}
+	p.db.PUT("/tasks/"+req.Task_id+"/user", data)
 	currentTime := time.Now()
 	data = map[string]interface{}{
 		"start": currentTime.Format("2006-01-02"),
 	}
-	_, ok = p.db.PUT("/tasks/"+task_id+"/active-period", data)
-	if !ok {
-		return map[string]interface{}{}, false
-	}
+	p.db.PUT("/tasks/"+req.Task_id+"/active-period", data)
 	data = map[string]interface{}{
 		"status": "active",
 	}
-	return p.db.PATCH("/tasks/"+task_id+"/status", data)
+	p.db.PATCH("/tasks/"+req.Task_id+"/status", data)
+	return nil
 }
-func (p *ProjectService) CompleteTask(task_id string) (map[string]interface{}, bool) {
-	_, ok := p.db.DELETE("/tasks/" + task_id + "/problems/all")
-	if !ok {
-		return map[string]interface{}{}, false
-	}
+func (p *ProjectService) CompleteTask(req *CompleteTaskRequest, res *EmptyResponse) error {
+	p.db.DELETE("/tasks/" + req.Task_id + "/problems/all")
 	currentTime := time.Now()
 	data := map[string]interface{}{
 		"end": currentTime.Format("2006-01-02"),
 	}
-	_, ok = p.db.PATCH("/tasks/"+task_id+"/active-period", data)
-	if !ok {
-		return map[string]interface{}{}, false
-	}
+	p.db.PATCH("/tasks/"+req.Task_id+"/active-period", data)
 	data = map[string]interface{}{
 		"status": "closed",
 	}
-	return p.db.PATCH("/tasks/"+task_id+"/status", data)
+	p.db.PATCH("/tasks/"+req.Task_id+"/status", data)
+	return nil
 }
