@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Body
 from pymongo import MongoClient
 from pydantic import BaseModel, Field
 from typing import List, Optional
@@ -23,139 +23,126 @@ except Exception as e:
 db = client["project_management"]
 
 
+# FastAPI App
 app = FastAPI()
 
-def object_id_to_str(obj):
-    if isinstance(obj, ObjectId):
-        return str(obj)
-    return obj
+# Models
+class ActivePeriod(BaseModel):
+    start: Optional[datetime]
+    end: Optional[datetime] = None
 
 class Problem(BaseModel):
     name: str
-    resolved: Optional[bool] = False
-    resolved_at: Optional[datetime] = None
-
+    posted_at: datetime
 
 class Task(BaseModel):
-    title: str
-    description: Optional[str] = None
-    user_id: Optional[str] = None
-    problems: List[Problem] = []
-    status: str = "Open"
-    active_start: Optional[datetime] = None
-    active_end: Optional[datetime] = None
-
+    id: str
+    name: str
+    status: str
+    user: Optional[str] = None
+    active_period: Optional[ActivePeriod] = None
+    problems: Optional[List[Problem]] = []
 
 class Milestone(BaseModel):
-    title: str
+    id: str
+    name: str
     deadline: datetime
-    tasks: List[Task] = []
-
 
 class Project(BaseModel):
+    id: str
     name: str
-    description: Optional[str] = None
     deadline: datetime
-    user_ids: List[str]
     github_repo: str
-    milestones: List[Milestone] = []
+    user_ids: List[str] = []
 
+# Routes
+@app.get("/projects", response_model=List[Project])
+def list_projects():
+    """List all projects with only ID and name."""
+    projects = db.projects.find({}, {"_id": 1, "name": 1})
+    return [{"id": str(p["_id"]), "name": p["name"]} for p in projects]
 
-@app.post("/projects/")
-async def create_project(project: Project):
-    project_dict = project.dict()
-    result = db.projects.insert_one(project_dict)
-    project_dict["_id"] = str(result.inserted_id)
-    return project_dict
-
-
-@app.get("/projects/{project_id}")
-async def get_project(project_id: str):
-    project = db.projects.find_one({"_id": ObjectId(project_id)})
+@app.get("/projects/{project_id}", response_model=Project)
+def get_project(project_id: str):
+    """Get full details of a specific project."""
+    project = db.projects.find_one({"_id": project_id})
     if not project:
         raise HTTPException(status_code=404, detail="Project not found")
-    project["_id"] = object_id_to_str(project["_id"])
     return project
 
+@app.get("/projects/user/{user_id}", response_model=List[Project])
+def get_projects_by_user(user_id: str):
+    """Get all projects containing a specific user."""
+    projects = db.projects.find({"user_ids": user_id}, {"_id": 1, "name": 1})
+    return [{"id": str(p["_id"]), "name": p["name"]} for p in projects]
 
-@app.put("/projects/{project_id}")
-async def update_project(project_id: str, project: Project):
-    project_dict = project.dict()
-    result = db.projects.update_one({"_id": ObjectId(project_id)}, {"$set": project_dict})
+@app.post("/projects/{project_id}/users", status_code=201)
+def add_user_to_project(project_id: str, user_id: str = Body(...)):
+    """Add a user to a project."""
+    result = db.projects.update_one({"_id": project_id}, {"$addToSet": {"user_ids": user_id}})
     if result.matched_count == 0:
         raise HTTPException(status_code=404, detail="Project not found")
-    return {"message": "Project updated successfully"}
+    return {"message": "User added to project"}
 
-
-@app.delete("/projects/{project_id}")
-async def delete_project(project_id: str):
-    result = db.projects.delete_one({"_id": ObjectId(project_id)})
-    if result.deleted_count == 0:
-        raise HTTPException(status_code=404, detail="Project not found")
-    return {"message": "Project deleted successfully"}
-
-
-@app.post("/projects/{project_id}/milestones/")
-async def add_milestone(project_id: str, milestone: Milestone):
-    milestone_dict = milestone.dict()
-    result = db.projects.update_one(
-        {"_id": ObjectId(project_id)},
-        {"$push": {"milestones": milestone_dict}}
-    )
-    if result.matched_count == 0:
-        raise HTTPException(status_code=404, detail="Project not found")
-    return {"message": "Milestone added successfully"}
-
-
-@app.get("/milestones/{milestone_id}")
-async def get_milestone(project_id: str, milestone_id: str):
-    project = db.projects.find_one({"_id": ObjectId(project_id)})
-    if not project:
-        raise HTTPException(status_code=404, detail="Project not found")
-    milestones = project.get("milestones", [])
-    milestone = next((m for m in milestones if m["_id"] == milestone_id), None)
+@app.get("/milestones/{milestone_id}", response_model=Milestone)
+def get_milestone(milestone_id: str):
+    """Get full details of a specific milestone."""
+    milestone = db.milestones.find_one({"_id": milestone_id})
     if not milestone:
         raise HTTPException(status_code=404, detail="Milestone not found")
-    # Add stats
-    milestone["total_tasks"] = len(milestone["tasks"])
-    milestone["completed_tasks"] = sum(
-        1 for t in milestone["tasks"] if t["status"] == "closed"
-    )
-    milestone["total_problems"] = sum(len(t["problems"]) for t in milestone["tasks"])
     return milestone
 
+@app.get("/milestones/project/{project_id}", response_model=List[Milestone])
+def list_milestones_in_project(project_id: str):
+    """List all milestones in a project."""
+    milestones = db.milestones.find({"project_id": project_id}, {"_id": 1, "name": 1})
+    return [{"id": str(m["_id"]), "name": m["name"]} for m in milestones]
 
-@app.post("/tasks/")
-async def add_task_to_milestone(project_id: str, milestone_id: str, task: Task):
-    task_dict = task.dict()
-    result = db.projects.update_one(
-        {"_id": ObjectId(project_id), "milestones._id": milestone_id},
-        {"$push": {"milestones.$.tasks": task_dict}}
-    )
-    if result.matched_count == 0:
-        raise HTTPException(status_code=404, detail="Project or milestone not found")
-    return {"message": "Task added successfully"}
+@app.get("/tasks/{task_id}", response_model=Task)
+def get_task(task_id: str):
+    """Get full details of a specific task."""
+    task = db.tasks.find_one({"_id": task_id})
+    if not task:
+        raise HTTPException(status_code=404, detail="Task not found")
+    return task
 
+@app.get("/tasks/milestone/{milestone_id}", response_model=List[Task])
+def list_tasks_in_milestone(milestone_id: str):
+    """List all tasks in a milestone."""
+    tasks = db.tasks.find({"milestone_id": milestone_id}, {"_id": 1, "name": 1})
+    return [{"id": str(t["_id"]), "name": t["name"]} for t in tasks]
 
 @app.patch("/tasks/{task_id}/status")
-async def update_task_status(project_id: str, milestone_id: str, task_id: str, status: str):
-    valid_status = {"open", "active", "closed"}
-    if status not in valid_status:
-        raise HTTPException(status_code=400, detail="Invalid status")
-    now = datetime.utcnow()
-    update_fields = {"status": status}
-    if status == "active":
-        update_fields["active_start"] = now
-    elif status == "closed":
-        update_fields["active_end"] = now
-    result = db.projects.update_one(
-        {"_id": ObjectId(project_id), "milestones._id": milestone_id, "milestones.tasks._id": task_id},
-        {"$set": {f"milestones.$.tasks.$.status": update_fields}}
-    )
+def update_task_status(task_id: str, status: str = Body(...)):
+    """Update the status of a task."""
+    result = db.tasks.update_one({"_id": task_id}, {"$set": {"status": status}})
     if result.matched_count == 0:
         raise HTTPException(status_code=404, detail="Task not found")
-    return {"message": "Task status updated successfully"}
+    return {"message": "Task status updated"}
 
+@app.patch("/tasks/{task_id}/active_period")
+def update_task_active_period(task_id: str, start: Optional[datetime] = None, end: Optional[datetime] = None):
+    """Update the active period of a task."""
+    update_fields = {}
+    if start:
+        update_fields["active_period.start"] = start
+    if end:
+        update_fields["active_period.end"] = end
+    if not update_fields:
+        raise HTTPException(status_code=400, detail="No fields to update")
+
+    result = db.tasks.update_one({"_id": task_id}, {"$set": update_fields})
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Task not found")
+    return {"message": "Task active period updated"}
+
+@app.delete("/tasks/{task_id}/problems")
+def delete_all_problems_from_task(task_id: str):
+    """Delete all problems from a task."""
+    result = db.tasks.update_one({"_id": task_id}, {"$set": {"problems": []}})
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Task not found")
+    return {"message": "All problems deleted from task"}
 
 
 if __name__ == "__main__":
