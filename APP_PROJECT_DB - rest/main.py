@@ -27,7 +27,7 @@ app = FastAPI()
 
 # Models
 class ActivePeriod(BaseModel):
-    start: Optional[str]
+    start: Optional[str] = None
     end: Optional[str] = None
 
 class Problem(BaseModel):
@@ -38,7 +38,7 @@ class Problem(BaseModel):
 class Task(BaseModel):
     id: str = str(uuid.uuid4())
     name: str
-    status: str = "open"
+    status: str
     user: Optional[str] = None
     active_period: Optional[ActivePeriod] = None
     problems: List[Problem] = []
@@ -67,7 +67,8 @@ class DeleteProblemRequest(BaseModel):
     problem_id: str
 class PutUserRequest(BaseModel):
     user_id: str
-
+class StatusRequest(BaseModel):
+    status: str
 # ======================================================================
 # 
 #       PROJECTS
@@ -175,7 +176,7 @@ def remove_problem_from_task(task_id: str, delete_req: DeleteProblemRequest):
     return {"message": "Problem removed from task"}
 
 @app.delete("/tasks/{task_id}/problems/all")
-def remove_problem_from_task(task_id: str):
+def remove_all_problems_from_task(task_id: str):
     result = db.tasks.update_one({"id": task_id}, {"$set": {"problems": []}})
     if result.matched_count == 0:
         raise HTTPException(status_code=404, detail="Task not found")
@@ -189,20 +190,25 @@ def put_user_on_task(task_id: str, put_req:PutUserRequest):
     return {"message": "User put on task"}
 
 @app.put("/tasks/{task_id}/active-period")
-def put_user_on_task(task_id: str, period:ActivePeriod):
+def put_period_on_task(task_id: str, period:ActivePeriod):
     result = db.tasks.update_one({"id": task_id}, {"$set": {"active_period": period.model_dump()}})
     if result.matched_count == 0:
         raise HTTPException(status_code=404, detail="Task not found")
     return {"message": "active_period put on task"}
 
 @app.patch("/tasks/{task_id}/active-period")
-def put_user_on_task(task_id: str, period:ActivePeriod):
+def set_period_end_on_task(task_id: str, period:ActivePeriod):
     result = db.tasks.update_one({"id": task_id}, {"$set": {"active_period": {"end": period.end}}})
     if result.matched_count == 0:
         raise HTTPException(status_code=404, detail="Task not found")
     return {"message": "end timestamp set on active_period"}
 
-
+@app.patch("/tasks/{task_id}/status")
+def set_status_of_task(task_id: str, status:StatusRequest):
+    result = db.tasks.update_one({"id": task_id}, {"$set": {"status": status.status}})
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Task not found")
+    return {"message": "status set on task"}
 
 if __name__ == "__main__":
     port = os.getenv('LISTEN_PORT')

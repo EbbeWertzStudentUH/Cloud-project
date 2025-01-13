@@ -4,6 +4,7 @@ services:
 # =========================
 # FRONTEND
 # =========================
+
 # svelte kit main frontend app
   client-svc:
     build:
@@ -14,6 +15,7 @@ services:
       - "80:3000"
     networks:
       - "cloud-netwerk"
+      
   client-devstats:
     build:
       context: "./CLIENT_DEVSTATS"
@@ -27,6 +29,7 @@ services:
 # =========================
 # DATABASES
 # =========================
+
 # mongodb database voor algemene data
   db-mongo:
     image: mongo
@@ -39,9 +42,12 @@ services:
     #   - "27017"
     ports: # DEBUG
       - "27017:27017"
+    volumes:
+    - mongo-data:/data/db
     networks:
       - "cloud-netwerk"
     attach: false # ik hoef geen console logs te zien
+
 # mysql database voor user data
   db-mysql:
     image: mysql:9.1.0
@@ -61,9 +67,11 @@ services:
     volumes:
       - mysql-data:/var/lib/mysql
     attach: false # ik hoef geen console logs te zien
+
 # =========================
 # DATABASE CLIENTS  
 # =========================
+
 # mongodb
   db-client-mongo:
     image: mongo-express
@@ -77,11 +85,14 @@ services:
       ME_CONFIG_BASICAUTH_USERNAME: "admin"
       ME_CONFIG_BASICAUTH_PASSWORD: "123"
       ME_CONFIG_BASICAUTH: true
+      ME_CONFIG_OPTIONS_EDITABLEJSON: "true"
+      ME_CONFIG_SHOW_DBS: "true"
     ports:
       - "8081:8081"
     networks:
       - "cloud-netwerk"
     attach: false # ik hoef geen console logs te zien
+
 # mysql
   db-client-mysql:
     image: adminer
@@ -92,9 +103,11 @@ services:
     networks:
       - "cloud-netwerk"
     attach: false # ik hoef geen console logs te zien
+
 # =========================
 # CORE MICROSERVICES 
 # =========================
+
   core-apapter-rest:
     build:
       context: "./CORE_ADAPTER - rest"
@@ -104,6 +117,7 @@ services:
       - "3001:3001"
     networks:
       - "cloud-netwerk"
+
   core-gateway-grpc:
     build:
       context: "./CORE_GATEWAY - grpc"
@@ -115,6 +129,7 @@ services:
       - "3006:3006"
     networks:
       - "cloud-netwerk"
+
   core-notifier-ws-rest:
     build:
       context: "./CORE_NOTIFIER - websocket+rest"
@@ -131,6 +146,31 @@ services:
 # =========================
 # APP MICROSERVICES  
 # =========================
+
+  app-project-db-rest:
+    build:
+      context: "./APP_PROJECT_DB - rest"
+      dockerfile: Dockerfile
+    container_name: APP_PROJECT_DB-REST
+    # expose:
+    #  - "3008"
+    ports: # debug
+      - "3008:3008"
+    networks:
+      - "cloud-netwerk"
+
+  app-project-facade-rpc:
+    build:
+      context: "./APP_PROJECT_FACADE - rpc"
+      dockerfile: Dockerfile
+    container_name: APP_PROJECT_FACADE-RPC
+    # expose:
+    #  - "3009"
+    ports: # debug
+      - "3009:3009"
+    networks:
+      - "cloud-netwerk"
+
   app-devstats-soap:
     build:
       context: "./APP_DEVSTATS - soap"
@@ -154,6 +194,7 @@ services:
       - "3003:3003"
     networks:
       - "cloud-netwerk"
+
   app-userdb-graphql:
     build:
       context: "./APP_USERDB - graphql"
@@ -170,3 +211,4 @@ networks:
   cloud-netwerk:
 volumes:
   mysql-data:
+  mongo-data:
