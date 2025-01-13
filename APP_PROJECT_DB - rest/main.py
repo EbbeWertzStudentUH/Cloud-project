@@ -44,9 +44,10 @@ class Task(BaseModel):
     problems: Optional[List[Problem]] = []
 
 class Milestone(BaseModel):
-    _id: Optional[ObjectId] = None
+    id: str = str(uuid.uuid4())
     name: str
     deadline: str
+    tasks: Optional[List[str]] = [] #ID's
 
 class Project(BaseModel):
     id: str = str(uuid.uuid4())
@@ -58,6 +59,8 @@ class Project(BaseModel):
     
 class AddUserRequest(BaseModel):
     user_id: str
+class AddMilestoneRequest(BaseModel):
+    milestone_id: str
 
 # ======================================================================
 # 
@@ -89,11 +92,36 @@ def add_user_to_project(project_id: str, add_req: AddUserRequest):
         raise HTTPException(status_code=404, detail="Project not found")
     return {"message": "User added to project"}
 
+@app.post("/projects/{project_id}/milestones")
+def add_milestone_to_project(project_id: str, add_req: AddMilestoneRequest):
+    result = db.projects.update_one({"id": project_id}, {"$addToSet": {"milestones": add_req.milestone_id}})
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Project not found")
+    return {"message": "Milestone added to project"}
+
 # ======================================================================
 # 
 #       MILESTONES
 # 
 # ======================================================================
+
+@app.post("/milestones")
+def create_milestone(milestone: Milestone):
+    db.milestones.insert_one(milestone.model_dump())
+    return milestone
+
+@app.get("/milestones/{milestone_id}")
+def get_milestone_by_id(milestone_id: str):
+    milestone = db.milestones.find_one({"id": milestone_id}, {'_id':0})
+    if not milestone:
+        raise HTTPException(status_code=404, detail="Milestone not found")
+    return milestone
+
+@app.get("/milestones/project/{project_id}")
+def list_milestones_from_project(project_id: str):
+    ids = db.projects.find_one({"id": project_id}, {'milestones':1, '_id':0})['milestones']
+    milestones = db.milestones.find({"id": {"$in": ids}}, {'_id':0})
+    return list(milestones)
 
 # ======================================================================
 # 
@@ -101,40 +129,9 @@ def add_user_to_project(project_id: str, add_req: AddUserRequest):
 # 
 # ======================================================================
 
-# @app.get("/milestones/{milestone_id}", response_model=Milestone)
-# def get_milestone(milestone_id: str):
-#     milestone = db.milestones.find_one({"_id": milestone_id})
-#     if not milestone:
-#         raise HTTPException(status_code=404, detail="Milestone not found")
-#     return milestone
 
-# @app.get("/milestones/project/{project_id}", response_model=List[Milestone])
-# def list_milestones_in_project(project_id: str):
-#     """List all milestones in a project."""
-#     milestones = db.milestones.find({"project_id": project_id}, {"_id": 1, "name": 1})
-#     return [{"id": str(m["_id"]), "name": m["name"]} for m in milestones]
 
-# @app.get("/tasks/{task_id}", response_model=Task)
-# def get_task(task_id: str):
-#     """Get full details of a specific task."""
-#     task = db.tasks.find_one({"_id": task_id})
-#     if not task:
-#         raise HTTPException(status_code=404, detail="Task not found")
-#     return task
 
-# @app.get("/tasks/milestone/{milestone_id}", response_model=List[Task])
-# def list_tasks_in_milestone(milestone_id: str):
-#     """List all tasks in a milestone."""
-#     tasks = db.tasks.find({"milestone_id": milestone_id}, {"_id": 1, "name": 1})
-#     return [{"id": str(t["_id"]), "name": t["name"]} for t in tasks]
-
-# @app.patch("/tasks/{task_id}/status")
-# def update_task_status(task_id: str, status: str = Body(...)):
-#     """Update the status of a task."""
-#     result = db.tasks.update_one({"_id": task_id}, {"$set": {"status": status}})
-#     if result.matched_count == 0:
-#         raise HTTPException(status_code=404, detail="Task not found")
-#     return {"message": "Task status updated"}
 
 # @app.patch("/tasks/{task_id}/active_period")
 # def update_task_active_period(task_id: str, start: Optional[datetime] = None, end: Optional[datetime] = None):
