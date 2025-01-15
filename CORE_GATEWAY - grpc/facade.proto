@@ -26,18 +26,58 @@ service UserService {
     rpc GetUserName(UserID) returns (User);
 
     // userdb: addFriendRequest bij friend
+    // notifier: send notification to friend, send update friend requests list to friend
     rpc sendFriendRequest(FriendEditRequest) returns (Empty);
     // userdb: addFriend bij user, remove request bij user, addFriend bij friend
+    // notifier: subscribe elkaar, update friend's friends list
     rpc acceptFriendRequest(FriendEditRequest) returns (FriendsResponse);
     // userdb: remove request bij user
     rpc RejectFriendRequest(FriendEditRequest) returns (FriendsResponse);
     // userdb: removeFriend bij user, removeFriend bij friend
+    // notifier: unsubscribe elkaar, update friend's friends list
     rpc removeFriend(FriendEditRequest) returns (FriendsResponse);
 
 }
 
 service NotificationService {
     rpc subscribeFriendList(UserID) returns (Empty);
+    rpc subscribeToProject(ProjectID) returns (Empty);
+    rpc unSubscribeToProject(ProjectID) returns (Empty);
+}
+
+service ProjectService {
+    // proj_fac: create project
+    //notifier: update projects list
+    rpc InitialiseProject (Project) returns (Empty); // notifier returnt minimal project
+    // proj_fac: get project by id
+    rpc GetProjectById (ProjectID) returns (Project);
+    // proj_fac: adduser
+    // notifier: publish update users list, publish notification, send projects list update to friend, send notification to friend
+    rpc AddUserToProject (AddUserToProjectRequest) returns (Empty);
+    // proj_fac: get projects from user
+    rpc GetProjectsFromUser(UserID) returns (ProjectsList);
+    // proj facacde: create milestone
+    //notifier: publish update milestones list
+    rpc CreateMilestoneInProject(MilestoneAddRequest) returns (Empty); // notifier returnt minimal milestone
+    // proj facade: get milestone by id
+    rpc GetMilestoneById(MilestoneID) returns (Milestone);
+    // proj facade: add task to milestone
+    // notifier: publish udpate tasks list
+    rpc CreateTaskInMilestone(TaskAddRequest) returns (Empty);
+    // proj facade: get task by id
+    rpc GetTaskById(TaskID) returns (Task);
+    // proj facade: add problem to task
+    // notifier: publish udpate problems list, publish notification
+    rpc AddProblemToTask(ProblemAddRequest) returns (Empty);
+    // proj facade: resolve problem
+    // notifier: publish udpate problems list, publish notification
+    rpc ResolveProblem(ProblemID) returns (Empty);
+    // proj facade: assign task
+    // notifier: publish udpate task
+    rpc AssignTask(TaskAssignRequest) returns (Empty);
+    // proj facade: complete task
+    // notifier: publish udpate task
+    rpc CompleteTask(TaskID) returns (Empty);
 }
 
 //=================
@@ -50,6 +90,18 @@ message FriendEditRequest{
 }
 message UserID{
     string user_id = 1;
+}
+message ProjectID{
+    string project_id = 1;
+}
+message MilestoneID{
+    string milestone_id = 1;
+}
+message TaskID{
+    string task_id = 1;
+}
+message ProblemID{
+    string problem_id = 1;
 }
 message User{
     string first_name = 1;
@@ -76,4 +128,55 @@ message AuthResponse {
     bool valid = 1;
     string token = 2;
     User user = 3;
+}
+message ProjectsList{
+    repeated Project projects = 1;
+}
+message Project {
+    optional string id = 1;
+    optional string user_id = 2;
+    repeated User users = 3;
+    string deadline = 4;
+    string github_repo =5;
+    repeated Milestone milestones = 6; 
+}
+message Milestone {
+    optional string id = 1;
+    string name = 2;
+    string deadline = 3;
+    repeated Task tasks = 4;
+}
+message MilestoneAddRequest{
+    string project_id = 1;
+    Milestone milestone = 2;
+}
+message AddUserToProjectRequest{
+    string project_id = 1;
+    string user_id = 2;
+}
+message Task{
+    optional string id = 1;
+    string name = 2;
+    optional string status = 3;
+    optional User user = 4;
+    optional string activePeriodStart = 5;
+    optional string activePeriodEnd = 6;
+    repeated Problem problems = 7;
+}
+message Problem{
+    optional string id = 1;
+    string name = 2;
+    string posted_at = 3;
+}
+message TaskAddRequest{
+    string milestone_id = 1;
+    Task task = 2;
+}
+message ProblemAddRequest{
+    string task_id = 1;
+    Problem problem = 2;
+}
+message TaskAssignRequest{
+    string task_id = 1;
+    string user_id  = 2;
 }
