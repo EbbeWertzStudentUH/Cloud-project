@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package facade_service;
+package gateway_service;
 option go_package = "./protobuf_generated";
 /* command:
 protoc --go_out=. --go-grpc_out=. facade.proto

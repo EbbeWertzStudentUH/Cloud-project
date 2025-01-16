@@ -19,16 +19,16 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	UserService_LoginAndAuthenticate_FullMethodName = "/facade_service.UserService/LoginAndAuthenticate"
-	UserService_AuthenticateToken_FullMethodName    = "/facade_service.UserService/AuthenticateToken"
-	UserService_CreateAccount_FullMethodName        = "/facade_service.UserService/CreateAccount"
-	UserService_GetFriends_FullMethodName           = "/facade_service.UserService/getFriends"
-	UserService_GetFriendRequests_FullMethodName    = "/facade_service.UserService/getFriendRequests"
-	UserService_GetUserName_FullMethodName          = "/facade_service.UserService/GetUserName"
-	UserService_SendFriendRequest_FullMethodName    = "/facade_service.UserService/sendFriendRequest"
-	UserService_AcceptFriendRequest_FullMethodName  = "/facade_service.UserService/acceptFriendRequest"
-	UserService_RejectFriendRequest_FullMethodName  = "/facade_service.UserService/RejectFriendRequest"
-	UserService_RemoveFriend_FullMethodName         = "/facade_service.UserService/removeFriend"
+	UserService_LoginAndAuthenticate_FullMethodName = "/gateway_service.UserService/LoginAndAuthenticate"
+	UserService_AuthenticateToken_FullMethodName    = "/gateway_service.UserService/AuthenticateToken"
+	UserService_CreateAccount_FullMethodName        = "/gateway_service.UserService/CreateAccount"
+	UserService_GetFriends_FullMethodName           = "/gateway_service.UserService/getFriends"
+	UserService_GetFriendRequests_FullMethodName    = "/gateway_service.UserService/getFriendRequests"
+	UserService_GetUserName_FullMethodName          = "/gateway_service.UserService/GetUserName"
+	UserService_SendFriendRequest_FullMethodName    = "/gateway_service.UserService/sendFriendRequest"
+	UserService_AcceptFriendRequest_FullMethodName  = "/gateway_service.UserService/acceptFriendRequest"
+	UserService_RejectFriendRequest_FullMethodName  = "/gateway_service.UserService/RejectFriendRequest"
+	UserService_RemoveFriend_FullMethodName         = "/gateway_service.UserService/removeFriend"
 )
 
 // UserServiceClient is the client API for UserService service.
@@ -48,12 +48,15 @@ type UserServiceClient interface {
 	// userdb: get username
 	GetUserName(ctx context.Context, in *UserID, opts ...grpc.CallOption) (*User, error)
 	// userdb: addFriendRequest bij friend
+	// notifier: send notification to friend, send update friend requests list to friend
 	SendFriendRequest(ctx context.Context, in *FriendEditRequest, opts ...grpc.CallOption) (*Empty, error)
 	// userdb: addFriend bij user, remove request bij user, addFriend bij friend
+	// notifier: subscribe elkaar, update friend's friends list
 	AcceptFriendRequest(ctx context.Context, in *FriendEditRequest, opts ...grpc.CallOption) (*FriendsResponse, error)
 	// userdb: remove request bij user
 	RejectFriendRequest(ctx context.Context, in *FriendEditRequest, opts ...grpc.CallOption) (*FriendsResponse, error)
 	// userdb: removeFriend bij user, removeFriend bij friend
+	// notifier: unsubscribe elkaar, update friend's friends list
 	RemoveFriend(ctx context.Context, in *FriendEditRequest, opts ...grpc.CallOption) (*FriendsResponse, error)
 }
 
@@ -182,12 +185,15 @@ type UserServiceServer interface {
 	// userdb: get username
 	GetUserName(context.Context, *UserID) (*User, error)
 	// userdb: addFriendRequest bij friend
+	// notifier: send notification to friend, send update friend requests list to friend
 	SendFriendRequest(context.Context, *FriendEditRequest) (*Empty, error)
 	// userdb: addFriend bij user, remove request bij user, addFriend bij friend
+	// notifier: subscribe elkaar, update friend's friends list
 	AcceptFriendRequest(context.Context, *FriendEditRequest) (*FriendsResponse, error)
 	// userdb: remove request bij user
 	RejectFriendRequest(context.Context, *FriendEditRequest) (*FriendsResponse, error)
 	// userdb: removeFriend bij user, removeFriend bij friend
+	// notifier: unsubscribe elkaar, update friend's friends list
 	RemoveFriend(context.Context, *FriendEditRequest) (*FriendsResponse, error)
 	mustEmbedUnimplementedUserServiceServer()
 }
@@ -434,7 +440,7 @@ func _UserService_RemoveFriend_Handler(srv interface{}, ctx context.Context, dec
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var UserService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "facade_service.UserService",
+	ServiceName: "gateway_service.UserService",
 	HandlerType: (*UserServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
@@ -483,7 +489,9 @@ var UserService_ServiceDesc = grpc.ServiceDesc{
 }
 
 const (
-	NotificationService_SubscribeFriendList_FullMethodName = "/facade_service.NotificationService/subscribeFriendList"
+	NotificationService_SubscribeFriendList_FullMethodName  = "/gateway_service.NotificationService/subscribeFriendList"
+	NotificationService_SubscribeToProject_FullMethodName   = "/gateway_service.NotificationService/subscribeToProject"
+	NotificationService_UnSubscribeToProject_FullMethodName = "/gateway_service.NotificationService/unSubscribeToProject"
 )
 
 // NotificationServiceClient is the client API for NotificationService service.
@@ -491,6 +499,8 @@ const (
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type NotificationServiceClient interface {
 	SubscribeFriendList(ctx context.Context, in *UserID, opts ...grpc.CallOption) (*Empty, error)
+	SubscribeToProject(ctx context.Context, in *ProjectID, opts ...grpc.CallOption) (*Empty, error)
+	UnSubscribeToProject(ctx context.Context, in *ProjectID, opts ...grpc.CallOption) (*Empty, error)
 }
 
 type notificationServiceClient struct {
@@ -511,11 +521,33 @@ func (c *notificationServiceClient) SubscribeFriendList(ctx context.Context, in 
 	return out, nil
 }
 
+func (c *notificationServiceClient) SubscribeToProject(ctx context.Context, in *ProjectID, opts ...grpc.CallOption) (*Empty, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(Empty)
+	err := c.cc.Invoke(ctx, NotificationService_SubscribeToProject_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *notificationServiceClient) UnSubscribeToProject(ctx context.Context, in *ProjectID, opts ...grpc.CallOption) (*Empty, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(Empty)
+	err := c.cc.Invoke(ctx, NotificationService_UnSubscribeToProject_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // NotificationServiceServer is the server API for NotificationService service.
 // All implementations must embed UnimplementedNotificationServiceServer
 // for forward compatibility.
 type NotificationServiceServer interface {
 	SubscribeFriendList(context.Context, *UserID) (*Empty, error)
+	SubscribeToProject(context.Context, *ProjectID) (*Empty, error)
+	UnSubscribeToProject(context.Context, *ProjectID) (*Empty, error)
 	mustEmbedUnimplementedNotificationServiceServer()
 }
 
@@ -528,6 +560,12 @@ type UnimplementedNotificationServiceServer struct{}
 
 func (UnimplementedNotificationServiceServer) SubscribeFriendList(context.Context, *UserID) (*Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SubscribeFriendList not implemented")
+}
+func (UnimplementedNotificationServiceServer) SubscribeToProject(context.Context, *ProjectID) (*Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SubscribeToProject not implemented")
+}
+func (UnimplementedNotificationServiceServer) UnSubscribeToProject(context.Context, *ProjectID) (*Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UnSubscribeToProject not implemented")
 }
 func (UnimplementedNotificationServiceServer) mustEmbedUnimplementedNotificationServiceServer() {}
 func (UnimplementedNotificationServiceServer) testEmbeddedByValue()                             {}
@@ -568,16 +606,620 @@ func _NotificationService_SubscribeFriendList_Handler(srv interface{}, ctx conte
 	return interceptor(ctx, in, info, handler)
 }
 
+func _NotificationService_SubscribeToProject_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ProjectID)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(NotificationServiceServer).SubscribeToProject(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: NotificationService_SubscribeToProject_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(NotificationServiceServer).SubscribeToProject(ctx, req.(*ProjectID))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _NotificationService_UnSubscribeToProject_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ProjectID)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(NotificationServiceServer).UnSubscribeToProject(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: NotificationService_UnSubscribeToProject_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(NotificationServiceServer).UnSubscribeToProject(ctx, req.(*ProjectID))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // NotificationService_ServiceDesc is the grpc.ServiceDesc for NotificationService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var NotificationService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "facade_service.NotificationService",
+	ServiceName: "gateway_service.NotificationService",
 	HandlerType: (*NotificationServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
 			MethodName: "subscribeFriendList",
 			Handler:    _NotificationService_SubscribeFriendList_Handler,
+		},
+		{
+			MethodName: "subscribeToProject",
+			Handler:    _NotificationService_SubscribeToProject_Handler,
+		},
+		{
+			MethodName: "unSubscribeToProject",
+			Handler:    _NotificationService_UnSubscribeToProject_Handler,
+		},
+	},
+	Streams:  []grpc.StreamDesc{},
+	Metadata: "facade.proto",
+}
+
+const (
+	ProjectService_InitialiseProject_FullMethodName        = "/gateway_service.ProjectService/InitialiseProject"
+	ProjectService_GetProjectById_FullMethodName           = "/gateway_service.ProjectService/GetProjectById"
+	ProjectService_AddUserToProject_FullMethodName         = "/gateway_service.ProjectService/AddUserToProject"
+	ProjectService_GetProjectsFromUser_FullMethodName      = "/gateway_service.ProjectService/GetProjectsFromUser"
+	ProjectService_CreateMilestoneInProject_FullMethodName = "/gateway_service.ProjectService/CreateMilestoneInProject"
+	ProjectService_GetMilestoneById_FullMethodName         = "/gateway_service.ProjectService/GetMilestoneById"
+	ProjectService_CreateTaskInMilestone_FullMethodName    = "/gateway_service.ProjectService/CreateTaskInMilestone"
+	ProjectService_GetTaskById_FullMethodName              = "/gateway_service.ProjectService/GetTaskById"
+	ProjectService_AddProblemToTask_FullMethodName         = "/gateway_service.ProjectService/AddProblemToTask"
+	ProjectService_ResolveProblem_FullMethodName           = "/gateway_service.ProjectService/ResolveProblem"
+	ProjectService_AssignTask_FullMethodName               = "/gateway_service.ProjectService/AssignTask"
+	ProjectService_CompleteTask_FullMethodName             = "/gateway_service.ProjectService/CompleteTask"
+)
+
+// ProjectServiceClient is the client API for ProjectService service.
+//
+// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
+type ProjectServiceClient interface {
+	// proj_fac: create project
+	// notifier: update projects list
+	InitialiseProject(ctx context.Context, in *Project, opts ...grpc.CallOption) (*Empty, error)
+	// proj_fac: get project by id
+	GetProjectById(ctx context.Context, in *ProjectID, opts ...grpc.CallOption) (*Project, error)
+	// proj_fac: adduser
+	// notifier: publish update users list, publish notification, send projects list update to friend, send notification to friend
+	AddUserToProject(ctx context.Context, in *AddUserToProjectRequest, opts ...grpc.CallOption) (*Empty, error)
+	// proj_fac: get projects from user
+	GetProjectsFromUser(ctx context.Context, in *UserID, opts ...grpc.CallOption) (*ProjectsList, error)
+	// proj facacde: create milestone
+	// notifier: publish update milestones list
+	CreateMilestoneInProject(ctx context.Context, in *MilestoneAddRequest, opts ...grpc.CallOption) (*Empty, error)
+	// proj facade: get milestone by id
+	GetMilestoneById(ctx context.Context, in *MilestoneID, opts ...grpc.CallOption) (*Milestone, error)
+	// proj facade: add task to milestone
+	// notifier: publish udpate tasks list
+	CreateTaskInMilestone(ctx context.Context, in *TaskAddRequest, opts ...grpc.CallOption) (*Empty, error)
+	// proj facade: get task by id
+	GetTaskById(ctx context.Context, in *TaskID, opts ...grpc.CallOption) (*Task, error)
+	// proj facade: add problem to task
+	// notifier: publish udpate problems list, publish notification
+	AddProblemToTask(ctx context.Context, in *ProblemAddRequest, opts ...grpc.CallOption) (*Empty, error)
+	// proj facade: resolve problem
+	// notifier: publish udpate problems list, publish notification
+	ResolveProblem(ctx context.Context, in *ProblemID, opts ...grpc.CallOption) (*Empty, error)
+	// proj facade: assign task
+	// notifier: publish udpate task
+	AssignTask(ctx context.Context, in *TaskAssignRequest, opts ...grpc.CallOption) (*Empty, error)
+	// proj facade: complete task
+	// notifier: publish udpate task
+	CompleteTask(ctx context.Context, in *TaskID, opts ...grpc.CallOption) (*Empty, error)
+}
+
+type projectServiceClient struct {
+	cc grpc.ClientConnInterface
+}
+
+func NewProjectServiceClient(cc grpc.ClientConnInterface) ProjectServiceClient {
+	return &projectServiceClient{cc}
+}
+
+func (c *projectServiceClient) InitialiseProject(ctx context.Context, in *Project, opts ...grpc.CallOption) (*Empty, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(Empty)
+	err := c.cc.Invoke(ctx, ProjectService_InitialiseProject_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *projectServiceClient) GetProjectById(ctx context.Context, in *ProjectID, opts ...grpc.CallOption) (*Project, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(Project)
+	err := c.cc.Invoke(ctx, ProjectService_GetProjectById_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *projectServiceClient) AddUserToProject(ctx context.Context, in *AddUserToProjectRequest, opts ...grpc.CallOption) (*Empty, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(Empty)
+	err := c.cc.Invoke(ctx, ProjectService_AddUserToProject_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *projectServiceClient) GetProjectsFromUser(ctx context.Context, in *UserID, opts ...grpc.CallOption) (*ProjectsList, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ProjectsList)
+	err := c.cc.Invoke(ctx, ProjectService_GetProjectsFromUser_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *projectServiceClient) CreateMilestoneInProject(ctx context.Context, in *MilestoneAddRequest, opts ...grpc.CallOption) (*Empty, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(Empty)
+	err := c.cc.Invoke(ctx, ProjectService_CreateMilestoneInProject_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *projectServiceClient) GetMilestoneById(ctx context.Context, in *MilestoneID, opts ...grpc.CallOption) (*Milestone, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(Milestone)
+	err := c.cc.Invoke(ctx, ProjectService_GetMilestoneById_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *projectServiceClient) CreateTaskInMilestone(ctx context.Context, in *TaskAddRequest, opts ...grpc.CallOption) (*Empty, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(Empty)
+	err := c.cc.Invoke(ctx, ProjectService_CreateTaskInMilestone_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *projectServiceClient) GetTaskById(ctx context.Context, in *TaskID, opts ...grpc.CallOption) (*Task, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(Task)
+	err := c.cc.Invoke(ctx, ProjectService_GetTaskById_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *projectServiceClient) AddProblemToTask(ctx context.Context, in *ProblemAddRequest, opts ...grpc.CallOption) (*Empty, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(Empty)
+	err := c.cc.Invoke(ctx, ProjectService_AddProblemToTask_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *projectServiceClient) ResolveProblem(ctx context.Context, in *ProblemID, opts ...grpc.CallOption) (*Empty, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(Empty)
+	err := c.cc.Invoke(ctx, ProjectService_ResolveProblem_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *projectServiceClient) AssignTask(ctx context.Context, in *TaskAssignRequest, opts ...grpc.CallOption) (*Empty, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(Empty)
+	err := c.cc.Invoke(ctx, ProjectService_AssignTask_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *projectServiceClient) CompleteTask(ctx context.Context, in *TaskID, opts ...grpc.CallOption) (*Empty, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(Empty)
+	err := c.cc.Invoke(ctx, ProjectService_CompleteTask_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// ProjectServiceServer is the server API for ProjectService service.
+// All implementations must embed UnimplementedProjectServiceServer
+// for forward compatibility.
+type ProjectServiceServer interface {
+	// proj_fac: create project
+	// notifier: update projects list
+	InitialiseProject(context.Context, *Project) (*Empty, error)
+	// proj_fac: get project by id
+	GetProjectById(context.Context, *ProjectID) (*Project, error)
+	// proj_fac: adduser
+	// notifier: publish update users list, publish notification, send projects list update to friend, send notification to friend
+	AddUserToProject(context.Context, *AddUserToProjectRequest) (*Empty, error)
+	// proj_fac: get projects from user
+	GetProjectsFromUser(context.Context, *UserID) (*ProjectsList, error)
+	// proj facacde: create milestone
+	// notifier: publish update milestones list
+	CreateMilestoneInProject(context.Context, *MilestoneAddRequest) (*Empty, error)
+	// proj facade: get milestone by id
+	GetMilestoneById(context.Context, *MilestoneID) (*Milestone, error)
+	// proj facade: add task to milestone
+	// notifier: publish udpate tasks list
+	CreateTaskInMilestone(context.Context, *TaskAddRequest) (*Empty, error)
+	// proj facade: get task by id
+	GetTaskById(context.Context, *TaskID) (*Task, error)
+	// proj facade: add problem to task
+	// notifier: publish udpate problems list, publish notification
+	AddProblemToTask(context.Context, *ProblemAddRequest) (*Empty, error)
+	// proj facade: resolve problem
+	// notifier: publish udpate problems list, publish notification
+	ResolveProblem(context.Context, *ProblemID) (*Empty, error)
+	// proj facade: assign task
+	// notifier: publish udpate task
+	AssignTask(context.Context, *TaskAssignRequest) (*Empty, error)
+	// proj facade: complete task
+	// notifier: publish udpate task
+	CompleteTask(context.Context, *TaskID) (*Empty, error)
+	mustEmbedUnimplementedProjectServiceServer()
+}
+
+// UnimplementedProjectServiceServer must be embedded to have
+// forward compatible implementations.
+//
+// NOTE: this should be embedded by value instead of pointer to avoid a nil
+// pointer dereference when methods are called.
+type UnimplementedProjectServiceServer struct{}
+
+func (UnimplementedProjectServiceServer) InitialiseProject(context.Context, *Project) (*Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method InitialiseProject not implemented")
+}
+func (UnimplementedProjectServiceServer) GetProjectById(context.Context, *ProjectID) (*Project, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetProjectById not implemented")
+}
+func (UnimplementedProjectServiceServer) AddUserToProject(context.Context, *AddUserToProjectRequest) (*Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method AddUserToProject not implemented")
+}
+func (UnimplementedProjectServiceServer) GetProjectsFromUser(context.Context, *UserID) (*ProjectsList, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetProjectsFromUser not implemented")
+}
+func (UnimplementedProjectServiceServer) CreateMilestoneInProject(context.Context, *MilestoneAddRequest) (*Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateMilestoneInProject not implemented")
+}
+func (UnimplementedProjectServiceServer) GetMilestoneById(context.Context, *MilestoneID) (*Milestone, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetMilestoneById not implemented")
+}
+func (UnimplementedProjectServiceServer) CreateTaskInMilestone(context.Context, *TaskAddRequest) (*Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateTaskInMilestone not implemented")
+}
+func (UnimplementedProjectServiceServer) GetTaskById(context.Context, *TaskID) (*Task, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetTaskById not implemented")
+}
+func (UnimplementedProjectServiceServer) AddProblemToTask(context.Context, *ProblemAddRequest) (*Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method AddProblemToTask not implemented")
+}
+func (UnimplementedProjectServiceServer) ResolveProblem(context.Context, *ProblemID) (*Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ResolveProblem not implemented")
+}
+func (UnimplementedProjectServiceServer) AssignTask(context.Context, *TaskAssignRequest) (*Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method AssignTask not implemented")
+}
+func (UnimplementedProjectServiceServer) CompleteTask(context.Context, *TaskID) (*Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CompleteTask not implemented")
+}
+func (UnimplementedProjectServiceServer) mustEmbedUnimplementedProjectServiceServer() {}
+func (UnimplementedProjectServiceServer) testEmbeddedByValue()                        {}
+
+// UnsafeProjectServiceServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to ProjectServiceServer will
+// result in compilation errors.
+type UnsafeProjectServiceServer interface {
+	mustEmbedUnimplementedProjectServiceServer()
+}
+
+func RegisterProjectServiceServer(s grpc.ServiceRegistrar, srv ProjectServiceServer) {
+	// If the following call pancis, it indicates UnimplementedProjectServiceServer was
+	// embedded by pointer and is nil.  This will cause panics if an
+	// unimplemented method is ever invoked, so we test this at initialization
+	// time to prevent it from happening at runtime later due to I/O.
+	if t, ok := srv.(interface{ testEmbeddedByValue() }); ok {
+		t.testEmbeddedByValue()
+	}
+	s.RegisterService(&ProjectService_ServiceDesc, srv)
+}
+
+func _ProjectService_InitialiseProject_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Project)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ProjectServiceServer).InitialiseProject(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ProjectService_InitialiseProject_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ProjectServiceServer).InitialiseProject(ctx, req.(*Project))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ProjectService_GetProjectById_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ProjectID)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ProjectServiceServer).GetProjectById(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ProjectService_GetProjectById_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ProjectServiceServer).GetProjectById(ctx, req.(*ProjectID))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ProjectService_AddUserToProject_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AddUserToProjectRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ProjectServiceServer).AddUserToProject(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ProjectService_AddUserToProject_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ProjectServiceServer).AddUserToProject(ctx, req.(*AddUserToProjectRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ProjectService_GetProjectsFromUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UserID)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ProjectServiceServer).GetProjectsFromUser(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ProjectService_GetProjectsFromUser_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ProjectServiceServer).GetProjectsFromUser(ctx, req.(*UserID))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ProjectService_CreateMilestoneInProject_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(MilestoneAddRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ProjectServiceServer).CreateMilestoneInProject(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ProjectService_CreateMilestoneInProject_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ProjectServiceServer).CreateMilestoneInProject(ctx, req.(*MilestoneAddRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ProjectService_GetMilestoneById_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(MilestoneID)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ProjectServiceServer).GetMilestoneById(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ProjectService_GetMilestoneById_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ProjectServiceServer).GetMilestoneById(ctx, req.(*MilestoneID))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ProjectService_CreateTaskInMilestone_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(TaskAddRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ProjectServiceServer).CreateTaskInMilestone(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ProjectService_CreateTaskInMilestone_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ProjectServiceServer).CreateTaskInMilestone(ctx, req.(*TaskAddRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ProjectService_GetTaskById_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(TaskID)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ProjectServiceServer).GetTaskById(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ProjectService_GetTaskById_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ProjectServiceServer).GetTaskById(ctx, req.(*TaskID))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ProjectService_AddProblemToTask_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ProblemAddRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ProjectServiceServer).AddProblemToTask(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ProjectService_AddProblemToTask_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ProjectServiceServer).AddProblemToTask(ctx, req.(*ProblemAddRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ProjectService_ResolveProblem_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ProblemID)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ProjectServiceServer).ResolveProblem(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ProjectService_ResolveProblem_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ProjectServiceServer).ResolveProblem(ctx, req.(*ProblemID))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ProjectService_AssignTask_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(TaskAssignRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ProjectServiceServer).AssignTask(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ProjectService_AssignTask_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ProjectServiceServer).AssignTask(ctx, req.(*TaskAssignRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ProjectService_CompleteTask_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(TaskID)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ProjectServiceServer).CompleteTask(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ProjectService_CompleteTask_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ProjectServiceServer).CompleteTask(ctx, req.(*TaskID))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+// ProjectService_ServiceDesc is the grpc.ServiceDesc for ProjectService service.
+// It's only intended for direct use with grpc.RegisterService,
+// and not to be introspected or modified (even as a copy)
+var ProjectService_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "gateway_service.ProjectService",
+	HandlerType: (*ProjectServiceServer)(nil),
+	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "InitialiseProject",
+			Handler:    _ProjectService_InitialiseProject_Handler,
+		},
+		{
+			MethodName: "GetProjectById",
+			Handler:    _ProjectService_GetProjectById_Handler,
+		},
+		{
+			MethodName: "AddUserToProject",
+			Handler:    _ProjectService_AddUserToProject_Handler,
+		},
+		{
+			MethodName: "GetProjectsFromUser",
+			Handler:    _ProjectService_GetProjectsFromUser_Handler,
+		},
+		{
+			MethodName: "CreateMilestoneInProject",
+			Handler:    _ProjectService_CreateMilestoneInProject_Handler,
+		},
+		{
+			MethodName: "GetMilestoneById",
+			Handler:    _ProjectService_GetMilestoneById_Handler,
+		},
+		{
+			MethodName: "CreateTaskInMilestone",
+			Handler:    _ProjectService_CreateTaskInMilestone_Handler,
+		},
+		{
+			MethodName: "GetTaskById",
+			Handler:    _ProjectService_GetTaskById_Handler,
+		},
+		{
+			MethodName: "AddProblemToTask",
+			Handler:    _ProjectService_AddProblemToTask_Handler,
+		},
+		{
+			MethodName: "ResolveProblem",
+			Handler:    _ProjectService_ResolveProblem_Handler,
+		},
+		{
+			MethodName: "AssignTask",
+			Handler:    _ProjectService_AssignTask_Handler,
+		},
+		{
+			MethodName: "CompleteTask",
+			Handler:    _ProjectService_CompleteTask_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

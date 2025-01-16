@@ -3,7 +3,7 @@ package main
 import (
 	"google.golang.org/grpc"
 
-	pb "facade_service/protobuf_generated"
+	pb "gateway_service/protobuf_generated"
 	"log"
 	"net"
 	"os"
@@ -26,11 +26,15 @@ func main() {
 	auth_client := NewAuthClient(os.Getenv("AUTH_SERVICE_URL"), devstats_client)
 	userdb_client := NewUserDBClient(os.Getenv("USERDB_SERVICE_URL"), devstats_client)
 	notifier_client := NewNotifierClient(os.Getenv("NOTIFIER_SERVICE_URL"), devstats_client)
+	project_facade_client := NewProjectFacadeClient((os.Getenv("PROJECT_FACADE_URL")), devstats_client)
 
 	grpcServer := grpc.NewServer()
 	user_service := &UserServiceServer{authClient: *auth_client, userdbClient: *userdb_client, notifierClient: *notifier_client}
+	notification_service := &NotificationServiceServer{notifierClient: *notifier_client, userService: user_service}
+	project_service := &ProjectServiceServer{projectFacadeClient: *project_facade_client, notifierClient: *notifier_client}
 	pb.RegisterUserServiceServer(grpcServer, user_service)
-	pb.RegisterNotificationServiceServer(grpcServer, &NotificationServiceServer{notifierClient: *notifier_client, userService: user_service})
+	pb.RegisterNotificationServiceServer(grpcServer, notification_service)
+	pb.RegisterProjectServiceServer(grpcServer, project_service)
 
 	log.Println("Server is running on port " + os.Getenv("LISTEN_PORT"))
 	err = grpcServer.Serve(lis)

@@ -2,7 +2,7 @@ package main
 
 import (
 	"context"
-	pb "facade_service/protobuf_generated"
+	pb "gateway_service/protobuf_generated"
 )
 
 type NotificationServiceServer struct {

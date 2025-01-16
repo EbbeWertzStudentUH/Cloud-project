@@ -8,9 +8,10 @@ import (
 
 type ProjectFacadeClient struct {
 	rpcClient *rpc.Client
+	dsc       *DevstatClient
 }
 
-func NewProjectFacadeClient(url string) *ProjectFacadeClient {
+func NewProjectFacadeClient(url string, dsc *DevstatClient) *ProjectFacadeClient {
 	var client *rpc.Client
 	var err error
 	for {
@@ -24,10 +25,13 @@ func NewProjectFacadeClient(url string) *ProjectFacadeClient {
 	}
 	return &ProjectFacadeClient{
 		rpcClient: client,
+		dsc:       dsc,
 	}
 }
 
-// args := &common.SomeArgs{A: 5, B: 10}
-// 	reply := &common.SomeReply{}
-
-// 	err = client.Call("ProjectService.SomeMethod", args, reply)
+func (p *ProjectFacadeClient) call(function string, req any, resp any) any {
+	dsc_id := p.dsc.Start("Project facade", "(Go)RPC", function)
+	p.rpcClient.Call("ProjectService."+function, req, resp)
+	p.dsc.End(dsc_id)
+	return resp
+}
