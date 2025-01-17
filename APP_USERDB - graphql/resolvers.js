@@ -22,6 +22,18 @@ const generalResolvers = {
 		console.log(rows);
 		return rows[0];
 	},
+	users: async ({ ids }) => {
+		const meerdereVraagtekens = ids.map(() => "?").join(", ");
+		const [rows] = await pool.query(
+			`SELECT id, first_name, last_name
+			FROM users
+			WHERE id IN (${meerdereVraagtekens});
+			`,
+			[ids]
+		);
+		console.log(rows);
+		return rows;
+	},
 	friends: async ({ id }) => {
 		const [rows] = await pool.query(
 			`SELECT u.id, u.first_name, u.last_name

@@ -9,6 +9,7 @@ const generalSchema = buildSchema(`
   
     type Query {
       user(id: String!): User
+      users(ids: [String!]!): [User!]!
       friends(id: String!): [User!]!
       friendRequests(id: String!): [User!]!
     }
