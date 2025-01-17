@@ -92,7 +92,7 @@ service ProjectService {
     // notifier:
     // - publish udpate task
     // - publish notification "task completed"
-    rpc CompleteTask(TaskID) returns (Empty);
+    rpc CompleteTask(TaskCompleteRequest) returns (Empty);
 
     rpc Hello(World) returns (HelloWorld);
 }
@@ -124,12 +124,17 @@ message MilestoneID{
 message TaskID{
     string task_id = 1;
 }
+message TaskCompleteRequest{
+    string project_id = 1;
+    string task_id = 2;
+}
 message ProblemID{
     string problem_id = 1;
 }
 message ResolveProblemRequest{
-    string task_id = 1;
-    string problem_id = 2;
+    string project_id = 1;
+    string task_id = 2;
+    string problem_id = 3;
 }
 message User{
     string first_name = 1;

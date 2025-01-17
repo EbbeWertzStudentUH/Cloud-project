@@ -721,7 +721,7 @@ type ProjectServiceClient interface {
 	// notifier:
 	// - publish udpate task
 	// - publish notification "task completed"
-	CompleteTask(ctx context.Context, in *TaskID, opts ...grpc.CallOption) (*Empty, error)
+	CompleteTask(ctx context.Context, in *TaskCompleteRequest, opts ...grpc.CallOption) (*Empty, error)
 	Hello(ctx context.Context, in *World, opts ...grpc.CallOption) (*HelloWorld, error)
 }
 
@@ -823,7 +823,7 @@ func (c *projectServiceClient) AssignTask(ctx context.Context, in *TaskAssignReq
 	return out, nil
 }
 
-func (c *projectServiceClient) CompleteTask(ctx context.Context, in *TaskID, opts ...grpc.CallOption) (*Empty, error) {
+func (c *projectServiceClient) CompleteTask(ctx context.Context, in *TaskCompleteRequest, opts ...grpc.CallOption) (*Empty, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(Empty)
 	err := c.cc.Invoke(ctx, ProjectService_CompleteTask_FullMethodName, in, out, cOpts...)
@@ -884,7 +884,7 @@ type ProjectServiceServer interface {
 	// notifier:
 	// - publish udpate task
 	// - publish notification "task completed"
-	CompleteTask(context.Context, *TaskID) (*Empty, error)
+	CompleteTask(context.Context, *TaskCompleteRequest) (*Empty, error)
 	Hello(context.Context, *World) (*HelloWorld, error)
 	mustEmbedUnimplementedProjectServiceServer()
 }
@@ -923,7 +923,7 @@ func (UnimplementedProjectServiceServer) ResolveProblem(context.Context, *Resolv
 func (UnimplementedProjectServiceServer) AssignTask(context.Context, *TaskAssignRequest) (*Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method AssignTask not implemented")
 }
-func (UnimplementedProjectServiceServer) CompleteTask(context.Context, *TaskID) (*Empty, error) {
+func (UnimplementedProjectServiceServer) CompleteTask(context.Context, *TaskCompleteRequest) (*Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CompleteTask not implemented")
 }
 func (UnimplementedProjectServiceServer) Hello(context.Context, *World) (*HelloWorld, error) {
@@ -1113,7 +1113,7 @@ func _ProjectService_AssignTask_Handler(srv interface{}, ctx context.Context, de
 }
 
 func _ProjectService_CompleteTask_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(TaskID)
+	in := new(TaskCompleteRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -1125,7 +1125,7 @@ func _ProjectService_CompleteTask_Handler(srv interface{}, ctx context.Context, 
 		FullMethod: ProjectService_CompleteTask_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ProjectServiceServer).CompleteTask(ctx, req.(*TaskID))
+		return srv.(ProjectServiceServer).CompleteTask(ctx, req.(*TaskCompleteRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }

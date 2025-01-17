@@ -197,7 +197,7 @@ func (s *ProjectServiceServer) ResolveProblem(ctx context.Context, req *pb.Resol
 	s.pfc.call("ResolveProblem", resolveReq, response)
 
 	// Notifier: publish update problems list
-	s.nc.PublishUpdate("Project", req.ProblemId, "problem_resolve_in_task", req.TaskId, map[string]interface{}{
+	s.nc.PublishUpdate("Project", req.ProjectId, "problem_resolve_in_task", req.TaskId, map[string]interface{}{
 		"problem_id": req.ProblemId,
 	})
 
@@ -232,7 +232,7 @@ func (s *ProjectServiceServer) AssignTask(ctx context.Context, req *pb.TaskAssig
 // notifier:
 // - publish udpate task
 // - publish notification "task completed"
-func (s *ProjectServiceServer) CompleteTask(ctx context.Context, req *pb.TaskID) (*pb.Empty, error) {
+func (s *ProjectServiceServer) CompleteTask(ctx context.Context, req *pb.TaskCompleteRequest) (*pb.Empty, error) {
 	completeReq := &RPCCompleteTaskRequest{
 		Task_id: req.TaskId,
 	}
@@ -240,13 +240,13 @@ func (s *ProjectServiceServer) CompleteTask(ctx context.Context, req *pb.TaskID)
 	s.pfc.call("CompleteTask", completeReq, response)
 
 	// Notifier: publish update task
-	s.nc.PublishUpdate("Project", req.TaskId, "task_update", req.TaskId, map[string]interface{}{
+	s.nc.PublishUpdate("Project", req.ProjectId, "task_update", req.TaskId, map[string]interface{}{
 		"status":            response.Status,
 		"active_period_end": response.ActiveStartDate,
 	})
 
 	// Notifier: publish notification "task completed"
-	s.nc.PublishNotification("Project", req.TaskId, "A task was completed.")
+	s.nc.PublishNotification("Project", req.ProjectId, "A task was completed.")
 
 	return &pb.Empty{}, nil
 }
