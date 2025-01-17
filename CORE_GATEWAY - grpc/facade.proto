@@ -46,37 +46,52 @@ service NotificationService {
 }
 
 service ProjectService {
-    // proj_fac: create project
-    //notifier: update projects list
-    rpc InitialiseProject (Project) returns (Empty); // notifier returnt minimal project
-    // proj_fac: get project by id
-    rpc GetProjectById (ProjectID) returns (Project);
-    // proj_fac: adduser
-    // notifier: publish update users list, publish notification, send projects list update to friend, send notification to friend
-    rpc AddUserToProject (AddUserToProjectRequest) returns (Empty);
-    // proj_fac: get projects from user
+    // proj_fac: CreateProject
+    // notifier: send update projects list to user
+    rpc CreateProject (ProjectCreateRequest) returns (Empty); // notifier returnt minimal project
+    
+    // proj_fac: GetFullProjectById
+    rpc GetFullProjectById (ProjectID) returns (Project);
+    
+    // proj_fac: GetProjectsFromUser
     rpc GetProjectsFromUser(UserID) returns (ProjectsList);
-    // proj facacde: create milestone
-    //notifier: publish update milestones list
-    rpc CreateMilestoneInProject(MilestoneAddRequest) returns (Empty); // notifier returnt minimal milestone
-    // proj facade: get milestone by id
-    rpc GetMilestoneById(MilestoneID) returns (Milestone);
-    // proj facade: add task to milestone
+   
+    // proj_fac: AddUserToProject
+    // notifier: 
+    // - publish update users list
+    // - publish notification "new member"
+    // - send update projects list  to friend
+    // - send notification to friend "you are added"
+    rpc AddUserToProject (AddUserToProjectRequest) returns (Empty);
+   
+    // proj facacde: CreateMilestoneInProject
+    // notifier: publish update milestones list
+    rpc CreateMilestoneInProject(MilestoneAddRequest) returns (Empty);
+    
+    // proj facade: CreateTaskInMilestone
     // notifier: publish udpate tasks list
     rpc CreateTaskInMilestone(TaskAddRequest) returns (Empty);
-    // proj facade: get task by id
-    rpc GetTaskById(TaskID) returns (Task);
-    // proj facade: add problem to task
-    // notifier: publish udpate problems list, publish notification
+    
+    // proj facade: AddProblemToTask
+    // notifier:
+    // - publish udpate problems list
+    // - publish notification "new problem"
     rpc AddProblemToTask(ProblemAddRequest) returns (Empty);
-    // proj facade: resolve problem
-    // notifier: publish udpate problems list, publish notification
-    rpc ResolveProblem(ProblemID) returns (Empty);
-    // proj facade: assign task
+    
+    // proj facade: ResolveProblem
+    // notifier:
+    // - publish udpate problems list
+    // - publish notification "problem solved"
+    rpc ResolveProblem(ResolveProblemRequest) returns (Empty);
+    
+    // proj facade: AssignTask
     // notifier: publish udpate task
     rpc AssignTask(TaskAssignRequest) returns (Empty);
-    // proj facade: complete task
-    // notifier: publish udpate task
+    
+    // proj facade: CompleteTask
+    // notifier:
+    // - publish udpate task
+    // - publish notification "task completed"
     rpc CompleteTask(TaskID) returns (Empty);
 }
 
@@ -102,6 +117,10 @@ message TaskID{
 }
 message ProblemID{
     string problem_id = 1;
+}
+message ResolveProblemRequest{
+    string task_id = 1;
+    string problem_id = 2;
 }
 message User{
     string first_name = 1;
@@ -132,13 +151,19 @@ message AuthResponse {
 message ProjectsList{
     repeated Project projects = 1;
 }
+message ProjectCreateRequest{
+    string user_id = 1;
+    string name = 3;
+    string deadline = 5;
+    string github_repo = 6;
+}
 message Project {
-    optional string id = 1;
-    optional string user_id = 2;
-    repeated User users = 3;
-    string deadline = 4;
-    string github_repo =5;
-    repeated Milestone milestones = 6; 
+    string id = 1;
+    string name = 3;
+    repeated User users = 4;
+    string deadline = 5;
+    string github_repo = 6;
+    repeated Milestone milestones = 7; 
 }
 message Milestone {
     optional string id = 1;
@@ -169,14 +194,17 @@ message Problem{
     string posted_at = 3;
 }
 message TaskAddRequest{
-    string milestone_id = 1;
-    Task task = 2;
+    string project_id = 1;
+    string milestone_id = 2;
+    Task task = 3;
 }
 message ProblemAddRequest{
-    string task_id = 1;
-    Problem problem = 2;
+    string project_id = 1;
+    string task_id = 2;
+    Problem problem = 3;
 }
 message TaskAssignRequest{
-    string task_id = 1;
-    string user_id  = 2;
+    string project_id = 1;
+    string task_id = 2;
+    string user_id  = 3;
 }

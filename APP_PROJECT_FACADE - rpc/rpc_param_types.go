@@ -15,8 +15,12 @@ type MinimalProject struct {
 	Deadline   string
 	NumOfUsers int
 }
+type UserAddToProjectResponse struct {
+	Project MinimalProject
+	User    User
+}
 type MinimalProjects struct {
-	projects []MinimalProject
+	Projects []MinimalProject
 }
 type User struct {
 	Id        string

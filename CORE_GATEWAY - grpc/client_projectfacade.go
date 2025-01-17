@@ -29,9 +29,8 @@ func NewProjectFacadeClient(url string, dsc *DevstatClient) *ProjectFacadeClient
 	}
 }
 
-func (p *ProjectFacadeClient) call(function string, req any, resp any) any {
+func (p *ProjectFacadeClient) call(function string, req any, resp any) {
 	dsc_id := p.dsc.Start("Project facade", "(Go)RPC", function)
 	p.rpcClient.Call("ProjectService."+function, req, resp)
 	p.dsc.End(dsc_id)
-	return resp
 }

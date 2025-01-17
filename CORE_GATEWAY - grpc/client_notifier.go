@@ -21,7 +21,7 @@ func NewNotifierClient(url string, dsc *DevstatClient) *NotifierClient {
 }
 
 func (n *NotifierClient) SendNotification(user_id string, message string) bool {
-	dsc_id := n.dsc.Start("Notifier", "REST", "SendNotification")
+	dsc_id := n.dsc.Start("Notifier", "REST", "Send Notification")
 	data := map[string]interface{}{
 		"user_id": user_id,
 		"notification": map[string]interface{}{
@@ -44,7 +44,7 @@ func (n *NotifierClient) SendNotification(user_id string, message string) bool {
 }
 
 func (n *NotifierClient) SendUpdate(user_id string, update_type string, subject string, update_data map[string]interface{}) bool {
-	dsc_id := n.dsc.Start("Notifier", "REST", "SendUpdate")
+	dsc_id := n.dsc.Start("Notifier", "REST", "Send Update")
 
 	data := map[string]interface{}{
 		"user_id": user_id,
@@ -59,6 +59,61 @@ func (n *NotifierClient) SendUpdate(user_id string, update_type string, subject 
 		SetBody(data).
 		ForceContentType("application/json").
 		Post(n.url + "/send/update")
+	fmt.Println("STATUS | Notifier service | send notification", resp.Status())
+
+	if err != nil || resp.Status() != "200 OK" {
+		fmt.Println("Error:", err)
+		return false
+	}
+	n.dsc.End(dsc_id)
+	return true
+}
+
+func (n *NotifierClient) PublishNotification(topic_name string, topic_id string, message string) bool {
+	dsc_id := n.dsc.Start("Notifier", "REST", "Publish Notification")
+	data := map[string]interface{}{
+		"topic": map[string]interface{}{
+			"name": topic_name,
+			"id":   topic_id,
+		},
+		"notification": map[string]interface{}{
+			"message": message,
+		},
+	}
+	resp, err := n.restClient.R().
+		SetHeader("Content-Type", "application/json").
+		SetBody(data).
+		ForceContentType("application/json").
+		Post(n.url + "/publish/notification")
+	fmt.Println("STATUS | Notifier service | send notification", resp.Status())
+
+	if err != nil || resp.Status() != "200 OK" {
+		fmt.Println("Error:", err)
+		return false
+	}
+	n.dsc.End(dsc_id)
+	return true
+}
+
+func (n *NotifierClient) PublishUpdate(topic_name string, topic_id string, update_type string, subject string, update_data map[string]interface{}) bool {
+	dsc_id := n.dsc.Start("Notifier", "REST", "Publish Update")
+
+	data := map[string]interface{}{
+		"topic": map[string]interface{}{
+			"name": topic_name,
+			"id":   topic_id,
+		},
+		"update": map[string]interface{}{
+			"type":    update_type,
+			"subject": subject,
+			"data":    update_data,
+		},
+	}
+	resp, err := n.restClient.R().
+		SetHeader("Content-Type", "application/json").
+		SetBody(data).
+		ForceContentType("application/json").
+		Post(n.url + "/publish/update")
 	fmt.Println("STATUS | Notifier service | send notification", resp.Status())
 
 	if err != nil || resp.Status() != "200 OK" {

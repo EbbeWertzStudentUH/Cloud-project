@@ -58,15 +58,28 @@ func (p *ProjectService) GetProjectsFromUser(req *GetProjectsFromUserRequest, re
 			NumOfUsers: len(projectJSON["users"].([]string)),
 		})
 	}
-	res.projects = projects
+	res.Projects = projects
 	return nil
 }
 
-func (p *ProjectService) AddUserToProject(req *AddUserToProjectRequest, res *EmptyResponse) error {
+func (p *ProjectService) AddUserToProject(req *AddUserToProjectRequest, res *UserAddToProjectResponse) error {
 	data := map[string]interface{}{
 		"user_id": req.User_id,
 	}
 	p.db.POST("/projects/"+req.Proj_id+"/users", data)
+	userJSOn, _ := p.udb.QueryUsers([]string{req.User_id})
+	projectJSON, _ := p.db.GET("/projects/" + req.Proj_id)
+	res.Project = MinimalProject{
+		Id:         projectJSON["id"].(string),
+		Name:       projectJSON["name"].(string),
+		Deadline:   projectJSON["deadline"].(string),
+		NumOfUsers: len(projectJSON["users"].([]string)),
+	}
+	res.User = User{
+		Id:        userJSOn[0]["id"].(string),
+		FirstName: userJSOn[0]["id"].(string),
+		LastName:  userJSOn[0]["id"].(string),
+	}
 	return nil
 }
 
@@ -110,14 +123,18 @@ func (p *ProjectService) AddProblemToTask(req *AddProblemToTaskRequest, res *Emp
 	return nil
 }
 
-func (p *ProjectService) ResolveProblem(req *ResolveProblemRequest, res *EmptyResponse) error {
+func (p *ProjectService) ResolveProblem(req *ResolveProblemRequest, res *Problem) error {
 	data := map[string]interface{}{
 		"problem_id": req.Problem_id,
 	}
+	problemJSON, _ := p.db.GET("/tasks/" + req.Task_id + "/problems/" + req.Problem_id)
 	p.db.DELETE_WITH_BODY("/tasks/"+req.Task_id+"/problems", data)
+	res.Id = problemJSON["id"].(string)
+	res.Name = problemJSON["name"].(string)
+	res.PostedAt = problemJSON["posted_at"].(string)
 	return nil
 }
-func (p *ProjectService) AssignTask(req *AssignTaskRequest, res *EmptyResponse) error {
+func (p *ProjectService) AssignTask(req *AssignTaskRequest, res *Task) error {
 	data := map[string]interface{}{
 		"user_id": req.User_id,
 	}
@@ -131,9 +148,11 @@ func (p *ProjectService) AssignTask(req *AssignTaskRequest, res *EmptyResponse) 
 		"status": "active",
 	}
 	p.db.PATCH("/tasks/"+req.Task_id+"/status", data)
+	taskJSON, _ := p.db.GET("/tasks/" + req.Task_id)
+	*res = p.taskJSONTOTask(taskJSON)
 	return nil
 }
-func (p *ProjectService) CompleteTask(req *CompleteTaskRequest, res *EmptyResponse) error {
+func (p *ProjectService) CompleteTask(req *CompleteTaskRequest, res *Task) error {
 	p.db.DELETE("/tasks/" + req.Task_id + "/problems/all")
 	currentTime := time.Now()
 	data := map[string]interface{}{
@@ -144,6 +163,8 @@ func (p *ProjectService) CompleteTask(req *CompleteTaskRequest, res *EmptyRespon
 		"status": "closed",
 	}
 	p.db.PATCH("/tasks/"+req.Task_id+"/status", data)
+	taskJSON, _ := p.db.GET("/tasks/" + req.Task_id)
+	*res = p.taskJSONTOTask(taskJSON)
 	return nil
 }
 

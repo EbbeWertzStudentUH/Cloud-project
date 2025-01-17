@@ -667,14 +667,12 @@ var NotificationService_ServiceDesc = grpc.ServiceDesc{
 }
 
 const (
-	ProjectService_InitialiseProject_FullMethodName        = "/gateway_service.ProjectService/InitialiseProject"
-	ProjectService_GetProjectById_FullMethodName           = "/gateway_service.ProjectService/GetProjectById"
-	ProjectService_AddUserToProject_FullMethodName         = "/gateway_service.ProjectService/AddUserToProject"
+	ProjectService_CreateProject_FullMethodName            = "/gateway_service.ProjectService/CreateProject"
+	ProjectService_GetFullProjectById_FullMethodName       = "/gateway_service.ProjectService/GetFullProjectById"
 	ProjectService_GetProjectsFromUser_FullMethodName      = "/gateway_service.ProjectService/GetProjectsFromUser"
+	ProjectService_AddUserToProject_FullMethodName         = "/gateway_service.ProjectService/AddUserToProject"
 	ProjectService_CreateMilestoneInProject_FullMethodName = "/gateway_service.ProjectService/CreateMilestoneInProject"
-	ProjectService_GetMilestoneById_FullMethodName         = "/gateway_service.ProjectService/GetMilestoneById"
 	ProjectService_CreateTaskInMilestone_FullMethodName    = "/gateway_service.ProjectService/CreateTaskInMilestone"
-	ProjectService_GetTaskById_FullMethodName              = "/gateway_service.ProjectService/GetTaskById"
 	ProjectService_AddProblemToTask_FullMethodName         = "/gateway_service.ProjectService/AddProblemToTask"
 	ProjectService_ResolveProblem_FullMethodName           = "/gateway_service.ProjectService/ResolveProblem"
 	ProjectService_AssignTask_FullMethodName               = "/gateway_service.ProjectService/AssignTask"
@@ -685,37 +683,43 @@ const (
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type ProjectServiceClient interface {
-	// proj_fac: create project
-	// notifier: update projects list
-	InitialiseProject(ctx context.Context, in *Project, opts ...grpc.CallOption) (*Empty, error)
-	// proj_fac: get project by id
-	GetProjectById(ctx context.Context, in *ProjectID, opts ...grpc.CallOption) (*Project, error)
-	// proj_fac: adduser
-	// notifier: publish update users list, publish notification, send projects list update to friend, send notification to friend
-	AddUserToProject(ctx context.Context, in *AddUserToProjectRequest, opts ...grpc.CallOption) (*Empty, error)
-	// proj_fac: get projects from user
+	// proj_fac: CreateProject
+	// notifier: send update projects list to user
+	CreateProject(ctx context.Context, in *ProjectCreateRequest, opts ...grpc.CallOption) (*Empty, error)
+	// proj_fac: GetFullProjectById
+	GetFullProjectById(ctx context.Context, in *ProjectID, opts ...grpc.CallOption) (*Project, error)
+	// proj_fac: GetProjectsFromUser
 	GetProjectsFromUser(ctx context.Context, in *UserID, opts ...grpc.CallOption) (*ProjectsList, error)
-	// proj facacde: create milestone
+	// proj_fac: AddUserToProject
+	// notifier:
+	// - publish update users list
+	// - publish notification "new member"
+	// - send update projects list  to friend
+	// - send notification to friend "you are added"
+	AddUserToProject(ctx context.Context, in *AddUserToProjectRequest, opts ...grpc.CallOption) (*Empty, error)
+	// proj facacde: CreateMilestoneInProject
 	// notifier: publish update milestones list
 	CreateMilestoneInProject(ctx context.Context, in *MilestoneAddRequest, opts ...grpc.CallOption) (*Empty, error)
-	// proj facade: get milestone by id
-	GetMilestoneById(ctx context.Context, in *MilestoneID, opts ...grpc.CallOption) (*Milestone, error)
-	// proj facade: add task to milestone
+	// proj facade: CreateTaskInMilestone
 	// notifier: publish udpate tasks list
 	CreateTaskInMilestone(ctx context.Context, in *TaskAddRequest, opts ...grpc.CallOption) (*Empty, error)
-	// proj facade: get task by id
-	GetTaskById(ctx context.Context, in *TaskID, opts ...grpc.CallOption) (*Task, error)
-	// proj facade: add problem to task
-	// notifier: publish udpate problems list, publish notification
+	// proj facade: AddProblemToTask
+	// notifier:
+	// - publish udpate problems list
+	// - publish notification "new problem"
 	AddProblemToTask(ctx context.Context, in *ProblemAddRequest, opts ...grpc.CallOption) (*Empty, error)
-	// proj facade: resolve problem
-	// notifier: publish udpate problems list, publish notification
-	ResolveProblem(ctx context.Context, in *ProblemID, opts ...grpc.CallOption) (*Empty, error)
-	// proj facade: assign task
+	// proj facade: ResolveProblem
+	// notifier:
+	// - publish udpate problems list
+	// - publish notification "problem solved"
+	ResolveProblem(ctx context.Context, in *ResolveProblemRequest, opts ...grpc.CallOption) (*Empty, error)
+	// proj facade: AssignTask
 	// notifier: publish udpate task
 	AssignTask(ctx context.Context, in *TaskAssignRequest, opts ...grpc.CallOption) (*Empty, error)
-	// proj facade: complete task
-	// notifier: publish udpate task
+	// proj facade: CompleteTask
+	// notifier:
+	// - publish udpate task
+	// - publish notification "task completed"
 	CompleteTask(ctx context.Context, in *TaskID, opts ...grpc.CallOption) (*Empty, error)
 }
 
@@ -727,30 +731,20 @@ func NewProjectServiceClient(cc grpc.ClientConnInterface) ProjectServiceClient {
 	return &projectServiceClient{cc}
 }
 
-func (c *projectServiceClient) InitialiseProject(ctx context.Context, in *Project, opts ...grpc.CallOption) (*Empty, error) {
+func (c *projectServiceClient) CreateProject(ctx context.Context, in *ProjectCreateRequest, opts ...grpc.CallOption) (*Empty, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(Empty)
-	err := c.cc.Invoke(ctx, ProjectService_InitialiseProject_FullMethodName, in, out, cOpts...)
+	err := c.cc.Invoke(ctx, ProjectService_CreateProject_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *projectServiceClient) GetProjectById(ctx context.Context, in *ProjectID, opts ...grpc.CallOption) (*Project, error) {
+func (c *projectServiceClient) GetFullProjectById(ctx context.Context, in *ProjectID, opts ...grpc.CallOption) (*Project, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(Project)
-	err := c.cc.Invoke(ctx, ProjectService_GetProjectById_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *projectServiceClient) AddUserToProject(ctx context.Context, in *AddUserToProjectRequest, opts ...grpc.CallOption) (*Empty, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(Empty)
-	err := c.cc.Invoke(ctx, ProjectService_AddUserToProject_FullMethodName, in, out, cOpts...)
+	err := c.cc.Invoke(ctx, ProjectService_GetFullProjectById_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -767,20 +761,20 @@ func (c *projectServiceClient) GetProjectsFromUser(ctx context.Context, in *User
 	return out, nil
 }
 
-func (c *projectServiceClient) CreateMilestoneInProject(ctx context.Context, in *MilestoneAddRequest, opts ...grpc.CallOption) (*Empty, error) {
+func (c *projectServiceClient) AddUserToProject(ctx context.Context, in *AddUserToProjectRequest, opts ...grpc.CallOption) (*Empty, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(Empty)
-	err := c.cc.Invoke(ctx, ProjectService_CreateMilestoneInProject_FullMethodName, in, out, cOpts...)
+	err := c.cc.Invoke(ctx, ProjectService_AddUserToProject_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *projectServiceClient) GetMilestoneById(ctx context.Context, in *MilestoneID, opts ...grpc.CallOption) (*Milestone, error) {
+func (c *projectServiceClient) CreateMilestoneInProject(ctx context.Context, in *MilestoneAddRequest, opts ...grpc.CallOption) (*Empty, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(Milestone)
-	err := c.cc.Invoke(ctx, ProjectService_GetMilestoneById_FullMethodName, in, out, cOpts...)
+	out := new(Empty)
+	err := c.cc.Invoke(ctx, ProjectService_CreateMilestoneInProject_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -797,16 +791,6 @@ func (c *projectServiceClient) CreateTaskInMilestone(ctx context.Context, in *Ta
 	return out, nil
 }
 
-func (c *projectServiceClient) GetTaskById(ctx context.Context, in *TaskID, opts ...grpc.CallOption) (*Task, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(Task)
-	err := c.cc.Invoke(ctx, ProjectService_GetTaskById_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 func (c *projectServiceClient) AddProblemToTask(ctx context.Context, in *ProblemAddRequest, opts ...grpc.CallOption) (*Empty, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(Empty)
@@ -817,7 +801,7 @@ func (c *projectServiceClient) AddProblemToTask(ctx context.Context, in *Problem
 	return out, nil
 }
 
-func (c *projectServiceClient) ResolveProblem(ctx context.Context, in *ProblemID, opts ...grpc.CallOption) (*Empty, error) {
+func (c *projectServiceClient) ResolveProblem(ctx context.Context, in *ResolveProblemRequest, opts ...grpc.CallOption) (*Empty, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(Empty)
 	err := c.cc.Invoke(ctx, ProjectService_ResolveProblem_FullMethodName, in, out, cOpts...)
@@ -851,37 +835,43 @@ func (c *projectServiceClient) CompleteTask(ctx context.Context, in *TaskID, opt
 // All implementations must embed UnimplementedProjectServiceServer
 // for forward compatibility.
 type ProjectServiceServer interface {
-	// proj_fac: create project
-	// notifier: update projects list
-	InitialiseProject(context.Context, *Project) (*Empty, error)
-	// proj_fac: get project by id
-	GetProjectById(context.Context, *ProjectID) (*Project, error)
-	// proj_fac: adduser
-	// notifier: publish update users list, publish notification, send projects list update to friend, send notification to friend
-	AddUserToProject(context.Context, *AddUserToProjectRequest) (*Empty, error)
-	// proj_fac: get projects from user
+	// proj_fac: CreateProject
+	// notifier: send update projects list to user
+	CreateProject(context.Context, *ProjectCreateRequest) (*Empty, error)
+	// proj_fac: GetFullProjectById
+	GetFullProjectById(context.Context, *ProjectID) (*Project, error)
+	// proj_fac: GetProjectsFromUser
 	GetProjectsFromUser(context.Context, *UserID) (*ProjectsList, error)
-	// proj facacde: create milestone
+	// proj_fac: AddUserToProject
+	// notifier:
+	// - publish update users list
+	// - publish notification "new member"
+	// - send update projects list  to friend
+	// - send notification to friend "you are added"
+	AddUserToProject(context.Context, *AddUserToProjectRequest) (*Empty, error)
+	// proj facacde: CreateMilestoneInProject
 	// notifier: publish update milestones list
 	CreateMilestoneInProject(context.Context, *MilestoneAddRequest) (*Empty, error)
-	// proj facade: get milestone by id
-	GetMilestoneById(context.Context, *MilestoneID) (*Milestone, error)
-	// proj facade: add task to milestone
+	// proj facade: CreateTaskInMilestone
 	// notifier: publish udpate tasks list
 	CreateTaskInMilestone(context.Context, *TaskAddRequest) (*Empty, error)
-	// proj facade: get task by id
-	GetTaskById(context.Context, *TaskID) (*Task, error)
-	// proj facade: add problem to task
-	// notifier: publish udpate problems list, publish notification
+	// proj facade: AddProblemToTask
+	// notifier:
+	// - publish udpate problems list
+	// - publish notification "new problem"
 	AddProblemToTask(context.Context, *ProblemAddRequest) (*Empty, error)
-	// proj facade: resolve problem
-	// notifier: publish udpate problems list, publish notification
-	ResolveProblem(context.Context, *ProblemID) (*Empty, error)
-	// proj facade: assign task
+	// proj facade: ResolveProblem
+	// notifier:
+	// - publish udpate problems list
+	// - publish notification "problem solved"
+	ResolveProblem(context.Context, *ResolveProblemRequest) (*Empty, error)
+	// proj facade: AssignTask
 	// notifier: publish udpate task
 	AssignTask(context.Context, *TaskAssignRequest) (*Empty, error)
-	// proj facade: complete task
-	// notifier: publish udpate task
+	// proj facade: CompleteTask
+	// notifier:
+	// - publish udpate task
+	// - publish notification "task completed"
 	CompleteTask(context.Context, *TaskID) (*Empty, error)
 	mustEmbedUnimplementedProjectServiceServer()
 }
@@ -893,34 +883,28 @@ type ProjectServiceServer interface {
 // pointer dereference when methods are called.
 type UnimplementedProjectServiceServer struct{}
 
-func (UnimplementedProjectServiceServer) InitialiseProject(context.Context, *Project) (*Empty, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method InitialiseProject not implemented")
+func (UnimplementedProjectServiceServer) CreateProject(context.Context, *ProjectCreateRequest) (*Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateProject not implemented")
 }
-func (UnimplementedProjectServiceServer) GetProjectById(context.Context, *ProjectID) (*Project, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetProjectById not implemented")
-}
-func (UnimplementedProjectServiceServer) AddUserToProject(context.Context, *AddUserToProjectRequest) (*Empty, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method AddUserToProject not implemented")
+func (UnimplementedProjectServiceServer) GetFullProjectById(context.Context, *ProjectID) (*Project, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetFullProjectById not implemented")
 }
 func (UnimplementedProjectServiceServer) GetProjectsFromUser(context.Context, *UserID) (*ProjectsList, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetProjectsFromUser not implemented")
 }
+func (UnimplementedProjectServiceServer) AddUserToProject(context.Context, *AddUserToProjectRequest) (*Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method AddUserToProject not implemented")
+}
 func (UnimplementedProjectServiceServer) CreateMilestoneInProject(context.Context, *MilestoneAddRequest) (*Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateMilestoneInProject not implemented")
-}
-func (UnimplementedProjectServiceServer) GetMilestoneById(context.Context, *MilestoneID) (*Milestone, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetMilestoneById not implemented")
 }
 func (UnimplementedProjectServiceServer) CreateTaskInMilestone(context.Context, *TaskAddRequest) (*Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateTaskInMilestone not implemented")
 }
-func (UnimplementedProjectServiceServer) GetTaskById(context.Context, *TaskID) (*Task, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetTaskById not implemented")
-}
 func (UnimplementedProjectServiceServer) AddProblemToTask(context.Context, *ProblemAddRequest) (*Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method AddProblemToTask not implemented")
 }
-func (UnimplementedProjectServiceServer) ResolveProblem(context.Context, *ProblemID) (*Empty, error) {
+func (UnimplementedProjectServiceServer) ResolveProblem(context.Context, *ResolveProblemRequest) (*Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ResolveProblem not implemented")
 }
 func (UnimplementedProjectServiceServer) AssignTask(context.Context, *TaskAssignRequest) (*Empty, error) {
@@ -950,56 +934,38 @@ func RegisterProjectServiceServer(s grpc.ServiceRegistrar, srv ProjectServiceSer
 	s.RegisterService(&ProjectService_ServiceDesc, srv)
 }
 
-func _ProjectService_InitialiseProject_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(Project)
+func _ProjectService_CreateProject_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ProjectCreateRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(ProjectServiceServer).InitialiseProject(ctx, in)
+		return srv.(ProjectServiceServer).CreateProject(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: ProjectService_InitialiseProject_FullMethodName,
+		FullMethod: ProjectService_CreateProject_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ProjectServiceServer).InitialiseProject(ctx, req.(*Project))
+		return srv.(ProjectServiceServer).CreateProject(ctx, req.(*ProjectCreateRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _ProjectService_GetProjectById_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _ProjectService_GetFullProjectById_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(ProjectID)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(ProjectServiceServer).GetProjectById(ctx, in)
+		return srv.(ProjectServiceServer).GetFullProjectById(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: ProjectService_GetProjectById_FullMethodName,
+		FullMethod: ProjectService_GetFullProjectById_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ProjectServiceServer).GetProjectById(ctx, req.(*ProjectID))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _ProjectService_AddUserToProject_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(AddUserToProjectRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(ProjectServiceServer).AddUserToProject(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: ProjectService_AddUserToProject_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ProjectServiceServer).AddUserToProject(ctx, req.(*AddUserToProjectRequest))
+		return srv.(ProjectServiceServer).GetFullProjectById(ctx, req.(*ProjectID))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -1022,6 +988,24 @@ func _ProjectService_GetProjectsFromUser_Handler(srv interface{}, ctx context.Co
 	return interceptor(ctx, in, info, handler)
 }
 
+func _ProjectService_AddUserToProject_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AddUserToProjectRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ProjectServiceServer).AddUserToProject(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ProjectService_AddUserToProject_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ProjectServiceServer).AddUserToProject(ctx, req.(*AddUserToProjectRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _ProjectService_CreateMilestoneInProject_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(MilestoneAddRequest)
 	if err := dec(in); err != nil {
@@ -1040,24 +1024,6 @@ func _ProjectService_CreateMilestoneInProject_Handler(srv interface{}, ctx conte
 	return interceptor(ctx, in, info, handler)
 }
 
-func _ProjectService_GetMilestoneById_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(MilestoneID)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(ProjectServiceServer).GetMilestoneById(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: ProjectService_GetMilestoneById_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ProjectServiceServer).GetMilestoneById(ctx, req.(*MilestoneID))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 func _ProjectService_CreateTaskInMilestone_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(TaskAddRequest)
 	if err := dec(in); err != nil {
@@ -1072,24 +1038,6 @@ func _ProjectService_CreateTaskInMilestone_Handler(srv interface{}, ctx context.
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(ProjectServiceServer).CreateTaskInMilestone(ctx, req.(*TaskAddRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _ProjectService_GetTaskById_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(TaskID)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(ProjectServiceServer).GetTaskById(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: ProjectService_GetTaskById_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ProjectServiceServer).GetTaskById(ctx, req.(*TaskID))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -1113,7 +1061,7 @@ func _ProjectService_AddProblemToTask_Handler(srv interface{}, ctx context.Conte
 }
 
 func _ProjectService_ResolveProblem_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ProblemID)
+	in := new(ResolveProblemRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -1125,7 +1073,7 @@ func _ProjectService_ResolveProblem_Handler(srv interface{}, ctx context.Context
 		FullMethod: ProjectService_ResolveProblem_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ProjectServiceServer).ResolveProblem(ctx, req.(*ProblemID))
+		return srv.(ProjectServiceServer).ResolveProblem(ctx, req.(*ResolveProblemRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -1174,36 +1122,28 @@ var ProjectService_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*ProjectServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "InitialiseProject",
-			Handler:    _ProjectService_InitialiseProject_Handler,
+			MethodName: "CreateProject",
+			Handler:    _ProjectService_CreateProject_Handler,
 		},
 		{
-			MethodName: "GetProjectById",
-			Handler:    _ProjectService_GetProjectById_Handler,
-		},
-		{
-			MethodName: "AddUserToProject",
-			Handler:    _ProjectService_AddUserToProject_Handler,
+			MethodName: "GetFullProjectById",
+			Handler:    _ProjectService_GetFullProjectById_Handler,
 		},
 		{
 			MethodName: "GetProjectsFromUser",
 			Handler:    _ProjectService_GetProjectsFromUser_Handler,
 		},
 		{
+			MethodName: "AddUserToProject",
+			Handler:    _ProjectService_AddUserToProject_Handler,
+		},
+		{
 			MethodName: "CreateMilestoneInProject",
 			Handler:    _ProjectService_CreateMilestoneInProject_Handler,
 		},
 		{
-			MethodName: "GetMilestoneById",
-			Handler:    _ProjectService_GetMilestoneById_Handler,
-		},
-		{
 			MethodName: "CreateTaskInMilestone",
 			Handler:    _ProjectService_CreateTaskInMilestone_Handler,
-		},
-		{
-			MethodName: "GetTaskById",
-			Handler:    _ProjectService_GetTaskById_Handler,
 		},
 		{
 			MethodName: "AddProblemToTask",

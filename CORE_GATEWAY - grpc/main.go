@@ -31,7 +31,7 @@ func main() {
 	grpcServer := grpc.NewServer()
 	user_service := &UserServiceServer{authClient: *auth_client, userdbClient: *userdb_client, notifierClient: *notifier_client}
 	notification_service := &NotificationServiceServer{notifierClient: *notifier_client, userService: user_service}
-	project_service := &ProjectServiceServer{projectFacadeClient: *project_facade_client, notifierClient: *notifier_client}
+	project_service := &ProjectServiceServer{pfc: *project_facade_client, nc: *notifier_client}
 	pb.RegisterUserServiceServer(grpcServer, user_service)
 	pb.RegisterNotificationServiceServer(grpcServer, notification_service)
 	pb.RegisterProjectServiceServer(grpcServer, project_service)
