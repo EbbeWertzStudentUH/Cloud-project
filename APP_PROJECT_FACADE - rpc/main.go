@@ -2,7 +2,7 @@ package main
 
 import (
 	"log"
-	"net/http"
+	"net"
 	"net/rpc"
 	"os"
 
@@ -17,11 +17,23 @@ func main() {
 	userdb_client := NewUserDBClient(os.Getenv("USERDB_SERVICE_URL"))
 	projectdb_client := NewProjectDBClient(os.Getenv("PROJECT_DB_URL"))
 	service := NewProjectService(projectdb_client, userdb_client)
-	rpc.Register(service)
-	rpc.HandleHTTP()
-	log.Println("listening on " + "0.0.0.0:" + os.Getenv("LISTEN_PORT"))
-	err = http.ListenAndServe(":"+os.Getenv("LISTEN_PORT"), nil)
+	err = rpc.Register(service)
 	if err != nil {
-		log.Fatal("Error starting the RPC server: ", err)
+		log.Fatal("Error registering RPC service:", err)
+	}
+
+	listener, err := net.Listen("tcp", ":"+os.Getenv("LISTEN_PORT"))
+	if err != nil {
+		log.Fatalf("Error starting TCP server: %v", err)
+	}
+	log.Println("listening on " + "0.0.0.0:" + os.Getenv("LISTEN_PORT"))
+
+	for {
+		conn, err := listener.Accept()
+		if err != nil {
+			log.Printf("Connection error: %v", err)
+			continue
+		}
+		go rpc.ServeConn(conn)
 	}
 }
