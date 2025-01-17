@@ -238,11 +238,13 @@ func (p *ProjectService) taskJSONTOTask(taskJSON map[string]interface{}) Task {
 	if ok && activePeriod != nil {
 		activeStart, ok := activePeriod.(map[string]interface{})["start"]
 		if ok && activeStart != nil {
-			activeStartPtr = activeStart.(*string)
+			activeStartStr := activeStart.(string)
+			activeStartPtr = &activeStartStr
 		}
 		activeEnd, ok := activePeriod.(map[string]interface{})["end"]
 		if ok && activeEnd != nil {
-			activeEndPtr = activeEnd.(*string)
+			activeEndStr := activeEnd.(string)
+			activeEndPtr = &activeEndStr
 		}
 	}
 	problems := []Problem{}
