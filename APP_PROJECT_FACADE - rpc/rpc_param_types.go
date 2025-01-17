@@ -9,11 +9,14 @@ type CreateProjectRequest struct {
 	Deadline    string
 	Github_repo string
 }
-type MinimalProjectResponse struct {
+type MinimalProject struct {
 	Id         string
 	Name       string
 	Deadline   string
 	NumOfUsers int
+}
+type MinimalProjects struct {
+	projects []MinimalProject
 }
 type User struct {
 	Id        string

@@ -1,5 +1,7 @@
 package main
 
+import "time"
+
 type ProjectService struct {
 	db  *ProjectDBClient
 	udb *UserDBClient
@@ -12,7 +14,7 @@ func NewProjectService(db *ProjectDBClient, udb *UserDBClient) *ProjectService {
 	}
 }
 
-func (p *ProjectService) CreateProject(req *CreateProjectRequest, res *MinimalProjectResponse) error {
+func (p *ProjectService) CreateProject(req *CreateProjectRequest, res *MinimalProject) error {
 	data := map[string]interface{}{
 		"name":        req.Name,
 		"deadline":    req.Deadline,
@@ -42,6 +44,106 @@ func (p *ProjectService) GetFullProjectById(req *GetProjectByIdRequest, res *Ful
 	res.GithubRepo = projectJSON["github_repo"].(string)
 	res.Users = users
 	res.Milestones = milestones
+	return nil
+}
+
+func (p *ProjectService) GetProjectsFromUser(req *GetProjectsFromUserRequest, res *MinimalProjects) error {
+	projectJSONs, _ := p.db.GETMULTI("/projects/user/" + req.User_id)
+	projects := []MinimalProject{}
+	for _, projectJSON := range projectJSONs {
+		projects = append(projects, MinimalProject{
+			Id:         projectJSON["id"].(string),
+			Name:       projectJSON["name"].(string),
+			Deadline:   projectJSON["deadline"].(string),
+			NumOfUsers: len(projectJSON["users"].([]string)),
+		})
+	}
+	res.projects = projects
+	return nil
+}
+
+func (p *ProjectService) AddUserToProject(req *AddUserToProjectRequest, res *EmptyResponse) error {
+	data := map[string]interface{}{
+		"user_id": req.User_id,
+	}
+	p.db.POST("/projects/"+req.Proj_id+"/users", data)
+	return nil
+}
+
+func (p *ProjectService) CreateMilestoneInProject(req *CreateMilestoneInProjectRequest, res *Milestone) error {
+	data := map[string]interface{}{
+		"name":     req.Name,
+		"deadline": req.Deadline,
+	}
+	milestoneJSON, _ := p.db.POST("/milestones", data)
+	milestone := p.milestoneJSONToMilestone(milestoneJSON)
+	data = map[string]interface{}{
+		"milestone_id": milestoneJSON["id"],
+	}
+	p.db.POST("/projects/"+req.Proj_id+"/milestones", data)
+	*res = milestone
+	return nil
+}
+
+func (p *ProjectService) CreateTaskInMilestone(req *CreateTaskInMilestoneRequest, res *Task) error {
+	data := map[string]interface{}{
+		"name":   req.Name,
+		"status": "open",
+	}
+	taskJSOn, _ := p.db.POST("/tasks", data)
+	data = map[string]interface{}{
+		"task_id": taskJSOn["id"],
+	}
+	p.db.POST("/milestones/"+req.Milestone_id+"/tasks", data)
+	task := p.taskJSONTOTask(taskJSOn)
+	*res = task
+	return nil
+}
+
+func (p *ProjectService) AddProblemToTask(req *AddProblemToTaskRequest, res *EmptyResponse) error {
+	currentTime := time.Now()
+	data := map[string]interface{}{
+		"name":      req.Problem_name,
+		"posted_at": currentTime.Format("2006-01-02"), // GEEN IDEE WAAROM, maar go MOET deze exacte datum hebben als format
+	}
+	p.db.POST("/tasks/"+req.Task_id+"/problems", data)
+	return nil
+}
+
+func (p *ProjectService) ResolveProblem(req *ResolveProblemRequest, res *EmptyResponse) error {
+	data := map[string]interface{}{
+		"problem_id": req.Problem_id,
+	}
+	p.db.DELETE_WITH_BODY("/tasks/"+req.Task_id+"/problems", data)
+	return nil
+}
+func (p *ProjectService) AssignTask(req *AssignTaskRequest, res *EmptyResponse) error {
+	data := map[string]interface{}{
+		"user_id": req.User_id,
+	}
+	p.db.PUT("/tasks/"+req.Task_id+"/user", data)
+	currentTime := time.Now()
+	data = map[string]interface{}{
+		"start": currentTime.Format("2006-01-02"),
+	}
+	p.db.PUT("/tasks/"+req.Task_id+"/active-period", data)
+	data = map[string]interface{}{
+		"status": "active",
+	}
+	p.db.PATCH("/tasks/"+req.Task_id+"/status", data)
+	return nil
+}
+func (p *ProjectService) CompleteTask(req *CompleteTaskRequest, res *EmptyResponse) error {
+	p.db.DELETE("/tasks/" + req.Task_id + "/problems/all")
+	currentTime := time.Now()
+	data := map[string]interface{}{
+		"end": currentTime.Format("2006-01-02"),
+	}
+	p.db.PATCH("/tasks/"+req.Task_id+"/active-period", data)
+	data = map[string]interface{}{
+		"status": "closed",
+	}
+	p.db.PATCH("/tasks/"+req.Task_id+"/status", data)
 	return nil
 }
 
@@ -126,101 +228,3 @@ func (p *ProjectService) taskJSONTOTask(taskJSON map[string]interface{}) Task {
 		Problems:        problems,
 	}
 }
-
-// func (p *ProjectService) GetProjectsFromUser(req *GetProjectsFromUserRequest, res *JSONResponse) error {
-// 	jsonRes, _ := p.db.GET("/projects/user/" + req.User_id)
-// 	res.Data = map[string]interface{}{
-// 		"projects": jsonRes,
-// 	}
-// 	return nil
-// }
-// func (p *ProjectService) AddUserToProject(req *AddUserToProjectRequest, res *EmptyResponse) error {
-// 	data := map[string]interface{}{
-// 		"user_id": req.User_id,
-// 	}
-// 	p.db.POST("/projects/"+req.Proj_id+"/users", data)
-// 	return nil
-// }
-// func (p *ProjectService) CreateMilestoneInProject(req *CreateMilestoneInProjectRequest, res *JSONResponse) error {
-// 	data := map[string]interface{}{
-// 		"name":     req.Name,
-// 		"deadline": req.Deadline,
-// 	}
-// 	milestone, _ := p.db.POST("/milestones", data)
-// 	data = map[string]interface{}{
-// 		"milestone_id": milestone["id"],
-// 	}
-// 	p.db.POST("/projects/"+req.Proj_id+"/milestones", data)
-// 	res.Data = milestone
-// 	return nil
-// }
-// func (p *ProjectService) GetMilestoneById(req *GetMilestoneByIdRequest, res *JSONResponse) error {
-// 	milestone, _ := p.db.GET("/milestones/" + req.Milestone_id)
-// 	tasks, _ := p.db.GET("/tasks/milestone/" + req.Milestone_id)
-// 	milestone["tasks"] = tasks
-// 	res.Data = milestone
-// 	return nil
-// }
-// func (p *ProjectService) CreateTaskInMilestone(req *CreateTaskInMilestoneRequest, res *JSONResponse) error {
-// 	data := map[string]interface{}{
-// 		"name":   req.Name,
-// 		"status": "open",
-// 	}
-// 	task, _ := p.db.POST("/tasks", data)
-// 	data = map[string]interface{}{
-// 		"task_id": task["id"],
-// 	}
-// 	p.db.POST("/milestones/"+req.Milestone_id+"/tasks", data)
-// 	res.Data = task
-// 	return nil
-// }
-// func (p *ProjectService) GetTaskById(req *GetTaskByIdRequest, res *JSONResponse) error {
-// 	jsonRes, _ := p.db.GET("/tasks/" + req.Task_id)
-// 	res.Data = jsonRes
-// 	return nil
-// }
-// func (p *ProjectService) AddProblemToTask(req *AddProblemToTaskRequest, res *EmptyResponse) error {
-// 	currentTime := time.Now()
-// 	data := map[string]interface{}{
-// 		"name":      req.Problem_name,
-// 		"posted_at": currentTime.Format("2006-01-02"), // GEEN IDEE WAAROM, maar go MOET deze exacte datum hebben als format
-// 	}
-// 	p.db.POST("/tasks/"+req.Task_id+"/problems", data)
-// 	return nil
-// }
-// func (p *ProjectService) ResolveProblem(req *ResolveProblemRequest, res *EmptyResponse) error {
-// 	data := map[string]interface{}{
-// 		"problem_id": req.Problem_id,
-// 	}
-// 	p.db.DELETE_WITH_BODY("/tasks/"+req.Task_id+"/problems", data)
-// 	return nil
-// }
-// func (p *ProjectService) AssignTask(req *AssignTaskRequest, res *EmptyResponse) error {
-// 	data := map[string]interface{}{
-// 		"user_id": req.User_id,
-// 	}
-// 	p.db.PUT("/tasks/"+req.Task_id+"/user", data)
-// 	currentTime := time.Now()
-// 	data = map[string]interface{}{
-// 		"start": currentTime.Format("2006-01-02"),
-// 	}
-// 	p.db.PUT("/tasks/"+req.Task_id+"/active-period", data)
-// 	data = map[string]interface{}{
-// 		"status": "active",
-// 	}
-// 	p.db.PATCH("/tasks/"+req.Task_id+"/status", data)
-// 	return nil
-// }
-// func (p *ProjectService) CompleteTask(req *CompleteTaskRequest, res *EmptyResponse) error {
-// 	p.db.DELETE("/tasks/" + req.Task_id + "/problems/all")
-// 	currentTime := time.Now()
-// 	data := map[string]interface{}{
-// 		"end": currentTime.Format("2006-01-02"),
-// 	}
-// 	p.db.PATCH("/tasks/"+req.Task_id+"/active-period", data)
-// 	data = map[string]interface{}{
-// 		"status": "closed",
-// 	}
-// 	p.db.PATCH("/tasks/"+req.Task_id+"/status", data)
-// 	return nil
-// }
