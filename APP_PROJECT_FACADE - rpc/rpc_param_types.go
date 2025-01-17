@@ -1,8 +1,5 @@
 package main
 
-type JSONResponse struct {
-	Data map[string]interface{}
-}
 type EmptyResponse struct {
 }
 
@@ -12,9 +9,58 @@ type CreateProjectRequest struct {
 	Deadline    string
 	Github_repo string
 }
+type MinimalProjectResponse struct {
+	Id         string
+	Name       string
+	Deadline   string
+	NumOfUsers int
+}
+type User struct {
+	Id        string
+	FirstName string
+	LastName  string
+}
+type Problem struct {
+	Id       string
+	Name     string
+	PostedAt string
+}
+type Task struct {
+	Id              string
+	Name            string
+	Status          string
+	User            *User
+	ActiveStartDate *string
+	ActiveEndDate   *string
+	NumOfProblems   int
+	IsAssigned      bool
+	Problems        []Problem
+}
+type Milestone struct {
+	Id                 string
+	Name               string
+	Deadline           string
+	NumOfProblems      int
+	NumOfTasks         int
+	NumOfFinishedTasks int
+	Tasks              []Task
+}
 type GetProjectByIdRequest struct {
 	Proj_id string
 }
+type FullProject struct {
+	Id         string
+	Name       string
+	Deadline   string
+	GithubRepo string
+	Users      []User
+	Milestones []Milestone
+}
+
+//
+//
+//
+
 type GetProjectsFromUserRequest struct {
 	User_id string
 }

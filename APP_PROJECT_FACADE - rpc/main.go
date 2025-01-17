@@ -14,8 +14,9 @@ func main() {
 	if err != nil {
 		log.Fatalf("Error loading .env file %v", err)
 	}
-	db_client := NewProjectDBClient(os.Getenv("PROJECT_DB_URL"))
-	service := NewProjectService(db_client)
+	userdb_client := NewUserDBClient(os.Getenv("USERDB_SERVICE_URL"))
+	projectdb_client := NewProjectDBClient(os.Getenv("PROJECT_DB_URL"))
+	service := NewProjectService(projectdb_client, userdb_client)
 	rpc.Register(service)
 	rpc.HandleHTTP()
 	log.Println("listening on " + "0.0.0.0:" + os.Getenv("LISTEN_PORT"))
