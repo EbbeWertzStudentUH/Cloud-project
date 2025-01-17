@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.5.1
 // - protoc             v5.29.2
-// source: facade.proto
+// source: gateway.proto
 
 package protobuf_generated
 
@@ -485,13 +485,13 @@ var UserService_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "facade.proto",
+	Metadata: "gateway.proto",
 }
 
 const (
-	NotificationService_SubscribeFriendList_FullMethodName  = "/gateway_service.NotificationService/subscribeFriendList"
-	NotificationService_SubscribeToProject_FullMethodName   = "/gateway_service.NotificationService/subscribeToProject"
-	NotificationService_UnSubscribeToProject_FullMethodName = "/gateway_service.NotificationService/unSubscribeToProject"
+	NotificationService_SubscribeFriendList_FullMethodName       = "/gateway_service.NotificationService/subscribeFriendList"
+	NotificationService_SubscribeProjectsList_FullMethodName     = "/gateway_service.NotificationService/subscribeProjectsList"
+	NotificationService_SwitchProjectSubscription_FullMethodName = "/gateway_service.NotificationService/switchProjectSubscription"
 )
 
 // NotificationServiceClient is the client API for NotificationService service.
@@ -499,8 +499,8 @@ const (
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type NotificationServiceClient interface {
 	SubscribeFriendList(ctx context.Context, in *UserID, opts ...grpc.CallOption) (*Empty, error)
-	SubscribeToProject(ctx context.Context, in *ProjectID, opts ...grpc.CallOption) (*Empty, error)
-	UnSubscribeToProject(ctx context.Context, in *ProjectID, opts ...grpc.CallOption) (*Empty, error)
+	SubscribeProjectsList(ctx context.Context, in *UserID, opts ...grpc.CallOption) (*Empty, error)
+	SwitchProjectSubscription(ctx context.Context, in *ProjectSubscribeRequest, opts ...grpc.CallOption) (*Empty, error)
 }
 
 type notificationServiceClient struct {
@@ -521,20 +521,20 @@ func (c *notificationServiceClient) SubscribeFriendList(ctx context.Context, in 
 	return out, nil
 }
 
-func (c *notificationServiceClient) SubscribeToProject(ctx context.Context, in *ProjectID, opts ...grpc.CallOption) (*Empty, error) {
+func (c *notificationServiceClient) SubscribeProjectsList(ctx context.Context, in *UserID, opts ...grpc.CallOption) (*Empty, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(Empty)
-	err := c.cc.Invoke(ctx, NotificationService_SubscribeToProject_FullMethodName, in, out, cOpts...)
+	err := c.cc.Invoke(ctx, NotificationService_SubscribeProjectsList_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *notificationServiceClient) UnSubscribeToProject(ctx context.Context, in *ProjectID, opts ...grpc.CallOption) (*Empty, error) {
+func (c *notificationServiceClient) SwitchProjectSubscription(ctx context.Context, in *ProjectSubscribeRequest, opts ...grpc.CallOption) (*Empty, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(Empty)
-	err := c.cc.Invoke(ctx, NotificationService_UnSubscribeToProject_FullMethodName, in, out, cOpts...)
+	err := c.cc.Invoke(ctx, NotificationService_SwitchProjectSubscription_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -546,8 +546,8 @@ func (c *notificationServiceClient) UnSubscribeToProject(ctx context.Context, in
 // for forward compatibility.
 type NotificationServiceServer interface {
 	SubscribeFriendList(context.Context, *UserID) (*Empty, error)
-	SubscribeToProject(context.Context, *ProjectID) (*Empty, error)
-	UnSubscribeToProject(context.Context, *ProjectID) (*Empty, error)
+	SubscribeProjectsList(context.Context, *UserID) (*Empty, error)
+	SwitchProjectSubscription(context.Context, *ProjectSubscribeRequest) (*Empty, error)
 	mustEmbedUnimplementedNotificationServiceServer()
 }
 
@@ -561,11 +561,11 @@ type UnimplementedNotificationServiceServer struct{}
 func (UnimplementedNotificationServiceServer) SubscribeFriendList(context.Context, *UserID) (*Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SubscribeFriendList not implemented")
 }
-func (UnimplementedNotificationServiceServer) SubscribeToProject(context.Context, *ProjectID) (*Empty, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method SubscribeToProject not implemented")
+func (UnimplementedNotificationServiceServer) SubscribeProjectsList(context.Context, *UserID) (*Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SubscribeProjectsList not implemented")
 }
-func (UnimplementedNotificationServiceServer) UnSubscribeToProject(context.Context, *ProjectID) (*Empty, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method UnSubscribeToProject not implemented")
+func (UnimplementedNotificationServiceServer) SwitchProjectSubscription(context.Context, *ProjectSubscribeRequest) (*Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SwitchProjectSubscription not implemented")
 }
 func (UnimplementedNotificationServiceServer) mustEmbedUnimplementedNotificationServiceServer() {}
 func (UnimplementedNotificationServiceServer) testEmbeddedByValue()                             {}
@@ -606,38 +606,38 @@ func _NotificationService_SubscribeFriendList_Handler(srv interface{}, ctx conte
 	return interceptor(ctx, in, info, handler)
 }
 
-func _NotificationService_SubscribeToProject_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ProjectID)
+func _NotificationService_SubscribeProjectsList_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UserID)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(NotificationServiceServer).SubscribeToProject(ctx, in)
+		return srv.(NotificationServiceServer).SubscribeProjectsList(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: NotificationService_SubscribeToProject_FullMethodName,
+		FullMethod: NotificationService_SubscribeProjectsList_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(NotificationServiceServer).SubscribeToProject(ctx, req.(*ProjectID))
+		return srv.(NotificationServiceServer).SubscribeProjectsList(ctx, req.(*UserID))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _NotificationService_UnSubscribeToProject_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ProjectID)
+func _NotificationService_SwitchProjectSubscription_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ProjectSubscribeRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(NotificationServiceServer).UnSubscribeToProject(ctx, in)
+		return srv.(NotificationServiceServer).SwitchProjectSubscription(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: NotificationService_UnSubscribeToProject_FullMethodName,
+		FullMethod: NotificationService_SwitchProjectSubscription_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(NotificationServiceServer).UnSubscribeToProject(ctx, req.(*ProjectID))
+		return srv.(NotificationServiceServer).SwitchProjectSubscription(ctx, req.(*ProjectSubscribeRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -654,16 +654,16 @@ var NotificationService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _NotificationService_SubscribeFriendList_Handler,
 		},
 		{
-			MethodName: "subscribeToProject",
-			Handler:    _NotificationService_SubscribeToProject_Handler,
+			MethodName: "subscribeProjectsList",
+			Handler:    _NotificationService_SubscribeProjectsList_Handler,
 		},
 		{
-			MethodName: "unSubscribeToProject",
-			Handler:    _NotificationService_UnSubscribeToProject_Handler,
+			MethodName: "switchProjectSubscription",
+			Handler:    _NotificationService_SwitchProjectSubscription_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "facade.proto",
+	Metadata: "gateway.proto",
 }
 
 const (
@@ -1201,5 +1201,5 @@ var ProjectService_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "facade.proto",
+	Metadata: "gateway.proto",
 }

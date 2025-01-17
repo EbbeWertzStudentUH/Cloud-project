@@ -3,7 +3,7 @@ syntax = "proto3";
 package gateway_service;
 option go_package = "./protobuf_generated";
 /* command:
-protoc --go_out=. --go-grpc_out=. facade.proto
+protoc --go_out=. --go-grpc_out=. gateway.proto
 */
 //=================
 // SERVICES
@@ -41,8 +41,8 @@ service UserService {
 
 service NotificationService {
     rpc subscribeFriendList(UserID) returns (Empty);
-    rpc subscribeToProject(ProjectID) returns (Empty);
-    rpc unSubscribeToProject(ProjectID) returns (Empty);
+    rpc subscribeProjectsList(UserID) returns (Empty);
+    rpc switchProjectSubscription(ProjectSubscribeRequest) returns (Empty);
 }
 
 service ProjectService {
@@ -117,6 +117,11 @@ message UserID{
 }
 message ProjectID{
     string project_id = 1;
+}
+message ProjectSubscribeRequest{
+    string user_id = 1;
+    optional string unsubscribe_project = 2;
+    string subscribe_project = 3;
 }
 message MilestoneID{
     string milestone_id = 1;
