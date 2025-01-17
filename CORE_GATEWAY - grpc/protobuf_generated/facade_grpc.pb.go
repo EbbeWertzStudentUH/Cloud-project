@@ -677,6 +677,7 @@ const (
 	ProjectService_ResolveProblem_FullMethodName           = "/gateway_service.ProjectService/ResolveProblem"
 	ProjectService_AssignTask_FullMethodName               = "/gateway_service.ProjectService/AssignTask"
 	ProjectService_CompleteTask_FullMethodName             = "/gateway_service.ProjectService/CompleteTask"
+	ProjectService_Hello_FullMethodName                    = "/gateway_service.ProjectService/Hello"
 )
 
 // ProjectServiceClient is the client API for ProjectService service.
@@ -721,6 +722,7 @@ type ProjectServiceClient interface {
 	// - publish udpate task
 	// - publish notification "task completed"
 	CompleteTask(ctx context.Context, in *TaskID, opts ...grpc.CallOption) (*Empty, error)
+	Hello(ctx context.Context, in *World, opts ...grpc.CallOption) (*HelloWorld, error)
 }
 
 type projectServiceClient struct {
@@ -831,6 +833,16 @@ func (c *projectServiceClient) CompleteTask(ctx context.Context, in *TaskID, opt
 	return out, nil
 }
 
+func (c *projectServiceClient) Hello(ctx context.Context, in *World, opts ...grpc.CallOption) (*HelloWorld, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(HelloWorld)
+	err := c.cc.Invoke(ctx, ProjectService_Hello_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ProjectServiceServer is the server API for ProjectService service.
 // All implementations must embed UnimplementedProjectServiceServer
 // for forward compatibility.
@@ -873,6 +885,7 @@ type ProjectServiceServer interface {
 	// - publish udpate task
 	// - publish notification "task completed"
 	CompleteTask(context.Context, *TaskID) (*Empty, error)
+	Hello(context.Context, *World) (*HelloWorld, error)
 	mustEmbedUnimplementedProjectServiceServer()
 }
 
@@ -912,6 +925,9 @@ func (UnimplementedProjectServiceServer) AssignTask(context.Context, *TaskAssign
 }
 func (UnimplementedProjectServiceServer) CompleteTask(context.Context, *TaskID) (*Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CompleteTask not implemented")
+}
+func (UnimplementedProjectServiceServer) Hello(context.Context, *World) (*HelloWorld, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Hello not implemented")
 }
 func (UnimplementedProjectServiceServer) mustEmbedUnimplementedProjectServiceServer() {}
 func (UnimplementedProjectServiceServer) testEmbeddedByValue()                        {}
@@ -1114,6 +1130,24 @@ func _ProjectService_CompleteTask_Handler(srv interface{}, ctx context.Context, 
 	return interceptor(ctx, in, info, handler)
 }
 
+func _ProjectService_Hello_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(World)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ProjectServiceServer).Hello(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ProjectService_Hello_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ProjectServiceServer).Hello(ctx, req.(*World))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // ProjectService_ServiceDesc is the grpc.ServiceDesc for ProjectService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -1160,6 +1194,10 @@ var ProjectService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "CompleteTask",
 			Handler:    _ProjectService_CompleteTask_Handler,
+		},
+		{
+			MethodName: "Hello",
+			Handler:    _ProjectService_Hello_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

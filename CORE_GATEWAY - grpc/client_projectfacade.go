@@ -20,7 +20,7 @@ func NewProjectFacadeClient(url string, dsc *DevstatClient) *ProjectFacadeClient
 			log.Println("connected to rpc:", url)
 			break
 		}
-		log.Println("could not connect to gRPC server. Trying again in 3s")
+		log.Println("could not connect to RPC server. Trying again in 3s")
 		time.Sleep(3 * time.Second)
 	}
 	return &ProjectFacadeClient{

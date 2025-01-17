@@ -3,12 +3,28 @@ package main
 import (
 	"context"
 	pb "gateway_service/protobuf_generated"
+	"log"
 )
 
 type ProjectServiceServer struct {
 	pb.UnimplementedProjectServiceServer
 	pfc ProjectFacadeClient
 	nc  NotifierClient
+}
+
+type World struct {
+	World string
+}
+type HelloWorld struct {
+	HelloWorld string
+}
+
+func (s *ProjectServiceServer) Hello(ctx context.Context, req *pb.World) (*pb.HelloWorld, error) {
+	rpcres := &HelloWorld{}
+	rpcreq := &World{World: req.World}
+	s.pfc.call("Hello", rpcreq, rpcres)
+	log.Println(rpcres.HelloWorld)
+	return &pb.HelloWorld{HelloWorld: rpcres.HelloWorld}, nil
 }
 
 // proj_fac: CreateProject

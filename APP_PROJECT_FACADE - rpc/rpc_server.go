@@ -14,6 +14,18 @@ func NewProjectService(db *ProjectDBClient, udb *UserDBClient) *ProjectService {
 	}
 }
 
+type World struct {
+	World string
+}
+type HelloWorld struct {
+	HelloWorld string
+}
+
+func (p *ProjectService) Hello(req *World, res *HelloWorld) error {
+	res.HelloWorld = "hello " + req.World
+	return nil
+}
+
 func (p *ProjectService) CreateProject(req *CreateProjectRequest, res *MinimalProject) error {
 	data := map[string]interface{}{
 		"name":        req.Name,
@@ -25,19 +37,24 @@ func (p *ProjectService) CreateProject(req *CreateProjectRequest, res *MinimalPr
 	res.Id = jsonRes["id"].(string)
 	res.Name = jsonRes["name"].(string)
 	res.Deadline = jsonRes["deadline"].(string)
-	res.NumOfUsers = len(jsonRes["users"].([]string))
+	res.NumOfUsers = len(jsonRes["users"].([]interface{}))
 	return nil
 }
 
 func (p *ProjectService) GetFullProjectById(req *GetProjectByIdRequest, res *FullProject) error {
 	projectJSON, _ := p.db.GET("/projects/" + req.Proj_id)
-	milestonesJSON, _ := p.db.GETMULTI("/milestones/project/" + projectJSON["id"].(string))
+	milestonesJSON, _ := p.db.GETMULTI("/milestones/project/" + req.Proj_id)
 	milestones := []Milestone{}
 	for _, milestoneJSON := range milestonesJSON {
 		milestone := p.milestoneJSONToMilestone(milestoneJSON)
 		milestones = append(milestones, milestone)
 	}
-	users := p.getUsers(projectJSON["users"].([]string))
+	user_ids_interface := projectJSON["users"].([]interface{})
+	user_ids := []string{}
+	for _, user_id := range user_ids_interface {
+		user_ids = append(user_ids, user_id.(string))
+	}
+	users := p.getUsers(user_ids)
 	res.Id = projectJSON["id"].(string)
 	res.Name = projectJSON["name"].(string)
 	res.Deadline = projectJSON["deadline"].(string)
@@ -55,7 +72,7 @@ func (p *ProjectService) GetProjectsFromUser(req *GetProjectsFromUserRequest, re
 			Id:         projectJSON["id"].(string),
 			Name:       projectJSON["name"].(string),
 			Deadline:   projectJSON["deadline"].(string),
-			NumOfUsers: len(projectJSON["users"].([]string)),
+			NumOfUsers: len(projectJSON["users"].([]interface{})),
 		})
 	}
 	res.Projects = projects
@@ -73,7 +90,7 @@ func (p *ProjectService) AddUserToProject(req *AddUserToProjectRequest, res *Use
 		Id:         projectJSON["id"].(string),
 		Name:       projectJSON["name"].(string),
 		Deadline:   projectJSON["deadline"].(string),
-		NumOfUsers: len(projectJSON["users"].([]string)),
+		NumOfUsers: len(projectJSON["users"].([]interface{})),
 	}
 	res.User = User{
 		Id:        userJSOn[0]["id"].(string),
@@ -212,28 +229,28 @@ func (p *ProjectService) milestoneJSONToMilestone(milestoneJSON map[string]inter
 func (p *ProjectService) taskJSONTOTask(taskJSON map[string]interface{}) Task {
 	user_id, ok := taskJSON["user"]
 	var userPtr *User = nil
-	if ok {
+	if ok && user_id != nil {
 		userPtr = &(p.getUsers([]string{user_id.(string)})[0])
 	}
 	var activeStartPtr *string = nil
 	var activeEndPtr *string = nil
 	activePeriod, ok := taskJSON["active_period"]
-	if ok {
-		activeStart, ok := activePeriod.(map[string]interface{})["start"].(string)
-		if ok {
-			activeStartPtr = &activeStart
+	if ok && activePeriod != nil {
+		activeStart, ok := activePeriod.(map[string]interface{})["start"]
+		if ok && activeStart != nil {
+			activeStartPtr = activeStart.(*string)
 		}
-		activeEnd, ok := activePeriod.(map[string]interface{})["end"].(string)
-		if ok {
-			activeEndPtr = &activeEnd
+		activeEnd, ok := activePeriod.(map[string]interface{})["end"]
+		if ok && activeEnd != nil {
+			activeEndPtr = activeEnd.(*string)
 		}
 	}
 	problems := []Problem{}
-	for _, problemJSON := range taskJSON["problems"].([]map[string]string) {
+	for _, problemJSON := range taskJSON["problems"].([]map[string]interface{}) {
 		problems = append(problems, Problem{
-			Id:       problemJSON["id"],
-			Name:     problemJSON["name"],
-			PostedAt: problemJSON["posted_at"],
+			Id:       problemJSON["id"].(string),
+			Name:     problemJSON["name"].(string),
+			PostedAt: problemJSON["posted_at"].(string),
 		})
 	}
 

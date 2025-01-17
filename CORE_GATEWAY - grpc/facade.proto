@@ -93,6 +93,15 @@ service ProjectService {
     // - publish udpate task
     // - publish notification "task completed"
     rpc CompleteTask(TaskID) returns (Empty);
+
+    rpc Hello(World) returns (HelloWorld);
+}
+
+message World {
+    string world = 1;
+}
+message HelloWorld {
+    string HelloWorld = 1;
 }
 
 //=================
