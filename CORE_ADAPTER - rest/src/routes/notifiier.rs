@@ -125,5 +125,8 @@ fn get_and_decode_token(req: HttpRequest) -> (bool, String) {
 
 // Configure routes
 pub fn config(cfg: &mut web::ServiceConfig) {
-    cfg.service(subscribe_friends);
+    cfg.service(subscribe_friends)
+    .service(subscribe_project)
+    .service(subscribe_projects_list)
+    .service(subscribe_all);
 }
