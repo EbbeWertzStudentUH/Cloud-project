@@ -12,7 +12,7 @@ mod routes;
 mod schemas;
 mod grpc_client;
 mod proto_generated {
-    tonic::include_proto!("facade_service");
+    tonic::include_proto!("gateway_service");
 }
 
 pub static GRPC_CLIENT_USERSERVICE: Lazy<Arc<Mutex<Option<UserServiceClient<Channel>>>>> = Lazy::new(|| {

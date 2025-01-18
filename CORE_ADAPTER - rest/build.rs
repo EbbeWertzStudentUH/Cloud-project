@@ -10,7 +10,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     tonic_build::configure()
         // .out_dir(out_dir) // Specify the output directory
-        .compile_protos(&["proto/facade.proto"], &["proto"])?; // Adjust paths to your proto files
-    println!("cargo:rerun-if-changed=proto/facade.proto");
+        .compile_protos(&["proto/gateway.proto"], &["proto"])?; // Adjust paths to your proto files
+    println!("cargo:rerun-if-changed=proto/gateway.proto");
     Ok(())
 }
