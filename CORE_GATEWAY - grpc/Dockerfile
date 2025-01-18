@@ -10,8 +10,8 @@ RUN apt-get update && apt-get install -y protobuf-compiler && \
 
 FROM base AS proto
 
-COPY facade.proto .
-RUN protoc --go_out=. --go-grpc_out=. facade.proto
+COPY gateway.proto .
+RUN protoc --go_out=. --go-grpc_out=. gateway.proto
 
 
 
