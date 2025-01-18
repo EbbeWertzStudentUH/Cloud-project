@@ -67,11 +67,11 @@ service ProjectService {
    
     // proj facacde: CreateMilestoneInProject
     // notifier: publish update milestones list
-    rpc CreateMilestoneInProject(MilestoneAddRequest) returns (Empty);
+    rpc CreateMilestoneInProject(MilestoneCreateRequest) returns (Empty);
     
     // proj facade: CreateTaskInMilestone
     // notifier: publish udpate tasks list
-    rpc CreateTaskInMilestone(TaskAddRequest) returns (Empty);
+    rpc CreateTaskInMilestone(TaskCreateRequest) returns (Empty);
     
     // proj facade: AddProblemToTask
     // notifier:
@@ -186,37 +186,43 @@ message Project {
     repeated Milestone milestones = 7; 
 }
 message Milestone {
-    optional string id = 1;
+    string id = 1;
     string name = 2;
     string deadline = 3;
     repeated Task tasks = 4;
+    int32 numOfProblems = 5;
+    int32 numOfTasks = 6;
+    int32 numOfFinishedTasks = 7;
 }
-message MilestoneAddRequest{
+message MilestoneCreateRequest{
     string project_id = 1;
-    Milestone milestone = 2;
+    string name = 2;
+    string deadline = 3;
 }
 message AddUserToProjectRequest{
     string project_id = 1;
     string user_id = 2;
 }
 message Task{
-    optional string id = 1;
+    string id = 1;
     string name = 2;
-    optional string status = 3;
+    string status = 3;
     optional User user = 4;
     optional string activePeriodStart = 5;
     optional string activePeriodEnd = 6;
     repeated Problem problems = 7;
+    int32 numOfProblems = 8;
+    bool IsAssigned = 9;
 }
 message Problem{
     optional string id = 1;
     string name = 2;
     string posted_at = 3;
 }
-message TaskAddRequest{
+message TaskCreateRequest{
     string project_id = 1;
     string milestone_id = 2;
-    Task task = 3;
+    string name = 3;
 }
 message ProblemAddRequest{
     string project_id = 1;

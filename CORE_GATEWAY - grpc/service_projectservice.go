@@ -115,11 +115,11 @@ func (s *ProjectServiceServer) AddUserToProject(ctx context.Context, req *pb.Add
 
 // proj facacde: CreateMilestoneInProject
 // notifier: publish update milestones list
-func (s *ProjectServiceServer) CreateMilestoneInProject(ctx context.Context, req *pb.MilestoneAddRequest) (*pb.Empty, error) {
+func (s *ProjectServiceServer) CreateMilestoneInProject(ctx context.Context, req *pb.MilestoneCreateRequest) (*pb.Empty, error) {
 	createReq := &RPCCreateMilestoneInProjectRequest{
 		Proj_id:  req.ProjectId,
-		Name:     req.Milestone.Name,
-		Deadline: req.Milestone.Deadline,
+		Name:     req.Name,
+		Deadline: req.Deadline,
 	}
 	response := &RPCMilestone{}
 	s.pfc.call("CreateMilestoneInProject", createReq, response)
@@ -140,10 +140,10 @@ func (s *ProjectServiceServer) CreateMilestoneInProject(ctx context.Context, req
 
 // proj facade: CreateTaskInMilestone
 // notifier: publish udpate tasks list
-func (s *ProjectServiceServer) CreateTaskInMilestone(ctx context.Context, req *pb.TaskAddRequest) (*pb.Empty, error) {
+func (s *ProjectServiceServer) CreateTaskInMilestone(ctx context.Context, req *pb.TaskCreateRequest) (*pb.Empty, error) {
 	createReq := &RPCCreateTaskInMilestoneRequest{
 		Milestone_id: req.MilestoneId,
-		Name:         req.Task.Name,
+		Name:         req.Name,
 	}
 	response := &RPCTask{}
 	s.pfc.call("CreateTaskInMilestone", createReq, response)
@@ -268,12 +268,55 @@ func convertMilestonesToProto(milestones []RPCMilestone) []*pb.Milestone {
 	protoMilestones := make([]*pb.Milestone, len(milestones))
 	for i, milestone := range milestones {
 		protoMilestones[i] = &pb.Milestone{
-			Id:       &milestone.Id,
-			Name:     milestone.Name,
-			Deadline: milestone.Deadline,
+			Id:                 milestone.Id,
+			Name:               milestone.Name,
+			Deadline:           milestone.Deadline,
+			NumOfProblems:      int32(milestone.NumOfProblems),
+			NumOfTasks:         int32(milestone.NumOfTasks),
+			NumOfFinishedTasks: int32(milestone.NumOfFinishedTasks),
+			Tasks:              convertTasksToProto(milestone.Tasks),
 		}
 	}
 	return protoMilestones
+}
+
+func convertTasksToProto(tasks []RPCTask) []*pb.Task {
+
+	protoTasks := make([]*pb.Task, len(tasks))
+	for i, task := range tasks {
+		var user *pb.User = nil
+		if task.User != nil {
+			user = &pb.User{
+				Id:        task.User.Id,
+				FirstName: task.User.FirstName,
+				LastName:  task.User.LastName,
+			}
+		}
+		protoTasks[i] = &pb.Task{
+			Id:                task.Id,
+			Name:              task.Name,
+			Status:            task.Status,
+			NumOfProblems:     int32(task.NumOfProblems),
+			IsAssigned:        task.IsAssigned,
+			User:              user,
+			ActivePeriodStart: task.ActiveStartDate,
+			ActivePeriodEnd:   task.ActiveEndDate,
+			Problems:          convertProblemsToProto(task.Problems),
+		}
+	}
+	return protoTasks
+}
+
+func convertProblemsToProto(problems []RPCProblem) []*pb.Problem {
+	protoProblems := make([]*pb.Problem, len(problems))
+	for i, problem := range problems {
+		protoProblems[i] = &pb.Problem{
+			Id:       &problem.Id,
+			Name:     problem.Name,
+			PostedAt: problem.PostedAt,
+		}
+	}
+	return protoProblems
 }
 
 func convertMinimalProjectsToProto(projects []RPCMinimalProject) []*pb.Project {

@@ -738,10 +738,10 @@ type ProjectServiceClient interface {
 	AddUserToProject(ctx context.Context, in *AddUserToProjectRequest, opts ...grpc.CallOption) (*Empty, error)
 	// proj facacde: CreateMilestoneInProject
 	// notifier: publish update milestones list
-	CreateMilestoneInProject(ctx context.Context, in *MilestoneAddRequest, opts ...grpc.CallOption) (*Empty, error)
+	CreateMilestoneInProject(ctx context.Context, in *MilestoneCreateRequest, opts ...grpc.CallOption) (*Empty, error)
 	// proj facade: CreateTaskInMilestone
 	// notifier: publish udpate tasks list
-	CreateTaskInMilestone(ctx context.Context, in *TaskAddRequest, opts ...grpc.CallOption) (*Empty, error)
+	CreateTaskInMilestone(ctx context.Context, in *TaskCreateRequest, opts ...grpc.CallOption) (*Empty, error)
 	// proj facade: AddProblemToTask
 	// notifier:
 	// - publish udpate problems list
@@ -811,7 +811,7 @@ func (c *projectServiceClient) AddUserToProject(ctx context.Context, in *AddUser
 	return out, nil
 }
 
-func (c *projectServiceClient) CreateMilestoneInProject(ctx context.Context, in *MilestoneAddRequest, opts ...grpc.CallOption) (*Empty, error) {
+func (c *projectServiceClient) CreateMilestoneInProject(ctx context.Context, in *MilestoneCreateRequest, opts ...grpc.CallOption) (*Empty, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(Empty)
 	err := c.cc.Invoke(ctx, ProjectService_CreateMilestoneInProject_FullMethodName, in, out, cOpts...)
@@ -821,7 +821,7 @@ func (c *projectServiceClient) CreateMilestoneInProject(ctx context.Context, in 
 	return out, nil
 }
 
-func (c *projectServiceClient) CreateTaskInMilestone(ctx context.Context, in *TaskAddRequest, opts ...grpc.CallOption) (*Empty, error) {
+func (c *projectServiceClient) CreateTaskInMilestone(ctx context.Context, in *TaskCreateRequest, opts ...grpc.CallOption) (*Empty, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(Empty)
 	err := c.cc.Invoke(ctx, ProjectService_CreateTaskInMilestone_FullMethodName, in, out, cOpts...)
@@ -901,10 +901,10 @@ type ProjectServiceServer interface {
 	AddUserToProject(context.Context, *AddUserToProjectRequest) (*Empty, error)
 	// proj facacde: CreateMilestoneInProject
 	// notifier: publish update milestones list
-	CreateMilestoneInProject(context.Context, *MilestoneAddRequest) (*Empty, error)
+	CreateMilestoneInProject(context.Context, *MilestoneCreateRequest) (*Empty, error)
 	// proj facade: CreateTaskInMilestone
 	// notifier: publish udpate tasks list
-	CreateTaskInMilestone(context.Context, *TaskAddRequest) (*Empty, error)
+	CreateTaskInMilestone(context.Context, *TaskCreateRequest) (*Empty, error)
 	// proj facade: AddProblemToTask
 	// notifier:
 	// - publish udpate problems list
@@ -946,10 +946,10 @@ func (UnimplementedProjectServiceServer) GetProjectsFromUser(context.Context, *U
 func (UnimplementedProjectServiceServer) AddUserToProject(context.Context, *AddUserToProjectRequest) (*Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method AddUserToProject not implemented")
 }
-func (UnimplementedProjectServiceServer) CreateMilestoneInProject(context.Context, *MilestoneAddRequest) (*Empty, error) {
+func (UnimplementedProjectServiceServer) CreateMilestoneInProject(context.Context, *MilestoneCreateRequest) (*Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateMilestoneInProject not implemented")
 }
-func (UnimplementedProjectServiceServer) CreateTaskInMilestone(context.Context, *TaskAddRequest) (*Empty, error) {
+func (UnimplementedProjectServiceServer) CreateTaskInMilestone(context.Context, *TaskCreateRequest) (*Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateTaskInMilestone not implemented")
 }
 func (UnimplementedProjectServiceServer) AddProblemToTask(context.Context, *ProblemAddRequest) (*Empty, error) {
@@ -1061,7 +1061,7 @@ func _ProjectService_AddUserToProject_Handler(srv interface{}, ctx context.Conte
 }
 
 func _ProjectService_CreateMilestoneInProject_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(MilestoneAddRequest)
+	in := new(MilestoneCreateRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -1073,13 +1073,13 @@ func _ProjectService_CreateMilestoneInProject_Handler(srv interface{}, ctx conte
 		FullMethod: ProjectService_CreateMilestoneInProject_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ProjectServiceServer).CreateMilestoneInProject(ctx, req.(*MilestoneAddRequest))
+		return srv.(ProjectServiceServer).CreateMilestoneInProject(ctx, req.(*MilestoneCreateRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
 func _ProjectService_CreateTaskInMilestone_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(TaskAddRequest)
+	in := new(TaskCreateRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -1091,7 +1091,7 @@ func _ProjectService_CreateTaskInMilestone_Handler(srv interface{}, ctx context.
 		FullMethod: ProjectService_CreateTaskInMilestone_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ProjectServiceServer).CreateTaskInMilestone(ctx, req.(*TaskAddRequest))
+		return srv.(ProjectServiceServer).CreateTaskInMilestone(ctx, req.(*TaskCreateRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
