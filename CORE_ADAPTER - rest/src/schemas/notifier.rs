@@ -1,7 +1,5 @@
 use serde::{Deserialize, Serialize};
-use crate::proto_generated::{
-    ProjectSubscribeRequest as GRPCProjectSubscribeRequest
-};
+use crate::proto_generated::ProjectSubscribeRequest as GRPCProjectSubscribeRequest;
 
 // REST
 #[derive(Serialize)]
