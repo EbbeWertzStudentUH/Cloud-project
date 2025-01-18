@@ -42,6 +42,7 @@ service UserService {
 service NotificationService {
     rpc subscribeFriendList(UserID) returns (Empty);
     rpc subscribeProjectsList(UserID) returns (Empty);
+    rpc subscribeAllInitial(UserID) returns (Empty);
     rpc switchProjectSubscription(ProjectSubscribeRequest) returns (Empty);
 }
 

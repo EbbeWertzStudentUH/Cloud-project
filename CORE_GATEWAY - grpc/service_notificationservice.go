@@ -39,3 +39,9 @@ func (s *NotificationServiceServer) SwitchProjectSubscription(ctx context.Contex
 	s.notifierClient.Subscribe(req.UserId, "project", []string{req.SubscribeProject})
 	return &pb.Empty{}, nil
 }
+
+func (s *NotificationServiceServer) SubscribeAllInitial(ctx context.Context, req *pb.UserID) (*pb.Empty, error) {
+	s.SubscribeFriendList(ctx, req)
+	s.SubscribeProjectsList(ctx, req)
+	return &pb.Empty{}, nil
+}

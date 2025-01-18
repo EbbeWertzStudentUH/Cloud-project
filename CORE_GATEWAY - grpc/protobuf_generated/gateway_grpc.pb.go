@@ -491,6 +491,7 @@ var UserService_ServiceDesc = grpc.ServiceDesc{
 const (
 	NotificationService_SubscribeFriendList_FullMethodName       = "/gateway_service.NotificationService/subscribeFriendList"
 	NotificationService_SubscribeProjectsList_FullMethodName     = "/gateway_service.NotificationService/subscribeProjectsList"
+	NotificationService_SubscribeAllInitial_FullMethodName       = "/gateway_service.NotificationService/subscribeAllInitial"
 	NotificationService_SwitchProjectSubscription_FullMethodName = "/gateway_service.NotificationService/switchProjectSubscription"
 )
 
@@ -500,6 +501,7 @@ const (
 type NotificationServiceClient interface {
 	SubscribeFriendList(ctx context.Context, in *UserID, opts ...grpc.CallOption) (*Empty, error)
 	SubscribeProjectsList(ctx context.Context, in *UserID, opts ...grpc.CallOption) (*Empty, error)
+	SubscribeAllInitial(ctx context.Context, in *UserID, opts ...grpc.CallOption) (*Empty, error)
 	SwitchProjectSubscription(ctx context.Context, in *ProjectSubscribeRequest, opts ...grpc.CallOption) (*Empty, error)
 }
 
@@ -531,6 +533,16 @@ func (c *notificationServiceClient) SubscribeProjectsList(ctx context.Context, i
 	return out, nil
 }
 
+func (c *notificationServiceClient) SubscribeAllInitial(ctx context.Context, in *UserID, opts ...grpc.CallOption) (*Empty, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(Empty)
+	err := c.cc.Invoke(ctx, NotificationService_SubscribeAllInitial_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *notificationServiceClient) SwitchProjectSubscription(ctx context.Context, in *ProjectSubscribeRequest, opts ...grpc.CallOption) (*Empty, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(Empty)
@@ -547,6 +559,7 @@ func (c *notificationServiceClient) SwitchProjectSubscription(ctx context.Contex
 type NotificationServiceServer interface {
 	SubscribeFriendList(context.Context, *UserID) (*Empty, error)
 	SubscribeProjectsList(context.Context, *UserID) (*Empty, error)
+	SubscribeAllInitial(context.Context, *UserID) (*Empty, error)
 	SwitchProjectSubscription(context.Context, *ProjectSubscribeRequest) (*Empty, error)
 	mustEmbedUnimplementedNotificationServiceServer()
 }
@@ -563,6 +576,9 @@ func (UnimplementedNotificationServiceServer) SubscribeFriendList(context.Contex
 }
 func (UnimplementedNotificationServiceServer) SubscribeProjectsList(context.Context, *UserID) (*Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SubscribeProjectsList not implemented")
+}
+func (UnimplementedNotificationServiceServer) SubscribeAllInitial(context.Context, *UserID) (*Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SubscribeAllInitial not implemented")
 }
 func (UnimplementedNotificationServiceServer) SwitchProjectSubscription(context.Context, *ProjectSubscribeRequest) (*Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SwitchProjectSubscription not implemented")
@@ -624,6 +640,24 @@ func _NotificationService_SubscribeProjectsList_Handler(srv interface{}, ctx con
 	return interceptor(ctx, in, info, handler)
 }
 
+func _NotificationService_SubscribeAllInitial_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UserID)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(NotificationServiceServer).SubscribeAllInitial(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: NotificationService_SubscribeAllInitial_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(NotificationServiceServer).SubscribeAllInitial(ctx, req.(*UserID))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _NotificationService_SwitchProjectSubscription_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(ProjectSubscribeRequest)
 	if err := dec(in); err != nil {
@@ -656,6 +690,10 @@ var NotificationService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "subscribeProjectsList",
 			Handler:    _NotificationService_SubscribeProjectsList_Handler,
+		},
+		{
+			MethodName: "subscribeAllInitial",
+			Handler:    _NotificationService_SubscribeAllInitial_Handler,
 		},
 		{
 			MethodName: "switchProjectSubscription",
