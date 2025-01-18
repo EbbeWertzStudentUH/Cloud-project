@@ -1,7 +1,7 @@
 use actix_web::{App, HttpServer};
 use actix_cors::Cors;
 
-use proto_generated::notification_service_client::NotificationServiceClient;
+use proto_generated::{notification_service_client::NotificationServiceClient, project_service_client::ProjectServiceClient};
 use tokio::sync::Mutex;
 use std::sync::Arc;
 use tonic::transport::Channel;
@@ -21,7 +21,9 @@ pub static GRPC_CLIENT_USERSERVICE: Lazy<Arc<Mutex<Option<UserServiceClient<Chan
 pub static GRPC_CLIENT_NOTIFICATIONSERVICE: Lazy<Arc<Mutex<Option<NotificationServiceClient<Channel>>>>> = Lazy::new(|| {
     Arc::new(Mutex::new(None)) // Initially None
 });
-
+pub static GRPC_CLIENT_PROJECTSERVICE: Lazy<Arc<Mutex<Option<ProjectServiceClient<Channel>>>>> = Lazy::new(|| {
+    Arc::new(Mutex::new(None)) // Initially None
+});
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
@@ -38,6 +40,11 @@ async fn main() -> std::io::Result<()> {
     {
         let mut grpc_client_notificationservice_lock = GRPC_CLIENT_NOTIFICATIONSERVICE.lock().await;
         *grpc_client_notificationservice_lock = Some(grpc_client_notificationservice);
+    }
+    let grpc_client_projectservice = grpc_client::try_to_connect_projectservice(gateway_url.as_str()).await;
+    {
+        let mut grpc_client_projectservice_lock = GRPC_CLIENT_PROJECTSERVICE.lock().await;
+        *grpc_client_projectservice_lock = Some(grpc_client_projectservice);
     }
     println!("connected to grpc");
     
