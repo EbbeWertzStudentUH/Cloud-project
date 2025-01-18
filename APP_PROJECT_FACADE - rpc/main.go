@@ -21,6 +21,7 @@ func main() {
 	if err != nil {
 		log.Fatal("Error registering RPC service:", err)
 	}
+	service.GetFullProjectById(&GetProjectByIdRequest{Proj_id: "124f84b3-b0d1-4acf-83b9-1445c1d08ab7"}, &FullProject{})
 
 	listener, err := net.Listen("tcp", ":"+os.Getenv("LISTEN_PORT"))
 	if err != nil {

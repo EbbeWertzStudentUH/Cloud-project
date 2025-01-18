@@ -29,7 +29,7 @@ const generalResolvers = {
 			FROM users
 			WHERE id IN (${meerdereVraagtekens});
 			`,
-			[ids]
+			ids
 		);
 		console.log(rows);
 		return rows;

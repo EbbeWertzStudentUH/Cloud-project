@@ -203,12 +203,12 @@ func (p *ProjectService) getUsers(userID []string) []User {
 }
 
 func (p *ProjectService) milestoneJSONToMilestone(milestoneJSON map[string]interface{}) Milestone {
-	tasksJSON, _ := p.db.GET("/tasks/milestone/" + milestoneJSON["id"].(string))
+	tasksJSON, _ := p.db.GETMULTI("/tasks/milestone/" + milestoneJSON["id"].(string))
 	tasks := []Task{}
 	numOfProblems := 0
 	NumOfFinishedTasks := 0
 	for _, taskJSON := range tasksJSON {
-		task := p.taskJSONTOTask(taskJSON.(map[string]interface{}))
+		task := p.taskJSONTOTask(taskJSON)
 		tasks = append(tasks, task)
 		numOfProblems += task.NumOfProblems
 		if task.Status == "closed" {
@@ -248,11 +248,11 @@ func (p *ProjectService) taskJSONTOTask(taskJSON map[string]interface{}) Task {
 		}
 	}
 	problems := []Problem{}
-	for _, problemJSON := range taskJSON["problems"].([]map[string]interface{}) {
+	for _, problemJSON := range taskJSON["problems"].([]interface{}) {
 		problems = append(problems, Problem{
-			Id:       problemJSON["id"].(string),
-			Name:     problemJSON["name"].(string),
-			PostedAt: problemJSON["posted_at"].(string),
+			Id:       problemJSON.(map[string]interface{})["id"].(string),
+			Name:     problemJSON.(map[string]interface{})["name"].(string),
+			PostedAt: problemJSON.(map[string]interface{})["posted_at"].(string),
 		})
 	}
 

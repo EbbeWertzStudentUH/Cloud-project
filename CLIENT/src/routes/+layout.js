@@ -42,7 +42,7 @@ function logout() {
 }
 
 async function subscribeToFriends(){
-	await PUTwithTokenNoResult('/notifier/subscribe-friends');
+	await PUTwithTokenNoResult('/notifier/subscribe/friends');
 }
 
 async function deleteFriend(friend_id) {
