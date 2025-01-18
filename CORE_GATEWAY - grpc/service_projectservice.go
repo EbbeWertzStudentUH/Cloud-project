@@ -94,13 +94,13 @@ func (s *ProjectServiceServer) AddUserToProject(ctx context.Context, req *pb.Add
 	response := &RPCUserAddToProjectResponse{}
 	s.pfc.call("AddUserToProject", addReq, response)
 
-	s.nc.PublishUpdate("Project", req.ProjectId, "user_add", req.UserId, map[string]interface{}{
+	s.nc.PublishUpdate("projects", req.ProjectId, "user_add", req.UserId, map[string]interface{}{
 		"id":         response.User.Id,
 		"first_name": response.User.FirstName,
 		"last_name":  response.User.LastName,
 	})
 
-	s.nc.PublishNotification("Project", req.ProjectId, response.User.FirstName+" was added to the project.")
+	s.nc.PublishNotification("projects_list", req.ProjectId, response.User.FirstName+" was added to the project: "+response.Project.Name)
 	s.nc.SendUpdate(req.UserId, "new_project", req.ProjectId, map[string]interface{}{
 		"id":           response.Project.Id,
 		"name":         response.Project.Name,
@@ -108,6 +108,7 @@ func (s *ProjectServiceServer) AddUserToProject(ctx context.Context, req *pb.Add
 		"num_of_users": response.Project.NumOfUsers,
 	})
 	s.nc.SendNotification(req.UserId, "You have been added to a project.")
+	s.nc.Subscribe(req.UserId, "projects_list", []string{req.ProjectId})
 
 	return &pb.Empty{}, nil
 }
@@ -124,7 +125,7 @@ func (s *ProjectServiceServer) CreateMilestoneInProject(ctx context.Context, req
 	s.pfc.call("CreateMilestoneInProject", createReq, response)
 
 	// Notifier: publish update milestones list
-	s.nc.PublishUpdate("Project", req.ProjectId, "milestone_add", response.Id, map[string]interface{}{
+	s.nc.PublishUpdate("project", req.ProjectId, "milestone_add", response.Id, map[string]interface{}{
 		"id":                    response.Id,
 		"name":                  response.Name,
 		"deadline":              response.Deadline,
@@ -148,7 +149,7 @@ func (s *ProjectServiceServer) CreateTaskInMilestone(ctx context.Context, req *p
 	s.pfc.call("CreateTaskInMilestone", createReq, response)
 
 	// Notifier: publish update tasks list
-	s.nc.PublishUpdate("Project", req.ProjectId, "task_add", response.Id, map[string]interface{}{
+	s.nc.PublishUpdate("project", req.ProjectId, "task_add", response.Id, map[string]interface{}{
 		"id":              response.Id,
 		"name":            response.Name,
 		"status":          response.Status,
@@ -172,14 +173,14 @@ func (s *ProjectServiceServer) AddProblemToTask(ctx context.Context, req *pb.Pro
 	s.pfc.call("AddProblemToTask", addReq, response)
 
 	// Notifier: publish update problems list
-	s.nc.PublishUpdate("Project", req.ProjectId, "new_problem_in_task", req.TaskId, map[string]interface{}{
+	s.nc.PublishUpdate("project", req.ProjectId, "new_problem_in_task", req.TaskId, map[string]interface{}{
 		"id":        req.Problem.Id,
 		"name":      req.Problem.Name,
 		"posted_at": req.Problem.PostedAt,
 	})
 
 	// Notifier: publish notification "new problem"
-	s.nc.PublishNotification("Project", req.ProjectId, "A new problem: "+req.Problem.Name+" was added to a task.")
+	s.nc.PublishNotification("projects_list", req.ProjectId, "A new problem: "+req.Problem.Name+" was added to a task.")
 
 	return &pb.Empty{}, nil
 }
@@ -197,12 +198,12 @@ func (s *ProjectServiceServer) ResolveProblem(ctx context.Context, req *pb.Resol
 	s.pfc.call("ResolveProblem", resolveReq, response)
 
 	// Notifier: publish update problems list
-	s.nc.PublishUpdate("Project", req.ProjectId, "problem_resolve_in_task", req.TaskId, map[string]interface{}{
+	s.nc.PublishUpdate("project", req.ProjectId, "problem_resolve_in_task", req.TaskId, map[string]interface{}{
 		"problem_id": req.ProblemId,
 	})
 
 	// Notifier: publish notification "problem solved"
-	s.nc.PublishNotification("Project", req.TaskId, "The problem: "+response.Name+"was resolved.")
+	s.nc.PublishNotification("projects_list", req.TaskId, "The problem: "+response.Name+"was resolved.")
 
 	return &pb.Empty{}, nil
 }
@@ -218,7 +219,7 @@ func (s *ProjectServiceServer) AssignTask(ctx context.Context, req *pb.TaskAssig
 	s.pfc.call("AssignTask", assignReq, response)
 
 	// Notifier: publish update task
-	s.nc.PublishUpdate("Project", req.ProjectId, "task_update", req.TaskId, map[string]interface{}{
+	s.nc.PublishUpdate("project", req.ProjectId, "task_update", req.TaskId, map[string]interface{}{
 		"status":              response.Status,
 		"user":                response.User,
 		"active_period_start": response.ActiveStartDate,
@@ -240,13 +241,13 @@ func (s *ProjectServiceServer) CompleteTask(ctx context.Context, req *pb.TaskCom
 	s.pfc.call("CompleteTask", completeReq, response)
 
 	// Notifier: publish update task
-	s.nc.PublishUpdate("Project", req.ProjectId, "task_update", req.TaskId, map[string]interface{}{
+	s.nc.PublishUpdate("project", req.ProjectId, "task_update", req.TaskId, map[string]interface{}{
 		"status":            response.Status,
 		"active_period_end": response.ActiveStartDate,
 	})
 
 	// Notifier: publish notification "task completed"
-	s.nc.PublishNotification("Project", req.ProjectId, "A task was completed.")
+	s.nc.PublishNotification("projects_list", req.ProjectId, "A task was completed.")
 
 	return &pb.Empty{}, nil
 }
