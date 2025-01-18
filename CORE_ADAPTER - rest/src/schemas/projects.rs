@@ -20,7 +20,6 @@ use crate::proto_generated::{
 // REST
 #[derive(Deserialize)]
 pub struct ProjectCreateRequest {
-    pub user_id: String,
     pub name: String,
     pub deadline: String,
     pub github_repo: String,
@@ -30,7 +29,7 @@ pub struct ProjectCreateRequest {
 impl From<ProjectCreateRequest> for GRPCProjectCreateRequest {
     fn from(rest: ProjectCreateRequest) -> Self {
         GRPCProjectCreateRequest {
-            user_id: rest.user_id,
+            user_id: String::new(),
             name: rest.name,
             deadline: rest.deadline,
             github_repo: rest.github_repo,
@@ -202,7 +201,6 @@ impl From<Problem> for GRPCProblem {
 #[derive(Deserialize)]
 pub struct AddUserToProjectRequest {
     pub project_id: String,
-    pub user_id: String,
 }
 
 // REST -> gRPC
@@ -210,7 +208,7 @@ impl From<AddUserToProjectRequest> for GRPCAddUserToProjectRequest {
     fn from(rest: AddUserToProjectRequest) -> Self {
         GRPCAddUserToProjectRequest {
             project_id: rest.project_id,
-            user_id: rest.user_id,
+            user_id: String::new(),
         }
     }
 }
@@ -277,7 +275,6 @@ impl From<ResolveProblemRequest> for GRPCResolveProblemRequest {
 pub struct TaskAssignRequest {
     pub project_id: String,
     pub task_id: String,
-    pub user_id: String,
 }
 
 // REST -> gRPC
@@ -286,7 +283,7 @@ impl From<TaskAssignRequest> for GRPCTaskAssignRequest {
         GRPCTaskAssignRequest {
             project_id: rest.project_id,
             task_id: rest.task_id,
-            user_id: rest.user_id,
+            user_id: String::new(),
         }
     }
 }

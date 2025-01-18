@@ -65,5 +65,6 @@ async fn main() -> std::io::Result<()> {
             )
             .configure(routes::user::config)
             .configure(routes::notifiier::config)
+            .configure(routes::projects::config)
     }).bind(listen_url)?.run().await
 }
