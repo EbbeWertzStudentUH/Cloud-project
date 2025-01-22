@@ -60,8 +60,75 @@
 - ```-> JSON [{first_name, last_name, id}]```
 
 # NOTIFIIER SERVICE
-### /notifier/subscribe-friends
-#### PUT
+### /notifier/subscribe
+#### PUT /notifier/subscribe/friends
 > subscribe de notifier connectie naar de friends list
 - ```HEADER{Authorisation:Bearer token}```
+- ```-> JSON (leeg/message)```
+#### PUT /notifier/subscribe/projects
+> subscribe de notifier connectie naar de projects list
+- ```HEADER{Authorisation:Bearer token}```
+- ```-> JSON (leeg/message)```
+#### PUT /notifier/subscribe/all
+> subscribe de notifier connectie naar de friends list en projects list
+- ```HEADER{Authorisation:Bearer token}```
+- ```-> JSON (leeg/message)```
+#### PUT /notifier/subscribe/project
+> subscribe de notifier connectie naar een specifiek project (en unsubscribe een enventueel vorig geopend project)
+- ```HEADER{Authorisation:Bearer token}, JSON {subscribe_project, unsubscribe_project?}```
+- ```-> JSON (leeg/message)```
+
+
+
+
+# PROJECT SERVICE
+### /project
+#### POST /project
+> maak nieuw project en laat notifier de projects list updaten
+- ```JSON {name, deadline, github_repo}```
+- ```-> JSON (leeg/message)```
+
+#### GET /project/{project_id}
+> get volledig project (incl milestones, tasks, problems)
+- ```(enkel path segments)```
+- ```-> JSON {id, name, users, deadline, github_repo, milestones}```
+
+#### GET /projects
+> get alle projecten waar jij deel van bent (minimale prject data, gewoon voor projects list)
+- ```HEADER{Authorisation:Bearer token}```
+- ```-> JSON [{id, name, users, deadline, github_repo, milestones}]```
+
+#### POST /project/{project_id}/user
+> Add a user to a project
+- ```JSON {user_id}```
+- ```-> JSON (leeg/message)```
+
+#### /project/{project_id}/milestone
+> maak milestone in project
+- ```JSON {name, deadline}```
+- ```-> JSON (leeg/message)```
+
+#### POST /project/{project_id}/milestone/{milestone_id}/task
+> maak task in milestone
+- ```JSON {name}```
+- ```-> JSON (leeg/message)```
+
+#### POST /project/{project_id}/task/{task_id}/problem
+> maak problem in task
+- ```JSON {problem: {id, name, posted_at}}```
+- ```-> JSON (leeg/message)```
+
+#### PUT /project/{project_id}/task/{task_id}/problem/{problem_id}/resolve
+> Resolve problem in task
+- ```JSON {problem_id}```
+- ```-> JSON (leeg/message)```
+
+#### PUT /project/{project_id}/task/{task_id}/assign
+> Assign een task naar jezelf
+- ```HEADER{Authorisation:Bearer token}```
+- ```-> JSON (leeg/message)```
+
+#### PUT /project/{project_id}/task/{task_id}/complete
+> set task naar complete
+- ```(enkel path segments)```
 - ```-> JSON (leeg/message)```

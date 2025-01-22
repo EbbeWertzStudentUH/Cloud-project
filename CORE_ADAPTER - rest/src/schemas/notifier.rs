@@ -13,7 +13,6 @@ pub struct SimpleResponse {
 pub struct ProjectSubscribeRequest {
     pub subscribe_project: String,
     pub unsubscribe_project: Option<String>,
-    pub user_id: String,
 }
 // REST -> gRPC
 impl From<ProjectSubscribeRequest> for GRPCProjectSubscribeRequest {
@@ -21,7 +20,7 @@ impl From<ProjectSubscribeRequest> for GRPCProjectSubscribeRequest {
         GRPCProjectSubscribeRequest {
             subscribe_project: rest.subscribe_project,
             unsubscribe_project: rest.unsubscribe_project,
-            user_id: rest.user_id,
+            user_id: String::new(),
         }
     }
 }

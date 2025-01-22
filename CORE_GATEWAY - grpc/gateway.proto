@@ -106,23 +106,14 @@ message HelloWorld {
 }
 
 //=================
-// MESSAGES
+// MESSAGES ID's
 //=================
 message Empty {}
-message FriendEditRequest{
-    string user_id = 1;
-    string friend_id = 2;
-}
 message UserID{
     string user_id = 1;
 }
 message ProjectID{
     string project_id = 1;
-}
-message ProjectSubscribeRequest{
-    string user_id = 1;
-    optional string unsubscribe_project = 2;
-    string subscribe_project = 3;
 }
 message MilestoneID{
     string milestone_id = 1;
@@ -130,25 +121,15 @@ message MilestoneID{
 message TaskID{
     string task_id = 1;
 }
-message TaskCompleteRequest{
-    string project_id = 1;
-    string task_id = 2;
-}
 message ProblemID{
     string problem_id = 1;
 }
-message ResolveProblemRequest{
-    string project_id = 1;
-    string task_id = 2;
-    string problem_id = 3;
-}
-message User{
-    string first_name = 1;
-    string last_name = 2;
-    string id = 3;
-}
-message FriendsResponse{
-    repeated User users = 1;
+//=================
+// MESSAGES REQUESTS
+//=================
+message FriendEditRequest{
+    string user_id = 1;
+    string friend_id = 2;
 }
 message LoginRequest {
     string email = 1;
@@ -163,19 +144,68 @@ message RegisterRequest {
     string first_name = 3;
     string last_name = 4;
 }
-message AuthResponse {
-    bool valid = 1;
-    string token = 2;
-    User user = 3;
+message ProjectSubscribeRequest{
+    string user_id = 1;
+    optional string unsubscribe_project = 2;
+    string subscribe_project = 3;
 }
-message ProjectsList{
-    repeated Project projects = 1;
+message TaskCompleteRequest{
+    string project_id = 1;
+    string task_id = 2;
+}
+message ResolveProblemRequest{
+    string project_id = 1;
+    string task_id = 2;
+    string problem_id = 3;
 }
 message ProjectCreateRequest{
     string user_id = 1;
     string name = 3;
     string deadline = 5;
     string github_repo = 6;
+}
+message MilestoneCreateRequest{
+    string project_id = 1;
+    string name = 2;
+    string deadline = 3;
+}
+message AddUserToProjectRequest{
+    string project_id = 1;
+    string user_id = 2;
+}
+message TaskCreateRequest{
+    string project_id = 1;
+    string milestone_id = 2;
+    string name = 3;
+}
+message ProblemAddRequest{
+    string project_id = 1;
+    string task_id = 2;
+    Problem problem = 3;
+}
+message TaskAssignRequest{
+    string project_id = 1;
+    string task_id = 2;
+    string user_id  = 3;
+}
+//=================
+// MODELS / RESPONSES
+//=================
+message FriendsResponse{
+    repeated User users = 1;
+}
+message AuthResponse {
+    bool valid = 1;
+    string token = 2;
+    User user = 3;
+}
+message User{
+    string first_name = 1;
+    string last_name = 2;
+    string id = 3;
+}
+message ProjectsList{
+    repeated Project projects = 1;
 }
 message Project {
     string id = 1;
@@ -194,15 +224,6 @@ message Milestone {
     int32 numOfTasks = 6;
     int32 numOfFinishedTasks = 7;
 }
-message MilestoneCreateRequest{
-    string project_id = 1;
-    string name = 2;
-    string deadline = 3;
-}
-message AddUserToProjectRequest{
-    string project_id = 1;
-    string user_id = 2;
-}
 message Task{
     string id = 1;
     string name = 2;
@@ -218,19 +239,4 @@ message Problem{
     optional string id = 1;
     string name = 2;
     string posted_at = 3;
-}
-message TaskCreateRequest{
-    string project_id = 1;
-    string milestone_id = 2;
-    string name = 3;
-}
-message ProblemAddRequest{
-    string project_id = 1;
-    string task_id = 2;
-    Problem problem = 3;
-}
-message TaskAssignRequest{
-    string project_id = 1;
-    string task_id = 2;
-    string user_id  = 3;
 }

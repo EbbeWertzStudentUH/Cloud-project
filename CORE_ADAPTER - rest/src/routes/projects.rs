@@ -1,26 +1,25 @@
-use actix_web::{post, get, put, delete, web, HttpResponse, Responder, HttpRequest};
-use crate::schemas::projects::*;
-use jsonwebtoken::{decode, DecodingKey, Validation, Algorithm};
+use jsonwebtoken::{decode, Algorithm, DecodingKey, Validation};
 use serde::Deserialize;
+use actix_web::{get, post, put, web, HttpRequest, HttpResponse, Responder};
 use crate::proto_generated::{
     ProjectCreateRequest as GRPCProjectCreateRequest,
-    ProjectId as GRPCProjectId,
+    ProjectId as GRPCProjectID,
+    UserId as GRPCUserID,
     AddUserToProjectRequest as GRPCAddUserToProjectRequest,
-    MilestoneAddRequest as GRPCMilestoneAddRequest,
-    TaskAddRequest as GRPCTaskAddRequest,
+    MilestoneCreateRequest as GRPCMilestoneCreateRequest,
+    TaskCreateRequest as GRPCTaskCreateRequest,
     ProblemAddRequest as GRPCProblemAddRequest,
     ResolveProblemRequest as GRPCResolveProblemRequest,
     TaskAssignRequest as GRPCTaskAssignRequest,
     TaskCompleteRequest as GRPCTaskCompleteRequest,
-    UserId as GRPCUserId
+};
+use crate::schemas::projects::{
+    AddUserToProjectRequest, MilestoneCreateRequest, ProblemAddRequest, Project, ProjectCreateRequest, ProjectsList, TaskCreateRequest
 };
 use crate::GRPC_CLIENT_PROJECTSERVICE;
-#[derive(Debug, Deserialize)]
-struct TokenContent {
-    user_id: String,
-}
-// POST /project/create
-#[post("/project/create")]
+
+// POST /project
+#[post("/project")]
 async fn create_project(body: web::Json<ProjectCreateRequest>, req: HttpRequest) -> impl Responder {
     let (ok, user_id) = get_and_decode_token(req);
     if !ok {
@@ -41,13 +40,16 @@ async fn create_project(body: web::Json<ProjectCreateRequest>, req: HttpRequest)
     }
 }
 
-// GET /project/full/{id}
-#[get("/project/full/{id}")]
+// GET /project/{project_id}
+#[get("/project/{project_id}")]
 async fn get_full_project_by_id(project_id: web::Path<String>) -> impl Responder {
-    let grpc_request = GRPCProjectId { project_id: project_id.to_string() };
+    let grpc_request = GRPCProjectID { project_id: project_id.to_string() };
     if let Some(grpc_client) = &mut *GRPC_CLIENT_PROJECTSERVICE.lock().await {
         match grpc_client.get_full_project_by_id(grpc_request).await {
-            Ok(response) => HttpResponse::Ok().json(Project::from(response.into_inner())),
+            Ok(response) => {
+                let http_response: Project = response.into_inner().into();
+                return HttpResponse::Ok().json(http_response)
+            }
             Err(err) => {
                 eprintln!("gRPC call failed: {}", err);
                 HttpResponse::InternalServerError().body("Failed to fetch project")
@@ -58,17 +60,20 @@ async fn get_full_project_by_id(project_id: web::Path<String>) -> impl Responder
     }
 }
 
-// GET /projects/user
-#[get("/projects/user")]
+// GET /projects
+#[get("/projects")]
 async fn get_projects_from_user(req: HttpRequest) -> impl Responder {
     let (ok, user_id) = get_and_decode_token(req);
     if !ok {
         return HttpResponse::InternalServerError().body("Failed to fetch projects");
     }
-    let grpc_request = GRPCUserId { user_id };
+    let grpc_request = GRPCUserID { user_id };
     if let Some(grpc_client) = &mut *GRPC_CLIENT_PROJECTSERVICE.lock().await {
         match grpc_client.get_projects_from_user(grpc_request).await {
-            Ok(response) => HttpResponse::Ok().json(ProjectsList::from(response.into_inner())),
+            Ok(response) => {
+                let http_response: ProjectsList = response.into_inner().into();
+                return HttpResponse::Ok().json(http_response)
+            }
             Err(err) => {
                 eprintln!("gRPC call failed: {}", err);
                 HttpResponse::InternalServerError().body("Failed to fetch projects")
@@ -79,15 +84,11 @@ async fn get_projects_from_user(req: HttpRequest) -> impl Responder {
     }
 }
 
-// POST /project/user
-#[post("/project/user")]
-async fn add_user_to_project(body: web::Json<AddUserToProjectRequest>, req: HttpRequest) -> impl Responder {
-    let (ok, user_id) = get_and_decode_token(req);
-    if !ok {
-        return HttpResponse::InternalServerError().body("Failed to add user to project");
-    }
+// POST /project/{project_id}/user
+#[post("/project/{project_id}/user")]
+async fn add_user_to_project(body: web::Json<AddUserToProjectRequest>, project_id: web::Path<String>) -> impl Responder {
     let mut grpc_request: GRPCAddUserToProjectRequest = body.into_inner().into();
-    grpc_request.user_id = user_id;
+    grpc_request.project_id = project_id.to_string();
     if let Some(grpc_client) = &mut *GRPC_CLIENT_PROJECTSERVICE.lock().await {
         match grpc_client.add_user_to_project(grpc_request).await {
             Ok(_) => HttpResponse::Ok().finish(),
@@ -101,10 +102,11 @@ async fn add_user_to_project(body: web::Json<AddUserToProjectRequest>, req: Http
     }
 }
 
-// POST /project/milestone
-#[post("/project/milestone")]
-async fn create_milestone_in_project(body: web::Json<MilestoneAddRequest>) -> impl Responder {
-    let grpc_request: GRPCMilestoneAddRequest = body.into_inner().into();
+// POST /project/{project_id}/milestone
+#[post("/project/{project_id}/milestone")]
+async fn create_milestone_in_project(body: web::Json<MilestoneCreateRequest>, project_id: web::Path<String>) -> impl Responder {
+    let mut grpc_request: GRPCMilestoneCreateRequest = body.into_inner().into();
+    grpc_request.project_id = project_id.to_string();
     if let Some(grpc_client) = &mut *GRPC_CLIENT_PROJECTSERVICE.lock().await {
         match grpc_client.create_milestone_in_project(grpc_request).await {
             Ok(_) => HttpResponse::Ok().finish(),
@@ -118,10 +120,12 @@ async fn create_milestone_in_project(body: web::Json<MilestoneAddRequest>) -> im
     }
 }
 
-// POST /project/task
-#[post("/project/task")]
-async fn create_task_in_milestone(body: web::Json<TaskAddRequest>) -> impl Responder {
-    let grpc_request: GRPCTaskAddRequest = body.into_inner().into();
+// POST /project/{project_id}/milestone/{milestone_id}/task
+#[post("/project/{project_id}/milestone/{milestone_id}/task")]
+async fn create_task_in_milestone(body: web::Json<TaskCreateRequest>, project_id: web::Path<String>, milestone_id: web::Path<String>) -> impl Responder {
+    let mut grpc_request: GRPCTaskCreateRequest = body.into_inner().into();
+    grpc_request.project_id = project_id.to_string();
+    grpc_request.milestone_id = milestone_id.to_string();
     if let Some(grpc_client) = &mut *GRPC_CLIENT_PROJECTSERVICE.lock().await {
         match grpc_client.create_task_in_milestone(grpc_request).await {
             Ok(_) => HttpResponse::Ok().finish(),
@@ -135,16 +139,18 @@ async fn create_task_in_milestone(body: web::Json<TaskAddRequest>) -> impl Respo
     }
 }
 
-// POST /project/task/problem
-#[post("/project/task/problem")]
-async fn add_problem_to_task(body: web::Json<ProblemAddRequest>) -> impl Responder {
-    let grpc_request: GRPCProblemAddRequest = body.into_inner().into();
+// POST /project/{project_id}/task/{task_id}/problem
+#[post("/project/{project_id}/task/{task_id}/problem")]
+async fn add_problem_to_task(body: web::Json<ProblemAddRequest>, project_id: web::Path<String>, task_id: web::Path<String>) -> impl Responder {
+    let mut grpc_request: GRPCProblemAddRequest = body.into_inner().into();
+    grpc_request.project_id = project_id.to_string();
+    grpc_request.task_id = task_id.to_string();
     if let Some(grpc_client) = &mut *GRPC_CLIENT_PROJECTSERVICE.lock().await {
         match grpc_client.add_problem_to_task(grpc_request).await {
             Ok(_) => HttpResponse::Ok().finish(),
             Err(err) => {
                 eprintln!("gRPC call failed: {}", err);
-                HttpResponse::InternalServerError().body("Failed to add problem")
+                HttpResponse::InternalServerError().body("Failed to add problem to task")
             }
         }
     } else {
@@ -152,10 +158,14 @@ async fn add_problem_to_task(body: web::Json<ProblemAddRequest>) -> impl Respond
     }
 }
 
-// POST /project/task/problem/resolve
-#[delete("/project/task/problem/resolve")]
-async fn resolve_problem(body: web::Json<ResolveProblemRequest>) -> impl Responder {
-    let grpc_request: GRPCResolveProblemRequest = body.into_inner().into();
+// PUT /project/{project_id}/task/{task_id}/problem/{problem_id}/resolve
+#[put("/project/{project_id}/task/{task_id}/problem/{problem_id}/resolve")]
+async fn resolve_problem(project_id: web::Path<String>, task_id: web::Path<String>, problem_id: web::Path<String>) -> impl Responder {
+    let grpc_request = GRPCResolveProblemRequest{
+        project_id: project_id.to_string(),
+        problem_id: problem_id.to_string(),
+        task_id: task_id.to_string()
+    };
     if let Some(grpc_client) = &mut *GRPC_CLIENT_PROJECTSERVICE.lock().await {
         match grpc_client.resolve_problem(grpc_request).await {
             Ok(_) => HttpResponse::Ok().finish(),
@@ -169,10 +179,18 @@ async fn resolve_problem(body: web::Json<ResolveProblemRequest>) -> impl Respond
     }
 }
 
-// POST /project/task/assign
-#[put("/project/task/assign")]
-async fn assign_task(body: web::Json<TaskAssignRequest>) -> impl Responder {
-    let grpc_request: GRPCTaskAssignRequest = body.into_inner().into();
+// PUT /project/{project_id}/task/{task_id}/assign
+#[put("/project/{project_id}/task/{task_id}/assign")]
+async fn assign_task(req: HttpRequest, project_id: web::Path<String>, task_id: web::Path<String>) -> impl Responder {
+    let (ok, user_id) = get_and_decode_token(req);
+    if !ok {
+        return HttpResponse::InternalServerError().body("Failed to assign task");
+    }
+    let grpc_request = GRPCTaskAssignRequest{
+        user_id: user_id,
+        project_id: project_id.to_string(),
+        task_id: task_id.to_string()
+    };
     if let Some(grpc_client) = &mut *GRPC_CLIENT_PROJECTSERVICE.lock().await {
         match grpc_client.assign_task(grpc_request).await {
             Ok(_) => HttpResponse::Ok().finish(),
@@ -186,10 +204,13 @@ async fn assign_task(body: web::Json<TaskAssignRequest>) -> impl Responder {
     }
 }
 
-// POST /project/task/complete
-#[put("/project/task/complete")]
-async fn complete_task(body: web::Json<TaskCompleteRequest>) -> impl Responder {
-    let grpc_request: GRPCTaskCompleteRequest = body.into_inner().into();
+// PUT /project/{project_id}/task/{task_id}/complete
+#[post("/project/{project_id}/task/{task_id}/complete")]
+async fn complete_task( project_id: web::Path<String>, task_id: web::Path<String>) -> impl Responder {
+    let grpc_request = GRPCTaskCompleteRequest{
+        project_id: project_id.to_string(),
+        task_id: task_id.to_string()
+    };
     if let Some(grpc_client) = &mut *GRPC_CLIENT_PROJECTSERVICE.lock().await {
         match grpc_client.complete_task(grpc_request).await {
             Ok(_) => HttpResponse::Ok().finish(),
@@ -201,6 +222,11 @@ async fn complete_task(body: web::Json<TaskCompleteRequest>) -> impl Responder {
     } else {
         HttpResponse::InternalServerError().body("Failed to connect to gRPC client")
     }
+}
+
+#[derive(Debug, Deserialize)]
+struct TokenContent {
+    user_id: String,
 }
 
 fn extract_bearer_token(req: HttpRequest) -> (bool, String) {
