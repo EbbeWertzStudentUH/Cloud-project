@@ -94,7 +94,7 @@ func (s *ProjectServiceServer) AddUserToProject(ctx context.Context, req *pb.Add
 	response := &RPCUserAddToProjectResponse{}
 	s.pfc.call("AddUserToProject", addReq, response)
 
-	s.nc.PublishUpdate("projects", req.ProjectId, "user_add", req.UserId, map[string]interface{}{
+	s.nc.PublishUpdate("project", req.ProjectId, "user_add", req.UserId, map[string]interface{}{
 		"id":         response.User.Id,
 		"first_name": response.User.FirstName,
 		"last_name":  response.User.LastName,

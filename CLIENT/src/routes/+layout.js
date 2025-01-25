@@ -2,10 +2,11 @@ import { GETwithToken, POST, POSTWithToken, DELETEwithToken, initializeWebSocket
 import { goto } from '$app/navigation';
 import { unsetUser, updateUser } from '../stores/user';
 import { updateFriendRequests, updateFriends } from '../stores/friends';
+import { updateProjectsList } from "../stores/projects";
 
 
 export async function load() {
-	return { loadUser, logout, deleteFriend, loadFullFriendsList, loadFullFriendRequestsList, acceptFriendRequest, rejectFriendRequest, subscribeToFriends, doInitialRequests };
+	return { loadUser, logout, deleteFriend, loadFullFriendsList, loadFullFriendRequestsList, acceptFriendRequest, rejectFriendRequest, subscribeAllInitial, doInitialRequests };
 }
 
 async function loadUser() {
@@ -31,7 +32,8 @@ async function doInitialRequests(){
 	initializeWebSocket();
 	await loadFullFriendsList();
 	await loadFullFriendRequestsList();
-	await subscribeToFriends();
+	await subscribeAllInitial();
+	await loadProjectsList();
 }
 
 function logout() {
@@ -41,8 +43,13 @@ function logout() {
 	goto('/login');
 }
 
-async function subscribeToFriends(){
-	await PUTwithTokenNoResult('/notifier/subscribe/friends');
+async function loadProjectsList() {
+    const resp = await GETwithToken('/projects');
+    updateProjectsList(resp.projects)
+  }
+
+async function subscribeAllInitial(){
+	await PUTwithTokenNoResult('/notifier/subscribe/all');
 }
 
 async function deleteFriend(friend_id) {
