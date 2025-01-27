@@ -46,7 +46,7 @@
 
 <Notifications />
 
-<div class="flex h-screen flex-col bg-slate-950">
+<div class="flex h-full min-h-screen flex-col bg-slate-950">
 	<nav
 		class="flex items-center justify-between border-b-2 border-slate-500 bg-slate-900 p-4 text-white"
 	>
@@ -69,7 +69,7 @@
 
 	<div class="flex flex-1">
 
-		<div class="flex-1 ">
+		<div class="flex-1">
 			<slot></slot>
 		</div>
 		{#if currentUser }

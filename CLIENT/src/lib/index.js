@@ -5,8 +5,8 @@ import { addMessage } from '../stores/updatemessages';
 let ws = null;
 
 export async function GETwithToken(path) {
-    const token = getToken();
-    if(!token) return;
+	const token = getToken();
+	if (!token) return;
 	try {
 		const res = await fetch('http://localhost:3001' + path, {
 			method: 'GET',
@@ -15,124 +15,132 @@ export async function GETwithToken(path) {
 
 		if (res.ok) {
 			const data = await res.json();
-      console.log(" ===== GET RESULT ===== ");
-      console.log(data);
+			console.log(' ===== GET RESULT ===== ');
+			console.log(data);
 			return data;
 		} else {
-            console.error('fetch GET with token gave error response: ', res.status, res.body);
-        }
+			console.error('fetch GET with token gave error response: ', res.status, res.body);
+		}
 	} catch (err) {
 		console.error('Failed to fetch GET with token:', err);
 	}
 }
-export async function PUTwithTokenNoResult(path) {
-  const token = getToken();
-  if(!token) return;
-try {
-  const res = await fetch('http://localhost:3001' + path, {
-    method: 'PUT',
-    headers: { Authorization: `Bearer ${token}` }
-  });
+export async function PUTwithTokenNoResult(path, body = null) {
+	const token = getToken();
+	if (!token) return;
+	try {
+		const res = await fetch('http://localhost:3001' + path, {
+			method: 'PUT',
+			headers: body
+				? {
+						'Content-Type': 'application/json',
+						Authorization: `Bearer ${token}`
+					}
+				: { Authorization: `Bearer ${token}` },
+        body: body ? JSON.stringify(body) : ''
+		});
 
-  if (!res.ok) {
-    console.error('fetch GET with token gave error response: ', res.status, res.body);
-  }
-} catch (err) {
-  console.error('Failed to fetch GET with token:', err);
-}
+		if (!res.ok) {
+			console.error('fetch GET with token gave error response: ', res.status, res.body);
+		}
+	} catch (err) {
+		console.error('Failed to fetch GET with token:', err);
+	}
 }
 export async function GET(path) {
-try {
-  const res = await fetch('http://localhost:3001'+path, {
-    method: 'GET',
-  });
-  if (res.ok) {
-    const data = await res.json();
-    console.log(" ===== GET RESULT ===== ");
-    console.log(data);
-    return data;
-  } else {
-          console.error('fetch GET gave error response: ', res.status, res.body);
-      }
-} catch (err) {
-  console.error('Failed to fetch GET:', err);
-}
+	try {
+		const res = await fetch('http://localhost:3001' + path, {
+			method: 'GET'
+		});
+		if (res.ok) {
+			const data = await res.json();
+			console.log(' ===== GET RESULT ===== ');
+			console.log(data);
+			return data;
+		} else {
+			console.error('fetch GET gave error response: ', res.status, res.body);
+		}
+	} catch (err) {
+		console.error('Failed to fetch GET:', err);
+	}
 }
 export async function DELETEwithToken(body, path) {
-  const token = getToken();
-  if(!token) return;
-try {
-  const res = await fetch('http://localhost:3001' + path, {
-    method: 'DELETE',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`
-     },
-    body: JSON.stringify(body),
-  });
+	const token = getToken();
+	if (!token) return;
+	try {
+		const res = await fetch('http://localhost:3001' + path, {
+			method: 'DELETE',
+			headers: {
+				'Content-Type': 'application/json',
+				Authorization: `Bearer ${token}`
+			},
+			body: JSON.stringify(body)
+		});
 
-  if (res.ok) {
-    const data = await res.json();
-    console.log(" ===== DELETE RESULT ===== ");
-      console.log(data);
-    return data;
-  } else {
-          console.error('fetch GET with token gave error response: ', res.status, res.body);
-      }
-} catch (err) {
-  console.error('Failed to fetch GET with token:', err);
+		if (res.ok) {
+			const data = await res.json();
+			console.log(' ===== DELETE RESULT ===== ');
+			console.log(data);
+			return data;
+		} else {
+			console.error('fetch GET with token gave error response: ', res.status, res.body);
+		}
+	} catch (err) {
+		console.error('Failed to fetch GET with token:', err);
+	}
 }
-}
-export async function POST(body, path) {
-      try {
-        const res = await fetch('http://localhost:3001'+path, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(body),
-        });
-    
-        if (res.ok) {
-          const data = await res.json();
-          console.log(" ===== POST RESULT ===== ");
-          console.log(data);
-          return data;
-        } else {
-            console.error('fetch POST gave error response: ', res.status, res.body);
-        }
-      } catch (err) {
-        console.error('Failed to fetch POST:', err);
-      }
+export async function POST(body, path, responseBody = true) {
+	try {
+		const res = await fetch('http://localhost:3001' + path, {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify(body)
+		});
+
+		if (res.ok) {
+			if (responseBody) {
+				const data = await res.json();
+				console.log(' ===== POST RESULT ===== ');
+				console.log(data);
+				return data;
+			}
+		} else {
+			console.error('fetch POST gave error response: ', res.status, res.body);
+		}
+	} catch (err) {
+		console.error('Failed to fetch POST:', err);
+	}
 }
 export async function POSTWithToken(body, path) {
-      const token = getToken();
-      if(!token) return;
-      try {
-        const res = await fetch('http://localhost:3001'+path, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`
-           },
-          body: JSON.stringify(body),
-        });
-    
-        if (res.ok) {
-          const data = await res.json();
-          console.log(" ===== POST RESULT ===== ");
-          console.log(data);
-          return data;
-        } else {
-            console.error('fetch POST gave error response: ', res.status, res.body);
-        }
-      } catch (err) {
-        console.error('Failed to fetch POST:', err);
-      }
+	const token = getToken();
+	if (!token) return;
+	try {
+		const res = await fetch('http://localhost:3001' + path, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+				Authorization: `Bearer ${token}`
+			},
+			body: JSON.stringify(body)
+		});
+
+		if (res.ok) {
+			const data = await res.json();
+			console.log(' ===== POST RESULT ===== ');
+			console.log(data);
+			return data;
+		} else {
+			console.error('fetch POST gave error response: ', res.status, res.body);
+		}
+	} catch (err) {
+		console.error('Failed to fetch POST:', err);
+	}
 }
 export function getToken() {
 	{
 		const token = localStorage.getItem('authToken');
 		if (!token) {
-            console.log("token is not present, going to login page");
+			console.log('token is not present, going to login page');
 			goto('/login');
 		} else {
 			return token;
@@ -140,33 +148,33 @@ export function getToken() {
 	}
 }
 
-export function killWebSocket(){
-  ws.close();
+export function killWebSocket() {
+	ws.close();
 }
 
 export function initializeWebSocket() {
-  ws = new WebSocket("ws://localhost:3004/ws");
+	ws = new WebSocket('ws://localhost:3004/ws');
 
-  ws.onopen = () => {
-      console.log("WebSocket connected");
-      const token = getToken();
-      ws.send(token);
-  };
+	ws.onopen = () => {
+		console.log('WebSocket connected');
+		const token = getToken();
+		ws.send(token);
+	};
 
-  ws.onmessage = (event) => {
-      const resp = JSON.parse(event.data);
-      console.log("WebSocket message received:", resp);
-      if(resp.type == "notification"){
-        addNotification(resp.data);
-      }
-      addMessage(resp);
-  };
+	ws.onmessage = (event) => {
+		const resp = JSON.parse(event.data);
+		console.log('WebSocket message received:', resp);
+		if (resp.type == 'notification') {
+			addNotification(resp.data);
+		}
+		addMessage(resp);
+	};
 
-  ws.onclose = () => {
-      console.log("WebSocket connection closed");
-  };
+	ws.onclose = () => {
+		console.log('WebSocket connection closed');
+	};
 
-  ws.onerror = (error) => {
-      console.error("WebSocket error:", error);
-  };
+	ws.onerror = (error) => {
+		console.error('WebSocket error:', error);
+	};
 }
