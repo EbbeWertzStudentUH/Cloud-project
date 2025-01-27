@@ -147,6 +147,15 @@ services:
 # APP MICROSERVICES  
 # =========================
 
+  app-ghstats-rest:
+    build:
+      context: "./APP_GHSTATS - rest"
+      dockerfile: Dockerfile
+    container_name: APP_GHSTATS-REST
+    ports:
+      - "3010:3010"
+    networks:
+      - "cloud-netwerk"
   app-project-db-rest:
     build:
       context: "./APP_PROJECT_DB - rest"

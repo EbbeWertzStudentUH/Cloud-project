@@ -1,0 +1,10 @@
+version: "3.8"
+
+services:
+  app-ghstats-rest:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: APP_GHSTATS-REST
+    ports:
+      - "3010:3010"
