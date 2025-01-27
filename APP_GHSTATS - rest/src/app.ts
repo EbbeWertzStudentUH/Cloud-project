@@ -37,9 +37,13 @@ app.post("/github-stats/", async (req: Request, res: Response): Promise<any> => 
   const apiUrl = `https://api.github.com/repos/${repoName}/stats/contributors`;
   try {
     const response = await axios.get(apiUrl, {
-      headers: { "User-Agent": "Node.js-App" },
+      headers: {
+        "User-Agent": "Node.js-App" ,
+        Authorization: `Bearer ${process.env.GH_BEARER_TOKEN}`,
+      },
     });
 
+    
     const contributors = response.data;
     const lastWeekStart = getLastWeekStart();
 
@@ -74,6 +78,7 @@ app.post("/github-stats/", async (req: Request, res: Response): Promise<any> => 
 
     res.json(stats);
   } catch (error: any) {
+    console.log(error)
     res
       .status(error.response?.status || 500)
       .json({ error: error.response?.data || "GitHub API error" });
