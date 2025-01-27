@@ -1,6 +1,8 @@
 import express, { Request, Response } from "express";
 import axios from "axios";
 import dotenv from "dotenv";
+import cors from "cors";
+
 
 dotenv.config();
 
@@ -8,7 +10,10 @@ dotenv.config();
 const app = express();
 const PORT = process.env.LISTEN_PORT;
 
+app.use(cors());
+
 app.use(express.json());
+
 
 const extractRepoName = (ghUrl: string): string | null => {
   const match = ghUrl.match(/github\.com\/([^/]+\/[^/]+)/);
