@@ -26,6 +26,34 @@ const getLastWeekStart = (): number => {
   return currentTimestamp - (currentTimestamp % secondsInWeek);
 };
 
+const fetchContributorStats = async (repoName: string) => {
+  const apiUrl = `https://api.github.com/repos/${repoName}/stats/contributors`;
+  let maxRetries = 5;
+  let retryDelay = 3000;
+
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    try {
+      const response = await axios.get(apiUrl, {
+        headers: {
+          "User-Agent": "Node.js-App",
+          Authorization: `Bearer ${process.env.GH_BEARER_TOKEN}`,
+        },
+      });
+
+      if (response.status === 200) {
+        return response.data;
+      } else if (response.status === 202) {
+        console.log("Data is being prepared. Retrying...");
+        await new Promise((resolve) => setTimeout(resolve, retryDelay));
+      }
+    } catch (error) {
+      console.error("Error fetching stats:");
+      throw error;
+    }
+  }
+  throw new Error("Max retries reached. The data is not ready yet.");
+};
+
 app.post("/github-stats/", async (req: Request, res: Response): Promise<any> => {
   const { githubUrl } = req.body;
 
@@ -34,17 +62,9 @@ app.post("/github-stats/", async (req: Request, res: Response): Promise<any> => 
     return res.status(400).json({ error: "Invalid GitHub repository URL" });
   }
 
-  const apiUrl = `https://api.github.com/repos/${repoName}/stats/contributors`;
   try {
-    const response = await axios.get(apiUrl, {
-      headers: {
-        "User-Agent": "Node.js-App" ,
-        Authorization: `Bearer ${process.env.GH_BEARER_TOKEN}`,
-      },
-    });
-
-    
-    const contributors = response.data;
+    const contributors = await fetchContributorStats(repoName);
+    console.log(contributors)
     const lastWeekStart = getLastWeekStart();
 
     const stats = contributors.map((contributor: any) => {
