@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/go-resty/resty/v2"
 )
@@ -12,6 +13,16 @@ type UserDBClient struct {
 }
 
 func NewUserDBClient(url string) *UserDBClient {
+	client := resty.New()
+	for {
+		_, err := client.R().Head(url)
+		if err == nil {
+			fmt.Println("connected to GRAPQL User DB.")
+			break
+		}
+		fmt.Println("could not connect to GRAPHQL server: user db. Trying again in 3s")
+		time.Sleep(3 * time.Second)
+	}
 	return &UserDBClient{
 		url:        url,
 		restClient: resty.New(),

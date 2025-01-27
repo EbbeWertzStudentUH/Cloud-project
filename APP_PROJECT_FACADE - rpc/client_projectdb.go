@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/go-resty/resty/v2"
 )
@@ -12,9 +13,19 @@ type ProjectDBClient struct {
 }
 
 func NewProjectDBClient(url string) *ProjectDBClient {
+	client := resty.New()
+	for {
+		_, err := client.R().Head(url)
+		if err == nil {
+			fmt.Println("connected to REST project DB.")
+			break
+		}
+		fmt.Println("could not connect to REST server: project db. Trying again in 3s")
+		time.Sleep(3 * time.Second)
+	}
 	return &ProjectDBClient{
 		url:        url,
-		restClient: resty.New(),
+		restClient: client,
 	}
 }
 
