@@ -94,8 +94,8 @@ func (p *ProjectService) AddUserToProject(req *AddUserToProjectRequest, res *Use
 	}
 	res.User = User{
 		Id:        userJSOn[0]["id"].(string),
-		FirstName: userJSOn[0]["id"].(string),
-		LastName:  userJSOn[0]["id"].(string),
+		FirstName: userJSOn[0]["first_name"].(string),
+		LastName:  userJSOn[0]["last_name"].(string),
 	}
 	return nil
 }

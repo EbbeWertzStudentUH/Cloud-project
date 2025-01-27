@@ -74,7 +74,7 @@ func (n *NotifierClient) PublishNotification(topic_name string, topic_id string,
 	data := map[string]interface{}{
 		"topic": map[string]interface{}{
 			"name": topic_name,
-			"id":   topic_id,
+			"ids":  []string{topic_id},
 		},
 		"notification": map[string]interface{}{
 			"message": message,
@@ -101,7 +101,7 @@ func (n *NotifierClient) PublishUpdate(topic_name string, topic_id string, updat
 	data := map[string]interface{}{
 		"topic": map[string]interface{}{
 			"name": topic_name,
-			"id":   topic_id,
+			"ids":  []string{topic_id},
 		},
 		"update": map[string]interface{}{
 			"type":    update_type,
