@@ -4,17 +4,22 @@
 	import { friends } from '../../../stores/friends';
 	import { fade, slide, fly } from 'svelte/transition';
 	import { onUpdateMessageType } from '../../../stores/updatemessages';
+	import GithubStatsTable from '../../../components/GithubStatsTable.svelte';
 
 	export let data;
-	let { fetchProject, addUserToProject } = data;
+	let { fetchProject, addUserToProject, getGithubStats } = data;
 	let showUserAddDropdown = false;
 	let selectedFriend = null;
+	let githubStats = null;
 	
 
 	$: current_open_project = $open_project;
 	$: currentFriends = $friends;
 	onMount(async () => {
 		await fetchProject();
+		if(current_open_project){
+			githubStats = await getGithubStats(current_open_project.github_repo);
+		}
 	});
 	onUpdateMessageType('user_add', (subject, data) => {
 		addUserToOpenProject(data);
@@ -125,6 +130,7 @@
 					</section>
 				</div>
 
+				<GithubStatsTable githubStats={githubStats}></GithubStatsTable>
 				<section class="flex gap-4">
 					<button
 						class="rounded-2xl bg-emerald-500 px-6 py-2 text-slate-900 shadow transition-colors hover:bg-emerald-600"

@@ -5,6 +5,7 @@
 	import { fade, slide, fly } from 'svelte/transition';
 	import { onUpdateMessageType } from '../stores/updatemessages';
 	import { user } from '../stores/user';
+	import { POSTWithToken } from '$lib';
 
 	let showForm = writable(false);
 	let newProject = { name: '', deadline: '', github: '' };
@@ -18,8 +19,12 @@
 		addProject(data);
 	});
 
-	function createProject() {
+	async function createProject() {
 		showForm.set(false);
+		await POSTWithToken(
+			{ name: newProject.name, deadline: newProject.deadline, github_repo: newProject.github },
+			'/project'
+		);
 	}
 </script>
 
