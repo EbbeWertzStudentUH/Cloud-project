@@ -1,15 +1,13 @@
-import { GET, POST, PUTwithTokenNoResult } from "$lib";
-import { updateOpenProject, updateProjectsList } from "../../../stores/projects";
-import { open_project } from '../../../stores/projects';
+import { GET, PUTwithTokenNoResult } from "$lib";
+import { updateOpenProject, open_project } from "../../../stores/projects";
 import {get} from 'svelte/store'
-
 
 
 let project_id = null;
 
 export async function load({ params }) {
     project_id = params.project_id;
-    return {fetchProject, addUserToProject, getGithubStats};
+    return {fetchProject, getGithubStats};
 };
 
 async function fetchProject() {
@@ -23,12 +21,7 @@ async function fetchProject() {
     updateOpenProject(resp);
 }
 
-async function addUserToProject(user_id) {
-    await POST({user_id}, '/project/'+project_id+'/user', false)
-}
-
 async function getGithubStats(gh_url){
-    console.log(gh_url)
     try {
 		const res = await fetch('http://localhost:3010/github-stats', {
 			method: 'POST',

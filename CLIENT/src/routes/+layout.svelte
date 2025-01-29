@@ -50,7 +50,7 @@
 	<nav
 		class="flex items-center justify-between border-b-2 border-slate-500 bg-slate-900 p-4 text-white"
 	>
-		<div class="text-xl font-bold">ProjectCloud</div>
+		<a class="text-xl font-bold" href="/">ProjectCloud</a>
 		<div class="text-l">Organise your projects on the cloud</div>
 		<div>
 			{#if currentUser}
