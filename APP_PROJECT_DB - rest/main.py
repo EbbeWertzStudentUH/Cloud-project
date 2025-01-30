@@ -77,7 +77,7 @@ class StatusRequest(BaseModel):
 
 @app.post("/projects")
 def create_new_project(project: Project):
-    project.id = uuid.uuid4()
+    project.id = str(uuid.uuid4())
     db.projects.insert_one(project.model_dump())
     return project
 
@@ -115,7 +115,7 @@ def add_milestone_to_project(project_id: str, add_req: AddMilestoneRequest):
 
 @app.post("/milestones")
 def create_milestone(milestone: Milestone):
-    milestone.id = uuid.uuid4()
+    milestone.id = str(uuid.uuid4())
     db.milestones.insert_one(milestone.model_dump())
     return milestone
 
@@ -147,7 +147,7 @@ def add_task_to_milestone(milestone_id: str, add_req: AddTaskRequest):
 
 @app.post("/tasks")
 def create_task(task: Task):
-    task.id = uuid.uuid4()
+    task.id = str(uuid.uuid4())
     db.tasks.insert_one(task.model_dump())
     return task
 
@@ -166,7 +166,7 @@ def get_tasks_from_milestone(milestone_id: str):
 
 @app.post("/tasks/{task_id}/problems")
 def add_problem_to_task(task_id: str, problem: Problem):
-    problem.id = uuid.uuid4()
+    problem.id = str(uuid.uuid4())
     result = db.tasks.update_one({"id": task_id}, {"$addToSet": {"problems": problem.model_dump()}})
     if result.matched_count == 0:
         raise HTTPException(status_code=404, detail="Task not found")
