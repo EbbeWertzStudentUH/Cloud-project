@@ -276,5 +276,6 @@ pub fn config(cfg: &mut web::ServiceConfig) {
         .service(create_task_in_milestone)
         .service(add_problem_to_task)
         .service(resolve_problem)
-        .service(complete_task);
+        .service(complete_task)
+        .service(assign_task);
 }
