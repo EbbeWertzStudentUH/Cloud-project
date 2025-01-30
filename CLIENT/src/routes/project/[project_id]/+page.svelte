@@ -1,9 +1,11 @@
 <script>
 	import { onMount } from 'svelte';
-	import { open_project } from '../../../stores/projects';
+	import { addMilestoneToOpenProject, open_project } from '../../../stores/projects';
 	import { friends } from '../../../stores/friends';
 	import Project from '../../../components/Project.svelte';
 	import Milestone from '../../../components/Milestone.svelte';
+	import { slide } from 'svelte/transition';
+	import { onUpdateMessageType } from '../../../stores/updatemessages';
 
 	export let data;
 	let { fetchProject, getGithubStats } = data;
@@ -15,7 +17,12 @@
 
 	onMount(async () => {
 		await fetchProject();
-		githubStats = await getGithubStats(current_open_project.github_repo);
+		if (current_open_project.github_repo != '') {
+			githubStats = await getGithubStats(current_open_project.github_repo);
+		}
+	});
+	onUpdateMessageType('milestone_add', (subject, data) => {
+		addMilestoneToOpenProject(data);
 	});
 </script>
 
@@ -39,11 +46,11 @@
 		</nav>
 
 		<div class="flex gap-4">
-			<aside class="w-1/4 rounded-2xl bg-slate-800 p-4 text-slate-200 shadow-lg">
+			<aside class="h-min w-1/4 rounded-2xl bg-slate-800 p-4 text-slate-200 shadow-lg">
 				<h2 class="mb-3 text-lg font-bold">Milestones</h2>
 				<ul class="space-y-2">
 					{#each current_open_project.milestones as milestone}
-						<li>
+						<li in:slide={{ y: -20, duration: 300 }}>
 							<button
 								class="w-full rounded-lg {milestone === selectedMilestone
 									? 'translate-x-2 cursor-pointer border-2 border-emerald-400 bg-emerald-800'
@@ -53,6 +60,22 @@
 								}}
 							>
 								{milestone.name}
+								<div class="gap-10 text-right">
+									<table>
+										<tbody>
+											<tr>
+												<td class="w-full pr-3 text-xs text-slate-500">Finished tasks: </td>
+												<td class="font-bold text-emerald-200"
+													>{milestone.num_of_finished_tasks}/{milestone.num_of_tasks}</td
+												>
+											</tr>
+											<tr>
+												<td class="w-full pr-3 text-xs text-slate-500">Problems: </td>
+												<td class="font-bold text-red-200">{milestone.num_of_problems}</td>
+											</tr>
+										</tbody>
+									</table>
+								</div>
 							</button>
 						</li>
 					{/each}
@@ -61,9 +84,17 @@
 
 			<section class="flex-1 rounded-2xl bg-slate-900 p-6 text-slate-200 shadow-lg">
 				{#if selectedMilestone}
-					<Milestone milestone={selectedMilestone}></Milestone>
+					<div in:slide={{ y: -20, duration: 300 }} out:slide={{ y: -20, duration: 300 }}>
+						<Milestone milestone={selectedMilestone}></Milestone>
+					</div>
 				{:else}
-					<Project project={current_open_project} githubStats={githubStats}></Project>
+					<div in:slide={{ y: -20, duration: 300 }} out:slide={{ y: -20, duration: 300 }}>
+						<Project
+							project={current_open_project}
+							{githubStats}
+							hasGithub={current_open_project.github_repo != ''}
+						></Project>
+					</div>
 				{/if}
 			</section>
 		</div>

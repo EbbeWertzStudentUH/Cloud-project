@@ -1,4 +1,6 @@
 <script>
+	import Task from "./Task.svelte";
+
     let { milestone } = $props();
 </script>
 <header class="mb-6">
@@ -9,5 +11,14 @@
     <p class="mb-2 text-slate-400">
         Deadline: {milestone.deadline}
     </p>
-    <pre>{JSON.stringify(milestone, null, 2)}</pre>
 </header>
+<section>
+    <h2 class="mb-3 text-lg font-bold">Tasks: </h2>
+				<ul class="space-y-2">
+					{#each milestone.tasks as task}
+						<li>
+							<Task task={task}></Task>
+						</li>
+					{/each}
+				</ul>
+</section>

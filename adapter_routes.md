@@ -103,7 +103,7 @@
 - ```JSON {user_id}```
 - ```-> JSON (leeg/message)```
 
-#### /project/{project_id}/milestone
+#### POST /project/{project_id}/milestone
 > maak milestone in project
 - ```JSON {name, deadline}```
 - ```-> JSON (leeg/message)```

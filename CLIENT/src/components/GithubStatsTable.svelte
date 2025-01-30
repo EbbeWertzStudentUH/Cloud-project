@@ -1,5 +1,6 @@
 <script>
 	import { text } from '@sveltejs/kit';
+	import { fade, slide } from 'svelte/transition';
 
 	let { githubStats } = $props();
 
@@ -10,8 +11,10 @@
 		return '#' + num;
 	}
 </script>
+
 {#if githubStats && githubStats.length > 0}
-	<section class="mb-6 rounded-lg bg-slate-800 p-4 shadow-md">
+	<section in:fade={{ duration: 300 }}
+	class="mb-6 rounded-lg bg-slate-800 p-4 shadow-md">
 		<h2 class="mb-4 text-xl font-semibold text-emerald-400">GitHub Stats</h2>
 		<div class="overflow-x-auto">
 			<table class="w-full border-collapse text-left text-sm text-slate-400">
@@ -52,7 +55,15 @@
 		</div>
 	</section>
 {:else}
-	<section class="mb-6 rounded-lg bg-slate-800 p-4 text-center shadow-md animate-pulse">
-		<p class="text-slate-600">Github statistics</p>
+	<section out:slide={{ duration: 300 }} class="mb-6 animate-pulse rounded-lg bg-slate-800 p-4 text-center shadow-md">
+		<p class="text-2xl font-bold text-slate-600">Github statistics</p>
+		<div class="flex items-center justify-center space-x-2">
+			{#each [0, 1, 2] as dot}
+				<div
+					class="my-4 h-2 w-2 animate-bounce rounded-full bg-slate-400 [animation-delay:-0.{dot *
+						3}s]"
+				></div>
+			{/each}
+		</div>
 	</section>
 {/if}

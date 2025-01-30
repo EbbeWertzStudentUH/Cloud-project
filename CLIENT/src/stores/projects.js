@@ -11,6 +11,14 @@ export function addUserToOpenProject(user) {
 		};
 	});
 }
+export function addMilestoneToOpenProject(milestone) {
+	open_project.update((project) => {
+		return {
+			...project,
+			milestones: [...project.milestones, milestone]
+		};
+	});
+}
 
 export function updateOpenProject(project) {
 	open_project.set(project);

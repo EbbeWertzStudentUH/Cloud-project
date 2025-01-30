@@ -73,7 +73,7 @@
 			<slot></slot>
 		</div>
 		{#if currentUser }
-		<aside class="w-64 bg-slate-900 border-r-2 border-slate-500 text-white flex flex-col">
+		<aside class="w-64 bg-slate-900 border-r-2 border-slate-500 text-white flex flex-col bottom-0">
 			<div class="p-4 border-b-2 border-slate-500">
 				<h2 class="text-lg font-bold">Friend Requests</h2>
 				<ul>
