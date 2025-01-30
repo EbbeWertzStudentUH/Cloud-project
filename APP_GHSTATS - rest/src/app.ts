@@ -21,9 +21,17 @@ const extractRepoName = (ghUrl: string): string | null => {
 };
 
 const getLastWeekStart = (): number => {
-  const currentTimestamp = Math.floor(Date.now() / 1000);
-  const secondsInWeek = 7 * 24 * 60 * 60;
-  return currentTimestamp - (currentTimestamp % secondsInWeek);
+    const date = new Date();
+    const dayOfWeek = date.getUTCDay(); // 0 = Sunday ... 6 = Saturday
+
+    const sundayUTC = new Date(Date.UTC(
+      date.getUTCFullYear(),
+      date.getUTCMonth(),
+      date.getUTCDate() - dayOfWeek,
+      0, 0, 0, 0
+  ));
+
+    return Math.floor(sundayUTC.getTime() / 1000); // to Unix
 };
 
 const fetchContributorStats = async (repoName: string) => {
@@ -66,6 +74,7 @@ app.post("/github-stats/", async (req: Request, res: Response): Promise<any> => 
     const contributors = await fetchContributorStats(repoName);
     console.log(contributors)
     const lastWeekStart = getLastWeekStart();
+    console.log("last week: ", lastWeekStart)
 
     const stats = contributors.map((contributor: any) => {
       const username = contributor.author.login;
@@ -80,7 +89,7 @@ app.post("/github-stats/", async (req: Request, res: Response): Promise<any> => 
       );
 
       const lastWeek = contributor.weeks.find(
-        (week: any) => week.w === lastWeekStart
+        (week: any) => week.w == lastWeekStart
       ) || { a: 0, d: 0, c: 0 };
 
       return {
