@@ -10,12 +10,13 @@
     let password = '';
     let first_name = '';
     let last_name = '';
+    let error = null;
   
     async function register() {
       const resp = await POST({email, password, first_name, last_name}, '/user/create_account');
       if(resp.valid){
         localStorage.setItem('authToken', resp.token);
-        const { id, first_name, last_name } = data.user;
+        const { id, first_name, last_name } = resp.user;
 			  updateUser({ id, first_name, last_name });
         goto('/');
       } else {
@@ -24,7 +25,7 @@
     }
   </script>
   
-  <main class="flex justify-center items-center flex-grow">
+  <main class="flex justify-center items-center flex-grow h-full">
     <div class="bg-slate-800 border-2 border-emerald-700 p-8 shadow-md rounded w-96">
       <h1 class="text-xl font-bold mb-4">Register</h1>
       <form on:submit|preventDefault={register}>
