@@ -1,6 +1,6 @@
 <script>
 	import { onMount } from 'svelte';
-	import { addMilestoneToOpenProject, addTaskToMilestone, addUserToOpenProject, open_project } from '../../../stores/projects';
+	import { addMilestoneToOpenProject, addTaskToMilestone, addUserToOpenProject, open_project, updateTask } from '../../../stores/projects';
 	import { friends } from '../../../stores/friends';
 	import Project from '../../../components/Project.svelte';
 	import Milestone from '../../../components/Milestone.svelte';
@@ -29,6 +29,9 @@
 	});
 	onUpdateMessageType('new_task_in_milestne', (subject, data) => {
 		addTaskToMilestone(subject, data)
+	});
+	onUpdateMessageType('task_update', (subject, data) => {
+		updateTask(subject, data);
 	});
 </script>
 
