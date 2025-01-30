@@ -169,18 +169,18 @@ func (s *ProjectServiceServer) AddProblemToTask(ctx context.Context, req *pb.Pro
 		Task_id:      req.TaskId,
 		Problem_name: req.Problem.Name,
 	}
-	response := &RPCEmptyResponse{}
+	response := &RPCProblem{}
 	s.pfc.call("AddProblemToTask", addReq, response)
 
 	// Notifier: publish update problems list
 	s.nc.PublishUpdate("project", req.ProjectId, "new_problem_in_task", req.TaskId, map[string]interface{}{
-		"id":        req.Problem.Id,
-		"name":      req.Problem.Name,
-		"posted_at": req.Problem.PostedAt,
+		"id":        response.Id,
+		"name":      response.Name,
+		"posted_at": response.PostedAt,
 	})
 
 	// Notifier: publish notification "new problem"
-	s.nc.PublishNotification("projects_list", req.ProjectId, "A new problem: "+req.Problem.Name+" was added to a task.")
+	s.nc.PublishNotification("projects_list", req.ProjectId, "A new problem: "+response.Name+" was added to a task.")
 
 	return &pb.Empty{}, nil
 }

@@ -115,12 +115,12 @@
 
 #### POST /project/{project_id}/task/{task_id}/problem
 > maak problem in task
-- ```JSON {problem: {id, name, posted_at}}```
+- ```JSON {problem: {name, posted_at}}```
 - ```-> JSON (leeg/message)```
 
 #### PUT /project/{project_id}/task/{task_id}/problem/{problem_id}/resolve
 > Resolve problem in task
-- ```JSON {problem_id}```
+- ```JSON {enkel path segments}```
 - ```-> JSON (leeg/message)```
 
 #### PUT /project/{project_id}/task/{task_id}/assign

@@ -170,7 +170,19 @@ def add_problem_to_task(task_id: str, problem: Problem):
     result = db.tasks.update_one({"id": task_id}, {"$addToSet": {"problems": problem.model_dump()}})
     if result.matched_count == 0:
         raise HTTPException(status_code=404, detail="Task not found")
-    return {"message": "Problem added to task"}
+    return problem
+
+@app.get("/tasks/{task_id}/problems/{problem_id}")
+def add_problem_to_task(task_id: str, problem_id: str):
+    task = db.tasks.find_one({"id": task_id}, {"_id": 0, "problems": 1})
+    if not task:
+        raise HTTPException(status_code=404, detail="Task not found")
+    problem = None
+    for p in task.get("problems", []):
+        if p.get("id") == problem_id: problem = p
+    if not problem:
+        raise HTTPException(status_code=404, detail="Problem not found")
+    return problem
 
 @app.delete("/tasks/{task_id}/problems")
 def remove_problem_from_task(task_id: str, delete_req: DeleteProblemRequest):

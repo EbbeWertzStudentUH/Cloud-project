@@ -130,13 +130,16 @@ func (p *ProjectService) CreateTaskInMilestone(req *CreateTaskInMilestoneRequest
 	return nil
 }
 
-func (p *ProjectService) AddProblemToTask(req *AddProblemToTaskRequest, res *EmptyResponse) error {
+func (p *ProjectService) AddProblemToTask(req *AddProblemToTaskRequest, res *Problem) error {
 	currentTime := time.Now()
 	data := map[string]interface{}{
 		"name":      req.Problem_name,
 		"posted_at": currentTime.Format("2006-01-02"), // GEEN IDEE WAAROM, maar go MOET deze exacte datum hebben als format
 	}
-	p.db.POST("/tasks/"+req.Task_id+"/problems", data)
+	jsonRes, _ := p.db.POST("/tasks/"+req.Task_id+"/problems", data)
+	res.Id = jsonRes["id"].(string)
+	res.Name = jsonRes["name"].(string)
+	res.PostedAt = jsonRes["posted_at"].(string)
 	return nil
 }
 
