@@ -3,7 +3,6 @@
 	import { addUserToProject, makeMilestoneInProject } from '$lib/project_requests';
 	import { friends } from '../stores/friends';
 	import { addUserToOpenProject } from '../stores/projects';
-	import { onUpdateMessageType } from '../stores/updatemessages';
 	import { fade, slide, fly } from 'svelte/transition';
 	import GithubStatsTable from './GithubStatsTable.svelte';
 
@@ -14,11 +13,11 @@
 	let showForm = $state(false);
 	let newMilestone = $state({ name: '', deadline: '' });
 
-	let currentFriends = $friends;
+	let currentFriends = $state([]);
+	$effect(() => {
+        currentFriends = $friends;
+    });
 
-	onUpdateMessageType('user_add', (subject, data) => {
-		addUserToOpenProject(data);
-	});
 	async function addUser() {
 		showUserAddDropdown = false;
 		addUserToProject(selectedFriend.id, project.id);
@@ -86,7 +85,7 @@
 				</div>
 			</section>
 		{:else}
-			<section in:slide={{ y: -20, duration: 300 }} out:slide={{ y: -20, duration: 300 }}>
+			<section class="mb-6" in:slide={{ y: -20, duration: 300 }} out:slide={{ y: -20, duration: 300 }}>
 				<div in:fade={{ duration: 300 }} out:fade={{ duration: 200 }}>
 					<button
 						onclick={() => {

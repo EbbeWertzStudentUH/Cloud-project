@@ -8,7 +8,8 @@
     <header>
         <h3 class="mb-4 text-xl font-bold text-emerald-600">{task.name}</h3>
         {#if task.status == "open" }
-        <span class="bg-slate-50 font-bold text-md rounded-md py-2 px-4">Not assigned yet</span>
+        <span class="bg-slate-700 font-bold text-md rounded-md py-2 px-4">Not assigned yet</span>
+        <div class="m-4"></div>
         <button class="bg-emerald-600 rounded-md m-2 px-8 text-lg hover:bg-emerald-400 hover:text-emerald-900">Assign yourself to Task</button>
         {:else if task.status == "active" }
         <span class="bg-emerald-900 font-bold text-md rounded-md py-2 px-4">Active</span>

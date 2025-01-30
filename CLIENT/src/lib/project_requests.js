@@ -8,3 +8,7 @@ export async function addUserToProject(user_id, project_id) {
 export async function makeMilestoneInProject(project_id, name, deadline) {
     await POST({name, deadline}, '/project/'+project_id+'/milestone', false)
 }
+export async function makeTaskInMilestone(project_id, milestone_id, name) {
+    console.log('/project/'+project_id+'/milestone/'+milestone_id+"/task")
+    await POST({name}, '/project/'+project_id+'/milestone/'+milestone_id+"/task", false)
+}

@@ -1,6 +1,6 @@
 <script>
 	import { onMount } from 'svelte';
-	import { addMilestoneToOpenProject, open_project } from '../../../stores/projects';
+	import { addMilestoneToOpenProject, addTaskToMilestone, addUserToOpenProject, open_project } from '../../../stores/projects';
 	import { friends } from '../../../stores/friends';
 	import Project from '../../../components/Project.svelte';
 	import Milestone from '../../../components/Milestone.svelte';
@@ -23,6 +23,12 @@
 	});
 	onUpdateMessageType('milestone_add', (subject, data) => {
 		addMilestoneToOpenProject(data);
+	});
+	onUpdateMessageType('user_add', (subject, data) => {
+		addUserToOpenProject(data);
+	});
+	onUpdateMessageType('new_task_in_milestne', (subject, data) => {
+		addTaskToMilestone(subject, data)
 	});
 </script>
 
@@ -52,7 +58,7 @@
 					{#each current_open_project.milestones as milestone}
 						<li in:slide={{ y: -20, duration: 300 }}>
 							<button
-								class="w-full rounded-lg {milestone === selectedMilestone
+								class="w-full rounded-lg {selectedMilestone && milestone.id === selectedMilestone.id
 									? 'translate-x-2 cursor-pointer border-2 border-emerald-400 bg-emerald-800'
 									: 'bg-slate-700 hover:bg-emerald-500'} p-3 shadow transition-colors hover:text-slate-900"
 								onclick={() => {
@@ -85,7 +91,7 @@
 			<section class="flex-1 rounded-2xl bg-slate-900 p-6 text-slate-200 shadow-lg">
 				{#if selectedMilestone}
 					<div in:slide={{ y: -20, duration: 300 }} out:slide={{ y: -20, duration: 300 }}>
-						<Milestone milestone={selectedMilestone}></Milestone>
+						<Milestone milestone_id={selectedMilestone.id}></Milestone>
 					</div>
 				{:else}
 					<div in:slide={{ y: -20, duration: 300 }} out:slide={{ y: -20, duration: 300 }}>
