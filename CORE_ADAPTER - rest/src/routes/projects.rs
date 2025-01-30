@@ -209,7 +209,7 @@ async fn assign_task(req: HttpRequest, ids: web::Path<(String, String)>) -> impl
 }
 
 // PUT /project/{project_id}/task/{task_id}/complete
-#[post("/project/{project_id}/task/{task_id}/complete")]
+#[put("/project/{project_id}/task/{task_id}/complete")]
 async fn complete_task(ids: web::Path<(String, String)>) -> impl Responder {
     let (project_id, task_id) = ids.into_inner();
     let grpc_request = GRPCTaskCompleteRequest{
