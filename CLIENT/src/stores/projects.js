@@ -19,22 +19,73 @@ export function addMilestoneToOpenProject(milestone) {
 		};
 	});
 }
+export function addProblemToTask(task_id, problem) {
+	open_project.update((project) => {
+		return {
+			...project,
+			milestones: project.milestones.map((milestone) => {
+				let updatedTasks = milestone.tasks.map((task) =>
+					task.id === task_id
+						? task.problems
+							? { ...task, problems: [...task.problems, problem] }
+							: { ...task, problems: [problem] }
+						: task
+				);
+				let problem_count = updatedTasks
+					.map((task) => (task.problems ? task.problems.length : 0))
+					.reduce((a, b) => a + b, 0);
+				return {
+					...milestone,
+					tasks: updatedTasks,
+					num_of_problems: problem_count
+				};
+			})
+		};
+	});
+}
+export function removeProblemFromTask(task_id, problem_id) {
+	open_project.update((project) => {
+		return {
+			...project,
+			milestones: project.milestones.map((milestone) => {
+				let updatedTasks = milestone.tasks.map((task) => {
+					if (task.id === task_id) {
+						return { ...task, problems: task.problems.filter((p) => p.id !== problem_id) };
+					}
+					return task;
+				});
+
+				let problem_count = updatedTasks
+					.map((task) => (task.problems ? task.problems.length : 0))
+					.reduce((a, b) => a + b, 0);
+				return {
+					...milestone,
+					tasks: updatedTasks,
+					num_of_problems: problem_count
+				};
+			})
+		};
+	});
+}
 export function updateTask(task_id, changed_fields) {
 	open_project.update((project) => {
 		return {
 			...project,
 			milestones: project.milestones.map((milestone) => {
-				
 				let updatedTasks = milestone.tasks.map((task) =>
 					task.id === task_id
 						? { ...task, user: { ...task.user, ...changed_fields.user }, ...changed_fields }
 						: task
 				);
 				let finished_tasks = updatedTasks.filter((task) => task.status == 'closed').length;
+				let problem_count = updatedTasks
+					.map((task) => (task.problems && task.status == 'active' ? task.problems.length : 0))
+					.reduce((a, b) => a + b, 0);
 				return {
 					...milestone,
 					tasks: updatedTasks,
-					num_of_finished_tasks: finished_tasks
+					num_of_finished_tasks: finished_tasks,
+					num_of_problems: problem_count
 				};
 			})
 		};

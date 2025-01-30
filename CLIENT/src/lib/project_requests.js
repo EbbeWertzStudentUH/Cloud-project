@@ -17,3 +17,9 @@ export async function assignToTask(project_id, task_id) {
 export async function completeTask(project_id, task_id) {
     await PUTwithTokenNoResult('/project/'+project_id+'/task/'+task_id+"/complete")
 }
+export async function makeProblemInTask(project_id, task_id, problem_name) {
+    await POST({problem:{name:problem_name, posted_at:''}}, '/project/'+project_id+'/task/'+task_id+"/problem", false)
+}
+export async function ResolveProblemInTask(project_id, task_id, problem_id) {
+    await PUTwithTokenNoResult('/project/'+project_id+'/task/'+task_id+'/problem/'+problem_id+"/resolve")
+}

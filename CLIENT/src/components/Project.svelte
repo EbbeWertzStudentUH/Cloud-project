@@ -101,7 +101,7 @@
 	</section>
 
 	<section class="mb-6 rounded-lg bg-slate-800 p-2 h-min">
-		<h2 class="mb-3 text-xl font-semibold">Users</h2>
+		<h2 class="mb-3 text-xl font-semibold">Team</h2>
 		<ul class="space-y-2">
 			{#each project.users as user}
 				<li class="border-b-2 border-slate-900 pr-24 text-slate-500">
@@ -160,7 +160,7 @@
 					onclick={() => (showUserAddDropdown = !showUserAddDropdown)}
 					class="w-full rounded-md bg-emerald-500 px-6 py-2 text-slate-900 shadow transition-colors hover:bg-emerald-600"
 				>
-					Add User
+					Add Member
 				</button>
 			{/if}
 		</div>

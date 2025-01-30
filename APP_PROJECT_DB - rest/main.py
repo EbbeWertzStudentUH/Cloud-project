@@ -214,7 +214,7 @@ def put_period_on_task(task_id: str, period:ActivePeriod):
 
 @app.patch("/tasks/{task_id}/active-period")
 def set_period_end_on_task(task_id: str, period:ActivePeriod):
-    result = db.tasks.update_one({"id": task_id}, {"$set": {"active_period": {"end": period.end}}})
+    result = db.tasks.update_one({"id": task_id}, {"$set":{"active_period.end": period.end}})
     if result.matched_count == 0:
         raise HTTPException(status_code=404, detail="Task not found")
     return {"message": "end timestamp set on active_period"}
