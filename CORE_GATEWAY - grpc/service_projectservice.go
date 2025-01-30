@@ -149,7 +149,7 @@ func (s *ProjectServiceServer) CreateTaskInMilestone(ctx context.Context, req *p
 	s.pfc.call("CreateTaskInMilestone", createReq, response)
 
 	// Notifier: publish update tasks list
-	s.nc.PublishUpdate("project", req.ProjectId, "task_add", response.Id, map[string]interface{}{
+	s.nc.PublishUpdate("project", req.ProjectId, "new_task_in_milestne", req.MilestoneId, map[string]interface{}{
 		"id":              response.Id,
 		"name":            response.Name,
 		"status":          response.Status,
