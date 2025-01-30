@@ -122,7 +122,8 @@ async fn create_milestone_in_project(body: web::Json<MilestoneCreateRequest>, pr
 
 // POST /project/{project_id}/milestone/{milestone_id}/task
 #[post("/project/{project_id}/milestone/{milestone_id}/task")]
-async fn create_task_in_milestone(body: web::Json<TaskCreateRequest>, project_id: web::Path<String>, milestone_id: web::Path<String>) -> impl Responder {
+async fn create_task_in_milestone(body: web::Json<TaskCreateRequest>, ids: web::Path<(String, String)>) -> impl Responder {
+    let (project_id, milestone_id) = ids.into_inner();
     let mut grpc_request: GRPCTaskCreateRequest = body.into_inner().into();
     grpc_request.project_id = project_id.to_string();
     grpc_request.milestone_id = milestone_id.to_string();
@@ -141,7 +142,8 @@ async fn create_task_in_milestone(body: web::Json<TaskCreateRequest>, project_id
 
 // POST /project/{project_id}/task/{task_id}/problem
 #[post("/project/{project_id}/task/{task_id}/problem")]
-async fn add_problem_to_task(body: web::Json<ProblemAddRequest>, project_id: web::Path<String>, task_id: web::Path<String>) -> impl Responder {
+async fn add_problem_to_task(body: web::Json<ProblemAddRequest>, ids: web::Path<(String, String)>) -> impl Responder {
+    let (project_id, task_id) = ids.into_inner();
     let mut grpc_request: GRPCProblemAddRequest = body.into_inner().into();
     grpc_request.project_id = project_id.to_string();
     grpc_request.task_id = task_id.to_string();
@@ -160,7 +162,8 @@ async fn add_problem_to_task(body: web::Json<ProblemAddRequest>, project_id: web
 
 // PUT /project/{project_id}/task/{task_id}/problem/{problem_id}/resolve
 #[put("/project/{project_id}/task/{task_id}/problem/{problem_id}/resolve")]
-async fn resolve_problem(project_id: web::Path<String>, task_id: web::Path<String>, problem_id: web::Path<String>) -> impl Responder {
+async fn resolve_problem(ids: web::Path<(String, String, String)>) -> impl Responder {
+    let (project_id, task_id, problem_id) = ids.into_inner();
     let grpc_request = GRPCResolveProblemRequest{
         project_id: project_id.to_string(),
         problem_id: problem_id.to_string(),
@@ -181,7 +184,8 @@ async fn resolve_problem(project_id: web::Path<String>, task_id: web::Path<Strin
 
 // PUT /project/{project_id}/task/{task_id}/assign
 #[put("/project/{project_id}/task/{task_id}/assign")]
-async fn assign_task(req: HttpRequest, project_id: web::Path<String>, task_id: web::Path<String>) -> impl Responder {
+async fn assign_task(req: HttpRequest, ids: web::Path<(String, String)>) -> impl Responder {
+    let (project_id, task_id) = ids.into_inner();
     let (ok, user_id) = get_and_decode_token(req);
     if !ok {
         return HttpResponse::InternalServerError().body("Failed to assign task");
@@ -206,7 +210,8 @@ async fn assign_task(req: HttpRequest, project_id: web::Path<String>, task_id: w
 
 // PUT /project/{project_id}/task/{task_id}/complete
 #[post("/project/{project_id}/task/{task_id}/complete")]
-async fn complete_task( project_id: web::Path<String>, task_id: web::Path<String>) -> impl Responder {
+async fn complete_task(ids: web::Path<(String, String)>) -> impl Responder {
+    let (project_id, task_id) = ids.into_inner();
     let grpc_request = GRPCTaskCompleteRequest{
         project_id: project_id.to_string(),
         task_id: task_id.to_string()
