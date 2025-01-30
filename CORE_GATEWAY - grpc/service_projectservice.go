@@ -221,9 +221,13 @@ func (s *ProjectServiceServer) AssignTask(ctx context.Context, req *pb.TaskAssig
 	// Notifier: publish update task
 	s.nc.PublishUpdate("project", req.ProjectId, "task_update", req.TaskId, map[string]interface{}{
 		"status":              response.Status,
-		"user":                response.User,
 		"active_period_start": response.ActiveStartDate,
 		"is_assigned":         response.IsAssigned,
+		"user": map[string]interface{}{
+			"id":         response.User.Id,
+			"first_name": response.User.FirstName,
+			"last_name":  response.User.LastName,
+		},
 	})
 
 	return &pb.Empty{}, nil
